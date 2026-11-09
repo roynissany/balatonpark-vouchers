@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Page not found — Balaton Park Circuit</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="bpc-logo.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Inter:wght@300;400;500&display=swap">
+<style>
+  :root{--ink:#0A1422;--blue:#427AB7;--pale:#A8CEF0;--text:#F5F7FB;
+        --cond:'Barlow Condensed',sans-serif}
+  *{box-sizing:border-box}
+  body{margin:0;min-height:100vh;background:var(--ink);color:var(--text);
+       font-family:Inter,-apple-system,system-ui,sans-serif;-webkit-font-smoothing:antialiased;
+       display:flex;flex-direction:column;overflow-x:hidden}
+  a{color:var(--pale)}
+  .pad{padding-left:clamp(20px,5vw,56px);padding-right:clamp(20px,5vw,56px)}
+  .wrap{width:100%;max-width:1180px;margin:0 auto}
+
+  @keyframes fadeUp{from{opacity:0;transform:translateY(34px)}to{opacity:1;transform:none}}
+  @keyframes kenburns{from{transform:scale(1.05)}to{transform:scale(1.16)}}
+  .up{animation:fadeUp .95s cubic-bezier(.22,.61,.36,1) both}
+  .d1{animation-delay:.12s}.d2{animation-delay:.26s}
+  .kb{animation:kenburns 30s ease-out both alternate infinite}
+  .lift{transition:transform .35s cubic-bezier(.22,.61,.36,1),box-shadow .35s}
+  .lift:hover{transform:translateY(-4px);box-shadow:0 16px 34px rgba(0,0,0,.42)}
+  @media (prefers-reduced-motion:reduce){
+    .up,.kb{animation:none!important;opacity:1!important;transform:none!important}
+    .lift{transition:none!important}
+  }
+
+  .shell{position:relative;flex:1;display:flex;flex-direction:column;
+         justify-content:space-between;overflow:hidden}
+  .shell img.bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;
+                filter:brightness(.42) saturate(.9)}
+  .shell .veil{position:absolute;inset:0;
+    background:linear-gradient(180deg,rgba(10,20,34,.80) 0%,rgba(10,20,34,.58) 45%,rgba(10,20,34,.97) 100%)}
+  .code{font-family:var(--cond);font-weight:800;font-size:clamp(90px,22vw,190px);
+        line-height:.82;letter-spacing:-.02em;color:var(--blue);margin:0}
+  h1{font-family:var(--cond);font-weight:800;text-transform:uppercase;
+     font-size:clamp(32px,6.5vw,56px);line-height:.98;margin:18px 0 0}
+  p.lede{margin:22px 0 0;font-size:clamp(15px,2.2vw,17px);font-weight:300;
+         line-height:1.65;color:rgba(245,247,251,.82);max-width:520px}
+  .cta{display:inline-flex;align-items:center;justify-content:center;
+    min-height:clamp(58px,8vw,72px);padding:0 clamp(26px,5vw,46px);text-decoration:none;
+    font-family:var(--cond);font-weight:800;font-size:clamp(20px,3.6vw,26px);
+    letter-spacing:.04em;text-transform:uppercase}
+  .cta.primary{background:var(--blue);color:#fff}
+  .cta.ghost{background:rgba(10,20,34,.55);color:var(--text);border:1px solid rgba(255,255,255,.5)}
+  footer{border-top:1px solid rgba(255,255,255,.10);position:relative}
+  footer .inner{display:flex;flex-wrap:wrap;gap:20px;align-items:center;
+    justify-content:space-between;padding-top:26px;padding-bottom:26px;
+    font-size:13px;color:rgba(245,247,251,.55)}
+  footer a{text-decoration:none;color:rgba(245,247,251,.55)}
+  footer a:hover{color:var(--text)}
+</style>
+</head>
+<body>
+
+<div class="shell">
+  <img class="bg kb" src="gantry.jpg" alt="">
+  <div class="veil"></div>
+
+  <div class="wrap pad" style="position:relative;padding-top:34px">
+    <a href="index.html" style="display:inline-flex">
+      <img src="bpc-logo.svg" alt="Balaton Park Circuit" style="height:clamp(26px,4vw,34px);width:auto"></a>
+  </div>
+
+  <div class="wrap pad" style="position:relative;padding-bottom:clamp(48px,8vw,80px)">
+    <p class="code up">404</p>
+    <h1 class="up d1">Wrong way round the circuit.</h1>
+    <p class="lede up d1">That page isn't here. The link may be old, or mistyped — nothing is broken on your end.</p>
+    <div class="up d2" style="display:flex;flex-wrap:wrap;gap:14px;margin:36px 0 0">
+      <a class="cta primary lift" href="index.html">Gift vouchers</a>
+      <a class="cta ghost lift" href="redeem.html">Redeem a voucher</a>
+    </div>
+    <p class="up d2" style="margin:28px 0 0;font-size:13px;font-weight:300;color:rgba(245,247,251,.62)">
+      Looking for something specific? <a href="mailto:info@balatonparkcircuit.com?subject=Gift%20vouchers">Contact us</a> and we'll point you at it.</p>
+  </div>
+</div>
+
+<footer>
+  <div class="inner wrap pad">
+    <a href="https://balatonpark.com" target="_blank" rel="noopener" style="display:inline-flex">
+      <img src="bpc-logo.svg" alt="Balaton Park Circuit" style="height:22px;width:auto;opacity:.75"></a>
+    <span style="display:flex;flex-wrap:wrap;gap:24px">
+      <a href="https://balatonpark.com" target="_blank" rel="noopener">balatonpark.com</a>
+      <a href="https://www.balatonparkcircuit.com/tc" target="_blank" rel="noopener">Terms</a>
+      <a href="https://www.balatonparkcircuit.com/tc" target="_blank" rel="noopener">Privacy</a>
+      <a href="mailto:info@balatonparkcircuit.com">Contact us</a>
+    </span>
+  </div>
+</footer>
+
+</body>
+</html>

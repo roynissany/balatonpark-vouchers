@@ -105,11 +105,12 @@
   .note p { margin:0; font-size:15px; font-weight:300; line-height:1.75;
             color:rgba(245,247,251,.85) }
 
-  footer { margin-top:92px; padding:34px clamp(20px,5vw,56px);
-    border-top:1px solid rgba(255,255,255,.10); display:flex; flex-wrap:wrap;
-    gap:20px; align-items:center; justify-content:space-between;
+  footer { margin-top:92px; border-top:1px solid rgba(255,255,255,.10) }
+  footer .inner { display:flex; flex-wrap:wrap; gap:20px; align-items:center;
+    justify-content:space-between; padding-top:34px; padding-bottom:34px;
     font-size:13px; color:rgba(245,247,251,.55) }
   footer a { text-decoration:none; color:rgba(245,247,251,.55) }
+  footer a:hover { color:var(--text) }
 
   #cookies { position:fixed; left:50%; transform:translateX(-50%); bottom:20px;
     z-index:60; width:calc(100% - 40px); max-width:600px; display:flex;
@@ -134,8 +135,8 @@
     <img class="bg kb" src="hero.jpg" alt="A car on the kerbs at Balaton Park Circuit">
     <div class="veil"></div>
 
-    <div class="fi pad" style="position:relative;padding-top:34px">
-      <img src="bpc-logo.svg" alt="Balaton Park Circuit" style="height:34px;width:auto">
+    <div class="fi wrap pad" style="position:relative;padding-top:34px">
+      <img src="bpc-logo.svg" alt="Balaton Park Circuit" style="height:clamp(26px,4vw,34px);width:auto">
     </div>
 
     <div class="wrap pad" style="position:relative;padding-bottom:clamp(48px,9vw,84px)">
@@ -157,8 +158,8 @@
 
   <div class="ticker">
     <div class="mq">
-      <span>Mid April 2027<b>/</b>Mid May 2027<b>/</b>Late June 2027<b>/</b>More to come soon<b>/</b>Mid April 2027<b>/</b>Mid May 2027<b>/</b>Late June 2027<b>/</b>More to come soon<b>/</b></span>
-      <span aria-hidden="true">Mid April 2027<b>/</b>Mid May 2027<b>/</b>Late June 2027<b>/</b>More to come soon<b>/</b>Mid April 2027<b>/</b>Mid May 2027<b>/</b>Late June 2027<b>/</b>More to come soon<b>/</b></span>
+      <span>17 April 2027<b>/</b>22 May 2027<b>/</b>26 June 2027<b>/</b>More to come soon<b>/</b>17 April 2027<b>/</b>22 May 2027<b>/</b>26 June 2027<b>/</b>More to come soon<b>/</b></span>
+      <span aria-hidden="true">17 April 2027<b>/</b>22 May 2027<b>/</b>26 June 2027<b>/</b>More to come soon<b>/</b>17 April 2027<b>/</b>22 May 2027<b>/</b>26 June 2027<b>/</b>More to come soon<b>/</b></span>
     </div>
   </div>
 
@@ -196,9 +197,9 @@
     <section style="margin:clamp(56px,9vw,88px) 0 0">
       <h2 class="up" style="margin:0 0 28px">Track days <span style="color:var(--blue)">2027.</span></h2>
       <div class="days">
-        <div class="day lift up d1"><p class="big">Mid April</p><p class="sub">Saturday</p></div>
-        <div class="day lift up d2"><p class="big">Mid May</p><p class="sub">Saturday</p></div>
-        <div class="day lift up d3"><p class="big">Late June</p><p class="sub">Saturday</p></div>
+        <div class="day lift up d1"><p class="big">17 April</p><p class="sub">Saturday · 2027</p></div>
+        <div class="day lift up d2"><p class="big">22 May</p><p class="sub">Saturday · 2027</p></div>
+        <div class="day lift up d3"><p class="big">26 June</p><p class="sub">Saturday · 2027</p></div>
         <div class="day soon up d4"><p>More to come soon!</p></div>
       </div>
     </section>
@@ -219,12 +220,16 @@
   </div>
 
   <footer>
-    <img src="bpc-logo.svg" alt="Balaton Park Circuit" style="height:22px;width:auto;opacity:.75">
-    <span style="display:flex;flex-wrap:wrap;gap:24px">
-      <a href="https://www.balatonparkcircuit.com/tc" target="_blank" rel="noopener">Terms</a>
-      <a href="https://www.balatonparkcircuit.com/tc" target="_blank" rel="noopener">Privacy</a>
-      <a href="mailto:info@balatonparkcircuit.com">info@balatonparkcircuit.com</a>
-    </span>
+    <div class="inner wrap pad">
+      <a href="https://balatonpark.com" target="_blank" rel="noopener" style="display:inline-flex">
+        <img src="bpc-logo.svg" alt="Balaton Park Circuit" style="height:22px;width:auto;opacity:.75"></a>
+      <span style="display:flex;flex-wrap:wrap;gap:24px">
+        <a href="https://balatonpark.com" target="_blank" rel="noopener">balatonpark.com</a>
+        <a href="https://www.balatonparkcircuit.com/tc" target="_blank" rel="noopener">Terms</a>
+        <a href="https://www.balatonparkcircuit.com/tc" target="_blank" rel="noopener">Privacy</a>
+        <a href="mailto:info@balatonparkcircuit.com">Contact us</a>
+      </span>
+    </div>
   </footer>
 
 </div>
