@@ -210,6 +210,15 @@
           <span style="font-family:var(--cond);font-weight:800;font-size:40px;line-height:1;color:var(--pale)" id="total">€0</span>
         </div>
         <button type="submit" class="pay lift" id="pay">Pay with card</button>
+
+        <div id="payWrap" hidden>
+          <div id="payment"></div>
+          <button type="button" class="pay lift" id="confirm" style="margin-top:18px">Pay now</button>
+          <button type="button" id="backToForm" style="width:100%;margin-top:10px;background:none;
+            border:none;color:var(--pale);font-size:13px;font-weight:500;cursor:pointer;min-height:44px">
+            Change my order</button>
+        </div>
+
         <p style="margin:16px 0 0;font-size:12px;font-weight:300;line-height:1.7;color:rgba(245,247,251,.60)">
           We never see your card details.<br><span id="codeNote"></span><br>
           For refund requests, <a href="mailto:info@balatonparkcircuit.com?subject=Gift%20voucher%20refund%20request">email us</a>.</p>
@@ -220,16 +229,6 @@
       </aside>
 
     </form>
-
-    <section id="paysection" hidden style="margin-top:8px">
-      <h2 class="sec" style="margin-top:0"><i class="rule"></i>5 · Payment</h2>
-      <p id="payTotal" style="margin:0 0 22px;font-size:17px;font-weight:300;color:rgba(245,247,251,.72)"></p>
-      <div id="payment"></div>
-      <p style="margin:22px 0 0;font-size:13px;font-weight:300;line-height:1.7;color:rgba(245,247,251,.60)">
-        Card details go straight to Stripe — they never touch our servers.
-        <button type="button" id="backToForm" style="background:none;border:none;color:var(--pale);
-          font-size:13px;font-weight:500;cursor:pointer;padding:6px 4px;min-height:44px">Change my order</button></p>
-    </section>
   </main>
 </div>
 
@@ -554,46 +553,104 @@
     return stripeJs;
   }
 
-  var mounted = null;
+  // Stripe draws the card fields inside its own frame — we can't reach into
+  // them, but we can hand it the page's own palette so the seam doesn't show.
+  var APPEARANCE = {
+    theme: 'night',
+    variables: {
+      colorPrimary: '#427AB7',
+      colorBackground: '#0A1422',
+      colorText: '#F5F7FB',
+      colorTextSecondary: 'rgba(245,247,251,0.60)',
+      colorTextPlaceholder: 'rgba(245,247,251,0.34)',
+      colorDanger: '#D9604F',
+      fontFamily: 'Inter, -apple-system, system-ui, sans-serif',
+      fontSizeBase: '15px',
+      borderRadius: '7px',
+      spacingUnit: '4px'
+    },
+    rules: {
+      '.Input': {
+        backgroundColor: 'rgba(255,255,255,0.04)',
+        border: '1px solid rgba(255,255,255,0.16)',
+        boxShadow: 'none',
+        padding: '13px 14px'
+      },
+      '.Input:focus': { border: '1px solid #427AB7', boxShadow: 'none',
+                        backgroundColor: 'rgba(66,122,183,0.10)' },
+      '.Input--invalid': { border: '1px solid #D9604F', boxShadow: 'none' },
+      '.Label': { color: 'rgba(245,247,251,0.72)', fontSize: '13px', fontWeight: '500' },
+      '.Tab': { backgroundColor: 'rgba(255,255,255,0.04)',
+                border: '1px solid rgba(255,255,255,0.16)', boxShadow: 'none' },
+      '.Tab:hover': { backgroundColor: 'rgba(255,255,255,0.07)' },
+      '.Tab--selected': { backgroundColor: 'rgba(66,122,183,0.16)',
+                          border: '1px solid #427AB7', boxShadow: 'none' },
+      '.TabLabel': { color: 'rgba(245,247,251,0.82)' },
+      '.Error': { color: '#F0A99D', fontSize: '13px' }
+    }
+  };
+
+  var pay = { stripe: null, elements: null, element: null, returnUrl: null };
 
   function mountPayment(res) {
     return loadStripeJs().then(function (Stripe) {
-      // Tearing down any previous form first: leaving two mounted at once
-      // puts the buyer in front of a stale amount.
-      if (mounted) { try { mounted.destroy(); } catch (e) {} mounted = null; }
+      // Tear down any previous form: two mounted at once would leave the
+      // buyer looking at a stale amount.
+      if (pay.element) { try { pay.element.destroy(); } catch (e) {} }
 
-      $('#payTotal').textContent = 'Paying ' + money(res.total_cents) +
-        (res.discount_cents ? ' — ' + money(res.discount_cents) + ' off' : '') + '.';
-      $('#paysection').hidden = false;
-      $('#buy').style.display = 'none';
+      pay.stripe = Stripe(res.publishable_key);
+      pay.elements = pay.stripe.elements({ clientSecret: res.client_secret, appearance: APPEARANCE });
+      pay.element = pay.elements.create('payment', { layout: 'tabs' });
+      pay.returnUrl = res.return_url;
 
-      return Stripe(res.publishable_key)
-        .initEmbeddedCheckout({ clientSecret: res.client_secret })
-        .then(function (checkout) {
-          mounted = checkout;
-          checkout.mount('#payment');
-          $('#paysection').scrollIntoView({ behavior: 'smooth', block: 'start' });
-        });
+      $('#pay').hidden = true;
+      $('#payWrap').hidden = false;
+      $('#confirm').textContent = 'Pay ' + money(res.total_cents);
+      pay.element.mount('#payment');
+      $('#payWrap').scrollIntoView({ behavior: 'smooth', block: 'center' });
     }).catch(function () {
-      $('#paysection').hidden = true;
-      $('#buy').style.display = '';
+      resetPayment();
       fail('We could not open the card form. Nothing has been charged — please try again.');
-      var btn = $('#pay');
-      btn.disabled = false;
-      btn.textContent = 'Pay with card';
     });
   }
 
+  function resetPayment() {
+    if (pay.element) { try { pay.element.destroy(); } catch (e) {} }
+    pay = { stripe: null, elements: null, element: null, returnUrl: null };
+    $('#payWrap').hidden = true;
+    $('#pay').hidden = false;
+    $('#pay').disabled = false;
+    $('#pay').textContent = 'Pay with card';
+    $('#confirm').disabled = false;
+  }
+
   $('#backToForm').addEventListener('click', function () {
-    // The order they go back to adjust is abandoned, not cancelled: it stays
-    // pending and unpaid, and a fresh one is created when they pay.
-    if (mounted) { try { mounted.destroy(); } catch (e) {} mounted = null; }
-    $('#paysection').hidden = true;
-    $('#buy').style.display = '';
-    var btn = $('#pay');
-    btn.disabled = false;
-    btn.textContent = 'Pay with card';
+    // The abandoned order stays pending and unpaid; paying creates a fresh
+    // one, so nothing has to be cancelled here.
+    resetPayment();
     $('#buy').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+
+  $('#confirm').addEventListener('click', function () {
+    if (!pay.stripe) return;
+    var btn = $('#confirm');
+    btn.disabled = true;
+    btn.textContent = 'Paying…';
+    $('#err').hidden = true;
+
+    pay.stripe.confirmPayment({
+      elements: pay.elements,
+      confirmParams: { return_url: pay.returnUrl }
+    }).then(function (r) {
+      // We only get here when the payment did NOT go through; a success
+      // leaves the page for the return URL.
+      var m = r.error && (r.error.type === 'card_error' || r.error.type === 'validation_error')
+        ? r.error.message
+        : 'That payment did not go through. Nothing has been charged — try again or use another card.';
+      fail(m);
+      btn.disabled = false;
+      btn.textContent = 'Pay now';
+    });
   });
 
   // Hungary is UTC+1, UTC+2 between the last Sundays of March and October.
