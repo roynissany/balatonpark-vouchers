@@ -81,7 +81,7 @@
       'buy.rname': 'Recipient name',
       'buy.remail': 'Recipient email',
       'buy.msg': 'Message on the gift card',
-      'buy.msgPlaceholder': 'Boldog szülinapot! See you on track.',
+      'buy.msgPlaceholder': 'Happy birthday! See you on track.',
       'buy.delNow': 'Email it now',
       'buy.delNowSub': 'Sent straight to the recipient after payment.',
       'buy.delDate': 'Email it on a date',

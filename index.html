@@ -21,7 +21,7 @@
   :root { --ink:#0A1422; --blue:#427AB7; --pale:#A8CEF0; --text:#F5F7FB;
           --cond:'Barlow Condensed',sans-serif; }
   *{box-sizing:border-box}
-  body { margin:0; background:var(--ink); color:var(--text);
+  body { margin:0;touch-action:manipulation; background:var(--ink); color:var(--text);
          font-family:Inter,-apple-system,system-ui,sans-serif;
          -webkit-font-smoothing:antialiased; overflow-x:hidden; }
   a { color:var(--pale) } a:hover { color:var(--text) }
@@ -58,6 +58,14 @@
                  object-fit:cover; filter:brightness(.62) saturate(.95) }
   .hero .veil { position:absolute; inset:0;
     background:linear-gradient(180deg,rgba(10,20,34,.78) 0%,rgba(10,20,34,.45) 38%,rgba(10,20,34,.96) 100%) }
+  .eyebrow { letter-spacing:.26em }
+  /* "Ajándékutalványok" is far wider than "Gift vouchers" and on a phone it
+     ran right up under the language buttons. Guarantee a gap and tighten the
+     tracking so the word keeps clear of them. */
+  @media (max-width:760px){
+    .headrow { margin-bottom:30px }
+    .eyebrow { letter-spacing:.16em }
+  }
   .pad { padding-left:clamp(20px,5vw,56px); padding-right:clamp(20px,5vw,56px) }
   .wrap { width:100%; max-width:1180px; margin:0 auto }
 
@@ -154,7 +162,7 @@
     </div>
 
     <div class="wrap pad" style="position:relative;padding-bottom:clamp(48px,9vw,84px)">
-      <p class="up" style="display:flex;align-items:center;gap:16px;margin:0 0 22px;font-size:12px;font-weight:600;letter-spacing:.26em;text-transform:uppercase">
+      <p class="up eyebrow" style="display:flex;align-items:center;gap:16px;margin:0 0 22px;font-size:12px;font-weight:600;text-transform:uppercase">
         <span class="rule" style="display:inline-block;width:48px;height:2px;background:var(--blue)"></span>
         <span data-i18n="home.eyebrow">Gift vouchers</span>
       </p>
@@ -202,7 +210,8 @@
 
     <section style="margin:clamp(56px,9vw,88px) 0 0">
       <div class="shots">
-        <div class="zw up d1"><img src="driver-wave.jpg" alt="A driver waving from the car" loading="lazy"></div>
+        <div class="zw up d1"><img src="driver-wave.jpg" alt="A driver waving from the car" loading="lazy"
+             style="object-position:50% 32%"></div>
         <div class="zw up d3"><img src="pit-overhead.jpg" alt="Pit boxes seen from above" loading="lazy"></div>
         <div class="zw up d5"><img src="grid-cars.jpg" alt="Cars lined up in the paddock" loading="lazy"></div>
       </div>
