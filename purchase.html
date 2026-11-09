@@ -104,6 +104,18 @@
   #schedule{display:flex;flex-wrap:wrap;gap:18px;align-items:flex-end;padding:22px 24px;
     background:rgba(66,122,183,.12);border:1px solid rgba(66,122,183,.45)}
   #schedule[hidden]{display:none}
+  /* Both halves share the row evenly: a wide date beside a narrow time left
+     a dead gap on the right, which read as a broken field on a phone. */
+  #schedule .half{flex:1 1 150px;min-width:0}
+  /* Safari draws date and time inputs its own way — centred value, native
+     chrome, its own height. Strip that so they match every other field. */
+  input[type=date],input[type=time]{
+    -webkit-appearance:none;appearance:none;text-align:left;
+    min-height:50px;line-height:normal;background:var(--ink)}
+  input[type=date]::-webkit-date-and-time-value,
+  input[type=time]::-webkit-date-and-time-value{text-align:left;margin:0}
+  input[type=date]::-webkit-calendar-picker-indicator,
+  input[type=time]::-webkit-calendar-picker-indicator{filter:invert(1) opacity(.55);cursor:pointer}
 
   aside{flex:1 1 320px;position:sticky;top:24px;margin-top:38px;padding:30px;
     background:rgba(10,20,34,.96);border:1px solid rgba(255,255,255,.14)}
@@ -173,13 +185,13 @@
         <h2 class="sec up"><i></i>3 · Delivery</h2>
         <div style="display:flex;flex-direction:column;gap:12px" id="delivery"></div>
         <div id="schedule" hidden style="margin-top:12px">
-          <div style="flex:1 1 200px;min-width:0">
+          <div class="half">
             <label class="f" for="senddate">Send on</label>
-            <input id="senddate" class="fld" type="date" style="background:var(--ink);border-color:rgba(255,255,255,.22)">
+            <input id="senddate" class="fld" type="date" style="border-color:rgba(255,255,255,.22)">
           </div>
-          <div style="flex:0 1 160px;min-width:0">
+          <div class="half">
             <label class="f" for="sendtime">At</label>
-            <input id="sendtime" class="fld" type="time" value="08:00" style="background:var(--ink);border-color:rgba(255,255,255,.22)">
+            <input id="sendtime" class="fld" type="time" value="08:00" style="border-color:rgba(255,255,255,.22)">
           </div>
           <p style="flex:1 1 100%;margin:0;font-size:13px;font-weight:300;line-height:1.6;color:rgba(245,247,251,.70)">Budapest time. Nothing is sent until then — you'll get your own copy straight after payment, so you know it worked.</p>
         </div>
