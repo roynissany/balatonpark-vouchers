@@ -1,0 +1,526 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Buy a gift voucher — Balaton Park Circuit</title>
+<meta name="description" content="Buy a Balaton Park Circuit gift voucher. The recipient picks their own track day.">
+<link rel="icon" href="bpc-logo.svg" type="image/svg+xml">
+<meta property="og:title" content="Gift a day on track at Balaton Park Circuit">
+<meta property="og:description" content="Track session vouchers for the 2027 season.">
+<meta property="og:image" content="https://gifts.balatonpark.com/og-share.jpg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap">
+<style>
+  :root { --ink:#0A1422; --blue:#427AB7; --pale:#A8CEF0; --text:#F5F7FB;
+          --cond:'Barlow Condensed',sans-serif; }
+  *{box-sizing:border-box}
+  body { margin:0; background:var(--ink); color:var(--text);
+         font-family:Inter,-apple-system,system-ui,sans-serif;
+         -webkit-font-smoothing:antialiased; overflow-x:hidden }
+  a{color:var(--pale)} a:hover{color:var(--text)}
+  h1,h2,h3{font-family:var(--cond);font-weight:800;text-transform:uppercase;margin:0}
+  input,select,textarea,button{font-family:inherit}
+
+  @keyframes fadeUp{from{opacity:0;transform:translateY(40px)}to{opacity:1;transform:none}}
+  @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+  @keyframes kenburns{from{transform:scale(1.05)}to{transform:scale(1.16)}}
+  @keyframes rule{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+  .up{animation:fadeUp .95s cubic-bezier(.22,.61,.36,1) both}
+  .fi{animation:fadeIn 1.3s ease both}
+  .d1{animation-delay:.12s} .d2{animation-delay:.24s}
+  .kb{animation:kenburns 28s ease-out both alternate infinite}
+  .rule{transform-origin:left;animation:rule .8s cubic-bezier(.22,.61,.36,1) both}
+  .lift{transition:transform .35s cubic-bezier(.22,.61,.36,1),background .25s,border-color .25s,box-shadow .35s}
+  .lift:hover{transform:translateY(-4px);box-shadow:0 16px 34px rgba(0,0,0,.42)}
+  .zw{overflow:hidden} .zw img{transition:transform .9s cubic-bezier(.22,.61,.36,1);display:block}
+  .zw:hover img{transform:scale(1.06)}
+  @media (prefers-reduced-motion: reduce){
+    .up,.fi,.kb,.rule{animation:none!important;opacity:1!important;transform:none!important}
+    .lift,.zw img{transition:none!important}
+  }
+
+  .pad{padding-left:clamp(20px,5vw,56px);padding-right:clamp(20px,5vw,56px)}
+  .wrap{width:100%;max-width:1240px;margin:0 auto}
+
+  .hero{position:relative;min-height:clamp(230px,34vw,300px);display:flex;
+        flex-direction:column;justify-content:space-between;overflow:hidden}
+  .hero img.bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+  .hero .veil{position:absolute;inset:0;
+    background:linear-gradient(180deg,rgba(10,20,34,.70) 0%,rgba(10,20,34,.40) 40%,rgba(10,20,34,.97) 100%)}
+  h1{font-size:clamp(36px,7vw,62px);line-height:.96}
+  .eyebrow{display:flex;align-items:center;gap:14px;margin:0 0 16px;font-size:12px;
+    font-weight:600;letter-spacing:.24em;text-transform:uppercase;color:rgba(245,247,251,.85)}
+  .eyebrow i{display:inline-block;width:40px;height:2px;background:var(--blue)}
+
+  .cols{display:flex;flex-wrap:wrap;gap:clamp(28px,4vw,52px);align-items:flex-start}
+  .main{flex:999 1 560px;min-width:0}
+  h2.sec{display:flex;align-items:center;gap:14px;margin:48px 0 22px;font-size:12px;
+    font-weight:600;letter-spacing:.22em;color:rgba(245,247,251,.72)}
+  h2.sec i{display:inline-block;width:28px;height:2px;background:var(--blue)}
+
+  .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px}
+  .card{display:flex;flex-direction:column;align-items:flex-start;min-height:172px;
+    padding:22px;cursor:pointer;text-align:left;color:var(--text);
+    background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.10)}
+  .card[aria-pressed=true]{background:#16293F;border:2px solid var(--blue)}
+  .card .big{font-family:var(--cond);font-weight:800;font-size:clamp(40px,7vw,50px);line-height:.86;text-transform:uppercase}
+  .card .kind{margin-top:8px;font-size:11px;font-weight:600;letter-spacing:.18em;
+    text-transform:uppercase;color:rgba(245,247,251,.60)}
+  .card .prices{display:flex;flex-wrap:wrap;align-items:baseline;gap:9px;margin-top:20px}
+  .card .now{font-family:var(--cond);font-weight:800;font-size:28px;color:var(--pale)}
+  .card .was{font-family:var(--cond);font-weight:700;font-size:20px;
+    color:rgba(245,247,251,.45);text-decoration:line-through}
+  .card .off{margin-top:7px;font-size:10px;font-weight:600;letter-spacing:.14em;
+    text-transform:uppercase;color:var(--pale)}
+
+  .hotel{position:relative;display:flex;width:100%;margin-top:14px;padding:0;
+    overflow:hidden;cursor:pointer;color:var(--text);background:#0D1A2B;
+    border:1px solid rgba(255,255,255,.10);text-align:left}
+  .hotel[aria-pressed=true]{border:2px solid var(--blue)}
+  .hotel .shot{position:absolute;inset:0;overflow:hidden}
+  .hotel .shot img{width:100%;height:100%;object-fit:cover}
+  .hotel .veil{position:absolute;inset:0;
+    background:linear-gradient(90deg,rgba(10,20,34,.95) 0%,rgba(10,20,34,.84) 42%,rgba(10,20,34,.38) 100%)}
+  .hotel .body{position:relative;display:flex;flex-direction:column;gap:12px;width:100%;
+    min-height:clamp(260px,34vw,320px);padding:clamp(22px,4vw,38px);justify-content:center}
+
+  label.f{display:block;font-size:13px;font-weight:500;color:rgba(245,247,251,.72);margin-bottom:8px}
+  .fld{width:100%;height:50px;padding:0 14px;background:rgba(255,255,255,.04);
+    border:1px solid rgba(255,255,255,.16);color:var(--text);font-size:15px;
+    transition:border-color .25s,background .25s}
+  textarea.fld{height:auto;padding:13px 14px;resize:vertical}
+  .fld:focus{outline:none;border-color:var(--blue);background:rgba(66,122,183,.10)}
+  .fld[aria-invalid=true]{border-color:#D9604F}
+  .grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:20px}
+
+  .delrow{display:flex;align-items:flex-start;gap:13px;padding:17px;cursor:pointer;
+    background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.10)}
+  .delrow.on{background:rgba(66,122,183,.14);border:1px solid var(--blue)}
+  .delrow input{margin-top:2px;accent-color:var(--blue)}
+  .delrow .t{display:block;font-size:15px;font-weight:500}
+  .delrow .s{display:block;margin-top:3px;font-size:13px;font-weight:300;color:rgba(245,247,251,.60)}
+  #schedule{display:flex;flex-wrap:wrap;gap:18px;align-items:flex-end;padding:22px 24px;
+    background:rgba(66,122,183,.12);border:1px solid rgba(66,122,183,.45)}
+  #schedule[hidden]{display:none}
+
+  aside{flex:1 1 320px;position:sticky;top:24px;margin-top:38px;padding:30px;
+    background:rgba(10,20,34,.96);border:1px solid rgba(255,255,255,.14)}
+  @media (max-width:900px){ aside{position:static;margin-top:8px} }
+  .line{padding:16px 0;border-bottom:1px solid rgba(255,255,255,.10)}
+  .line .top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+  .step{width:30px;height:30px;display:flex;align-items:center;justify-content:center;
+    background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.20);
+    color:var(--text);font-size:17px;line-height:1;cursor:pointer}
+  .nudge{display:flex;align-items:center;gap:9px;width:100%;margin:11px 0 0;
+    min-height:44px;padding:9px 13px;background:rgba(66,122,183,.16);
+    border:1px dashed var(--blue);color:var(--pale);font-size:13px;font-weight:500;
+    text-align:left;cursor:pointer}
+  .pay{width:100%;min-height:58px;background:var(--blue);color:#fff;border:none;
+    font-family:var(--cond);font-weight:800;font-size:22px;letter-spacing:.04em;
+    text-transform:uppercase;cursor:pointer}
+  .pay:disabled{opacity:.5;cursor:default}
+  .err{margin:0 0 16px;padding:11px 13px;background:rgba(217,96,79,.13);
+    border:1px solid rgba(217,96,79,.3);color:#F0A99D;font-size:13px;line-height:1.5}
+  .err[hidden]{display:none}
+</style>
+</head>
+<body>
+
+<div style="min-height:100%;display:flex;flex-direction:column">
+
+  <section class="hero">
+    <img class="bg kb" src="purchase-hero.jpg" alt="A car on track at Balaton Park Circuit">
+    <div class="veil"></div>
+    <div class="fi pad" style="position:relative;padding-top:30px">
+      <a href="index.html" style="display:inline-flex"><img src="bpc-logo.svg" alt="Balaton Park Circuit" style="height:30px;width:auto"></a>
+    </div>
+    <div class="wrap pad" style="position:relative;padding-bottom:40px">
+      <p class="eyebrow up"><i class="rule"></i>Step 1 of 2 · Choose &amp; pay</p>
+      <h1 class="up d1">Gift a session. <span style="color:var(--pale)">Or more.</span></h1>
+    </div>
+  </section>
+
+  <main class="wrap pad" style="flex-grow:1;padding-top:44px;padding-bottom:84px">
+    <p class="up" style="margin:0 0 48px;font-size:17px;font-weight:300;color:rgba(245,247,251,.72)">Pick one package or several — they add up in the summary. The recipient picks their own track day later.</p>
+
+    <form id="buy" class="cols" novalidate>
+
+      <div class="main">
+        <h2 class="sec up" style="margin-top:0"><i class="rule"></i>1 · Packages</h2>
+        <div class="cards" id="cards"></div>
+        <button type="button" class="hotel lift zw up d2" id="hotelCard" aria-pressed="false"></button>
+
+        <p class="up" style="margin:18px 0 0;font-size:13px;font-weight:300;line-height:1.75;color:rgba(245,247,251,.62)">A session is 25 minutes of track time. The VIP Day is at least five 30-minute sessions, your own box garage, dedicated care on site and a direct contact for the whole day. Rooms and photos at <a href="https://balatonparkhotel.com" target="_blank" rel="noopener">balatonparkhotel.com</a>.</p>
+
+        <h2 class="sec up"><i></i>2 · Who is it for</h2>
+        <div class="grid2">
+          <div>
+            <label class="f" for="rname">Recipient name</label>
+            <input id="rname" class="fld" type="text" autocomplete="off" placeholder="Kovács Péter">
+          </div>
+          <div>
+            <label class="f" for="remail">Recipient email</label>
+            <input id="remail" class="fld" type="email" required placeholder="peter@example.com">
+          </div>
+          <div style="grid-column:1/-1">
+            <label class="f" for="msg">Message on the gift card</label>
+            <textarea id="msg" class="fld" rows="3" maxlength="2000" placeholder="Boldog szülinapot! See you on track."></textarea>
+          </div>
+        </div>
+
+        <h2 class="sec up"><i></i>3 · Delivery</h2>
+        <div style="display:flex;flex-direction:column;gap:12px" id="delivery"></div>
+        <div id="schedule" hidden style="margin-top:12px">
+          <div style="flex:1 1 200px;min-width:0">
+            <label class="f" for="senddate">Send on</label>
+            <input id="senddate" class="fld" type="date" style="background:var(--ink);border-color:rgba(255,255,255,.22)">
+          </div>
+          <div style="flex:0 1 160px;min-width:0">
+            <label class="f" for="sendtime">At</label>
+            <input id="sendtime" class="fld" type="time" value="08:00" style="background:var(--ink);border-color:rgba(255,255,255,.22)">
+          </div>
+          <p style="flex:1 1 100%;margin:0;font-size:13px;font-weight:300;line-height:1.6;color:rgba(245,247,251,.70)">Budapest time. Nothing is sent until then — you'll get your own copy straight after payment, so you know it worked.</p>
+        </div>
+
+        <h2 class="sec up"><i></i>4 · Your details</h2>
+        <div class="grid2">
+          <div>
+            <label class="f" for="bname">Your name</label>
+            <input id="bname" class="fld" type="text" autocomplete="name">
+          </div>
+          <div>
+            <label class="f" for="bemail">Your email</label>
+            <input id="bemail" class="fld" type="email" required autocomplete="email">
+          </div>
+        </div>
+      </div>
+
+      <aside class="up d2">
+        <h2 style="margin:0 0 22px;font-size:30px;line-height:1">Summary</h2>
+        <p class="err" id="err" hidden></p>
+        <div id="lines"></div>
+        <div id="saving" hidden style="display:flex;align-items:baseline;justify-content:space-between;gap:16px;padding:16px 0 0">
+          <span style="font-size:14px;font-weight:500;color:var(--pale)">You save</span>
+          <span style="font-size:16px;font-weight:600;color:var(--pale)" id="savingAmt"></span>
+        </div>
+        <div style="display:flex;align-items:baseline;justify-content:space-between;gap:16px;padding:22px 0 26px">
+          <span style="font-family:var(--cond);font-weight:800;font-size:24px;text-transform:uppercase">Total</span>
+          <span style="font-family:var(--cond);font-weight:800;font-size:40px;line-height:1;color:var(--pale)" id="total">€0</span>
+        </div>
+        <button type="submit" class="pay lift" id="pay">Pay with card</button>
+        <p style="margin:16px 0 0;font-size:12px;font-weight:300;line-height:1.7;color:rgba(245,247,251,.60)">
+          We never see your card details.<br><span id="codeNote"></span><br>
+          For refund requests, <a href="mailto:info@balatonparkcircuit.com?subject=Gift%20voucher%20refund%20request">email us</a>.</p>
+        <div style="margin-top:24px;padding-top:20px;border-top:1px solid rgba(255,255,255,.10)">
+          <p style="margin:0;font-size:13px;font-weight:300;line-height:1.6;color:rgba(245,247,251,.72)">Already have a voucher? <a href="redeem.html" style="font-weight:500">Redeem it here</a>.</p>
+          <p style="margin:12px 0 0;font-size:12px;font-weight:300;line-height:1.65;color:rgba(245,247,251,.55)">Track days may be moved or cancelled — see the <a href="https://www.balatonparkcircuit.com/tc" target="_blank" rel="noopener">terms</a>.</p>
+        </div>
+      </aside>
+
+    </form>
+  </main>
+</div>
+
+<script>
+(function () {
+  'use strict';
+  var API = 'https://hbosxvmprhzrheilwwfv.supabase.co/functions/v1';
+
+  var $ = function (s) { return document.querySelector(s); };
+  var el = function (t, c, h) { var n = document.createElement(t);
+    if (c) n.className = c; if (h !== undefined) n.innerHTML = h; return n; };
+  var esc = function (s) { return String(s == null ? '' : s)
+    .replace(/[&<>"]/g, function (c) {
+      return { '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[c]; }); };
+  var money = function (cents) {
+    var n = Math.round(cents) / 100;
+    return '€' + n.toLocaleString('en-IE',
+      { minimumFractionDigits: n % 1 ? 2 : 0, maximumFractionDigits: 2 });
+  };
+
+  // Shape of each package card's headline number.
+  var FACE = {
+    s1:  { big: '1',    kind: 'session' },
+    s3:  { big: '3',    kind: 'sessions' },
+    s6:  { big: '6',    kind: 'sessions' },
+    vip: { big: 'VIP',  kind: 'full day' }
+  };
+
+  var cat = null;            // catalogue from the server
+  var qty = {};              // package code -> how many
+  var deliveryMode = 'now';
+
+  // The same ladder the checkout function applies. Shown here, enforced there.
+  function discountFor(n) {
+    var pct = 0;
+    (cat.tiers || []).forEach(function (t) { if (n >= t.min_qty) pct = t.percent; });
+    return pct;
+  }
+  function nextTier(n) {
+    var up = (cat.tiers || []).filter(function (t) { return t.min_qty > n; });
+    return up.length ? up[0] : null;
+  }
+
+  // ------------------------------------------------------------ render
+
+  function packageCard(p) {
+    var face = FACE[p.code] || { big: String(p.session_count || ''), kind: 'sessions' };
+    var n = qty[p.code] || 0;
+    var pct = discountFor(n);
+    var now = Math.round(p.price_cents * (1 - pct / 100));
+
+    var b = el('button', 'card lift up');
+    b.type = 'button';
+    b.setAttribute('aria-pressed', n > 0 ? 'true' : 'false');
+    b.innerHTML =
+      '<span class="big">' + esc(face.big) + '</span>' +
+      '<span class="kind">' + esc(face.kind) + '</span>' +
+      '<span class="prices"><span class="now">' + money(now) + '</span>' +
+      (pct ? '<span class="was">' + money(p.price_cents) + '</span>' : '') + '</span>' +
+      (pct ? '<span class="off">' + pct + '% off</span>' : '');
+    b.addEventListener('click', function () { toggle(p.code); });
+    return b;
+  }
+
+  function renderCards() {
+    var shop = cat.packages.filter(function (p) { return !p.includes_room; });
+    $('#cards').replaceChildren.apply($('#cards'), shop.map(packageCard));
+
+    var stay = cat.packages.filter(function (p) { return p.includes_room; })[0];
+    var box = $('#hotelCard');
+    if (!stay) { box.hidden = true; return; }
+
+    var n = qty[stay.code] || 0;
+    var pct = discountFor(n);
+    var now = Math.round(stay.price_cents * (1 - pct / 100));
+    var vip = cat.packages.filter(function (p) { return p.code === 'vip'; })[0];
+    var note = pct ? pct + '% volume discount'
+      : (vip ? money(stay.price_cents - vip.price_cents) + ' over the VIP day' : '');
+
+    box.setAttribute('aria-pressed', n > 0 ? 'true' : 'false');
+    box.innerHTML =
+      '<span class="shot"><img src="hotel-room.jpg" alt="" aria-hidden="true" loading="lazy"></span>' +
+      '<span class="veil"></span>' +
+      '<span class="body">' +
+        '<span style="display:flex;align-items:center;gap:12px;font-size:11px;font-weight:600;letter-spacing:.22em;text-transform:uppercase;color:var(--pale)">' +
+          '<span style="display:inline-block;width:28px;height:2px;background:var(--blue)"></span>Stay the night</span>' +
+        '<span style="font-family:var(--cond);font-weight:800;font-size:clamp(28px,5vw,44px);line-height:.96;text-transform:uppercase">VIP Day + 1 night<br>at Balaton Park Hotel</span>' +
+        '<span style="font-size:14px;font-weight:300;line-height:1.7;color:rgba(245,247,251,.82);max-width:480px">The full VIP track day, then a room looking straight down the main straight. Double room with breakfast for one — breakfast for a second guest is extra.</span>' +
+        '<span style="display:flex;flex-wrap:wrap;align-items:baseline;gap:14px;margin-top:10px">' +
+          '<span style="font-family:var(--cond);font-weight:800;font-size:clamp(38px,7vw,54px);line-height:1;color:var(--pale)">' + money(now) + '</span>' +
+          (pct ? '<span style="font-family:var(--cond);font-weight:700;font-size:26px;color:rgba(245,247,251,.45);text-decoration:line-through">' + money(stay.price_cents) + '</span>' : '') +
+          '<span style="font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:rgba(245,247,251,.65)">' + esc(note) + '</span>' +
+        '</span>' +
+      '</span>';
+    box.onclick = function () { toggle(stay.code); };
+  }
+
+  function renderSummary() {
+    var chosen = cat.packages.filter(function (p) { return (qty[p.code] || 0) > 0; });
+    var host = $('#lines');
+    host.replaceChildren();
+
+    if (!chosen.length) {
+      host.append(el('p', null, 'Nothing picked yet. Choose one or more packages above.'));
+      host.firstChild.style.cssText = 'margin:0 0 22px;padding:20px 0;font-size:14px;' +
+        'font-weight:300;line-height:1.7;color:rgba(245,247,251,.60);' +
+        'border-top:1px solid rgba(255,255,255,.10);border-bottom:1px solid rgba(255,255,255,.10)';
+    }
+
+    var gross = 0, total = 0, count = 0;
+
+    chosen.forEach(function (p) {
+      var n = qty[p.code];
+      var pct = discountFor(n);
+      var was = p.price_cents * n;
+      var line = Math.round(p.price_cents * (1 - pct / 100)) * n;
+      gross += was; total += line; count += n;
+
+      var next = nextTier(n);
+      var row = el('div', 'line');
+      row.innerHTML =
+        '<div class="top">' +
+          '<span style="display:flex;flex-direction:column;gap:9px;min-width:0">' +
+            '<span style="font-size:15px;font-weight:500">' + esc(p.name) + '</span>' +
+            '<span style="display:flex;align-items:center;gap:8px">' +
+              '<button type="button" class="step" data-act="dec" aria-label="Remove one ' + esc(p.name) + '">−</button>' +
+              '<span style="min-width:22px;text-align:center;font-size:14px;font-weight:600">' + n + '</span>' +
+              '<button type="button" class="step" data-act="inc" aria-label="Add one more ' + esc(p.name) + '">+</button>' +
+              '<span style="font-size:12px;color:rgba(245,247,251,.50)">' + money(p.price_cents) + ' each</span>' +
+            '</span>' +
+          '</span>' +
+          '<span style="display:flex;flex-direction:column;align-items:flex-end;gap:3px;white-space:nowrap">' +
+            '<span style="font-family:var(--cond);font-weight:800;font-size:22px;line-height:1">' + money(line) + '</span>' +
+            (pct ? '<span style="font-size:12px;color:rgba(245,247,251,.45);text-decoration:line-through">' + money(was) + '</span>' : '') +
+          '</span>' +
+        '</div>' +
+        (pct ? '<p style="margin:11px 0 0;font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--pale)">' + pct + '% volume discount</p>' : '');
+
+      if (next) {
+        var add = next.min_qty - n;
+        var nudge = el('button', 'nudge',
+          '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>' +
+          '<span>Add ' + add + ' more for <strong style="font-weight:700;color:var(--text)">' + next.percent + '%</strong> off</span>');
+        nudge.type = 'button';
+        nudge.addEventListener('click', function () { bump(p.code, add); });
+        row.append(nudge);
+      }
+
+      row.querySelector('[data-act=dec]').addEventListener('click', function () { bump(p.code, -1); });
+      row.querySelector('[data-act=inc]').addEventListener('click', function () { bump(p.code, 1); });
+      host.append(row);
+    });
+
+    $('#saving').hidden = gross <= total;
+    $('#savingAmt').textContent = '−' + money(gross - total);
+    $('#total').textContent = money(total);
+    $('#pay').disabled = !chosen.length;
+    $('#codeNote').textContent = count > 1
+      ? 'You get ' + count + ' separate voucher codes, one per voucher.'
+      : 'Your code is issued the moment payment clears.';
+  }
+
+  function renderDelivery() {
+    var defs = [
+      { id: 'now',   label: 'Email it now',       sub: 'Sent straight to the recipient after payment.' },
+      { id: 'date',  label: 'Email it on a date', sub: 'Pick the day and time it should land.' },
+      { id: 'print', label: 'Print it yourself',  sub: 'Download a PDF gift card after payment. We keep the recipient’s email on file but send them nothing.' }
+    ];
+    var host = $('#delivery');
+    host.replaceChildren.apply(host, defs.map(function (o) {
+      var lab = el('label', 'delrow lift' + (deliveryMode === o.id ? ' on' : ''),
+        '<input type="radio" name="delivery"' + (deliveryMode === o.id ? ' checked' : '') + '>' +
+        '<span><span class="t">' + esc(o.label) + '</span><span class="s">' + esc(o.sub) + '</span></span>');
+      lab.querySelector('input').addEventListener('change', function () {
+        deliveryMode = o.id;
+        renderDelivery();
+        $('#schedule').hidden = deliveryMode !== 'date';
+      });
+      return lab;
+    }));
+  }
+
+  function draw() { renderCards(); renderSummary(); }
+
+  function toggle(code) { qty[code] = (qty[code] || 0) > 0 ? 0 : 1; draw(); }
+  function bump(code, by) {
+    qty[code] = Math.max(0, Math.min(20, (qty[code] || 0) + by));
+    draw();
+  }
+
+  // ------------------------------------------------------------ submit
+
+  function fail(msg, field) {
+    var box = $('#err');
+    box.textContent = msg;
+    box.hidden = false;
+    if (field) { field.setAttribute('aria-invalid', 'true'); field.focus(); }
+    box.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+
+  function validEmail(v) { return /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(String(v).trim()); }
+
+  $('#buy').addEventListener('submit', function (ev) {
+    ev.preventDefault();
+    $('#err').hidden = true;
+    ['remail', 'bemail', 'senddate'].forEach(function (id) {
+      $('#' + id).removeAttribute('aria-invalid');
+    });
+
+    var items = Object.keys(qty)
+      .filter(function (c) { return qty[c] > 0; })
+      .map(function (c) { return { package_code: c, qty: qty[c] }; });
+    if (!items.length) return fail('Choose at least one package.');
+
+    if (!validEmail($('#remail').value)) {
+      return fail('We need a valid email for the person receiving the gift.', $('#remail'));
+    }
+    if (!validEmail($('#bemail').value)) {
+      return fail('We need your email, so we can send you the receipt.', $('#bemail'));
+    }
+
+    var deliverAt = null;
+    if (deliveryMode === 'date') {
+      var d = $('#senddate').value, t = $('#sendtime').value || '08:00';
+      if (!d) return fail('Pick the day the gift should arrive.', $('#senddate'));
+      // The field is Budapest time; send an explicit offset so the server is
+      // not left guessing which clock the buyer meant.
+      var when = new Date(d + 'T' + t + ':00');
+      if (isNaN(when.getTime()) || when.getTime() < Date.now()) {
+        return fail('That send date is in the past.', $('#senddate'));
+      }
+      deliverAt = d + 'T' + t + ':00' + budapestOffset(when);
+    }
+
+    var btn = $('#pay');
+    btn.disabled = true;
+    btn.textContent = 'Taking you to payment…';
+
+    fetch(API + '/checkout', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        items: items,
+        buyer_name: $('#bname').value.trim(),
+        buyer_email: $('#bemail').value.trim(),
+        recipient_name: $('#rname').value.trim(),
+        recipient_email: $('#remail').value.trim(),
+        gift_message: $('#msg').value.trim(),
+        delivery_method: deliveryMode === 'date' ? 'scheduled' : deliveryMode,
+        deliver_at: deliverAt
+      })
+    }).then(function (res) {
+      return res.json().then(function (body) { return { ok: res.ok, body: body }; });
+    }).then(function (r) {
+      if (!r.ok || !r.body.checkout_url) {
+        throw new Error(r.body && r.body.error === 'payments_not_configured'
+          ? 'Card payments are not switched on yet. Please try again shortly.'
+          : 'We could not start the payment. Nothing has been charged.');
+      }
+      window.location.href = r.body.checkout_url;
+    }).catch(function (e) {
+      fail(e instanceof TypeError
+        ? 'Could not reach the server. Check your connection and try again — nothing has been charged.'
+        : e.message);
+      btn.disabled = false;
+      btn.textContent = 'Pay with card';
+    });
+  });
+
+  // Hungary is UTC+1, UTC+2 between the last Sundays of March and October.
+  function budapestOffset(when) {
+    var y = when.getFullYear();
+    var lastSunday = function (month) {   // month: 0-based
+      var d = new Date(Date.UTC(y, month + 1, 0));
+      d.setUTCDate(d.getUTCDate() - d.getUTCDay());
+      return d;
+    };
+    var start = lastSunday(2), end = lastSunday(9);
+    return (when >= start && when < end) ? '+02:00' : '+01:00';
+  }
+
+  // ------------------------------------------------------------ boot
+
+  renderDelivery();
+  $('#senddate').min = new Date().toISOString().slice(0, 10);
+
+  fetch(API + '/catalogue')
+    .then(function (r) { return r.json(); })
+    .then(function (data) {
+      cat = data;
+      // Open on the middle package, the way the mockup did.
+      if (cat.packages.some(function (p) { return p.code === 's3'; })) qty.s3 = 1;
+      draw();
+    })
+    .catch(function () {
+      $('#cards').innerHTML =
+        '<p style="color:rgba(245,247,251,.6);font-size:14px">Could not load the packages. ' +
+        'Please refresh, or <a href="mailto:info@balatonparkcircuit.com">email us</a>.</p>';
+      $('#pay').disabled = true;
+    });
+})();
+</script>
+</body>
+</html>
