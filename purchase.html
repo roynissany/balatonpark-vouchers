@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title data-i18n-title="buy.title">Buy a gift voucher — Balaton Park Circuit</title>
+<title data-i18n-title="buy.title">Buy a gift voucher - Balaton Park Circuit</title>
 <meta name="description" content="Buy a Balaton Park Circuit gift voucher. The recipient picks their own track day.">
 <link rel="icon" type="image/png" href="favicon.png">
 <meta property="og:title" content="Gift a day on track at Balaton Park Circuit">
@@ -16,6 +16,8 @@
   :root { --ink:#0A1422; --blue:#427AB7; --pale:#A8CEF0; --text:#F5F7FB;
           --cond:'Barlow Condensed',sans-serif; }
   *{box-sizing:border-box}
+  /* An inline display: beats the hidden attribute otherwise. */
+  [hidden]{display:none!important}
   body { margin:0;touch-action:manipulation; background:var(--ink); color:var(--text);
          font-family:Inter,-apple-system,system-ui,sans-serif;
          -webkit-font-smoothing:antialiased; overflow-x:hidden }
@@ -110,7 +112,7 @@
   /* Both halves share the row evenly: a wide date beside a narrow time left
      a dead gap on the right, which read as a broken field on a phone. */
   #schedule .half{flex:1 1 150px;min-width:0}
-  /* Safari draws date and time inputs its own way — centred value, native
+  /* Safari draws date and time inputs its own way - centred value, native
      chrome, its own height. Strip that so they match every other field. */
   input[type=date],input[type=time]{
     -webkit-appearance:none;appearance:none;text-align:left;
@@ -172,7 +174,7 @@
   </section>
 
   <main class="wrap pad" style="flex-grow:1;padding-top:44px;padding-bottom:84px">
-    <p class="up" data-i18n="buy.lede" style="margin:0 0 48px;font-size:17px;font-weight:300;color:rgba(245,247,251,.72)">Pick one package or several — they add up in the summary. The recipient picks their own track day later.</p>
+    <p class="up" data-i18n="buy.lede" style="margin:0 0 48px;font-size:17px;font-weight:300;color:rgba(245,247,251,.72)">Pick one package or several - they add up in the summary. The recipient picks their own track day later.</p>
 
     <form id="buy" class="cols" novalidate>
 
@@ -426,7 +428,7 @@
           '<span style="display:flex;flex-direction:column;gap:9px;min-width:0">' +
             '<span style="font-size:15px;font-weight:500">' + esc(p.name) + '</span>' +
             '<span style="display:flex;align-items:center;gap:8px">' +
-              '<button type="button" class="step" data-act="dec" aria-label="Remove one ' + esc(p.name) + '">−</button>' +
+              '<button type="button" class="step" data-act="dec" aria-label="Remove one ' + esc(p.name) + '">-</button>' +
               '<span style="min-width:22px;text-align:center;font-size:14px;font-weight:600">' + n + '</span>' +
               '<button type="button" class="step" data-act="inc" aria-label="Add one more ' + esc(p.name) + '">+</button>' +
               '<span style="font-size:12px;color:rgba(245,247,251,.50)">' +
@@ -466,7 +468,7 @@
     }
 
     $('#saving').hidden = gross <= total;
-    $('#savingAmt').textContent = '−' + money(gross - total);
+    $('#savingAmt').textContent = '-' + money(gross - total);
     $('#total').textContent = money(total);
     $('#pay').disabled = !chosen.length;
     $('#pay').textContent = total ? t('buy.payAmount', { amount: money(total) }) : t('buy.pay');
@@ -558,7 +560,7 @@
 
     // Everything below runs inside a promise, so a thrown error always lands
     // in the catch at the end. Thrown outside one it would leave the button
-    // disabled with no message — a Pay press that hangs for good.
+    // disabled with no message - a Pay press that hangs for good.
     Promise.resolve().then(function () {
       btn.textContent = t('buy.paying');
       // Validate the card fields before creating anything server-side, so a
@@ -632,7 +634,7 @@
     return stripeJs;
   }
 
-  // Stripe draws the card fields inside its own frame — we can't reach into
+  // Stripe draws the card fields inside its own frame - we can't reach into
   // them, but we can hand it the page's own palette so the seam doesn't show.
   var APPEARANCE = {
     theme: 'night',

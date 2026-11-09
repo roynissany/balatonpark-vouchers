@@ -3,13 +3,13 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title data-i18n-title="home.title">Balaton Park Circuit — Gift Vouchers</title>
+<title data-i18n-title="home.title">Balaton Park Circuit - Gift Vouchers</title>
 <meta name="description" content="Gift a day on track at Balaton Park Circuit. The person you give it to picks their own date.">
 <link rel="icon" type="image/png" href="favicon.png">
 
 <meta property="og:type" content="website">
 <meta property="og:title" content="Gift a day on track at Balaton Park Circuit">
-<meta property="og:description" content="Track session vouchers for the 2027 season. They pick their own date — no need to decide for them.">
+<meta property="og:description" content="Track session vouchers for the 2027 season. They pick their own date - no need to decide for them.">
 <meta property="og:image" content="https://gifts.balatonpark.com/og-share.jpg">
 <meta property="og:url" content="https://gifts.balatonpark.com/">
 <meta name="twitter:card" content="summary_large_image">
@@ -21,6 +21,8 @@
   :root { --ink:#0A1422; --blue:#427AB7; --pale:#A8CEF0; --text:#F5F7FB;
           --cond:'Barlow Condensed',sans-serif; }
   *{box-sizing:border-box}
+  /* An inline display: beats the hidden attribute otherwise. */
+  [hidden]{display:none!important}
   body { margin:0;touch-action:manipulation; background:var(--ink); color:var(--text);
          font-family:Inter,-apple-system,system-ui,sans-serif;
          -webkit-font-smoothing:antialiased; overflow-x:hidden; }
@@ -170,7 +172,7 @@
         <span data-i18n="home.eyebrow">Gift vouchers</span>
       </p>
       <h1 class="up d1"><span data-i18n="home.h1a">Gift your loved ones a day on track.</span> <span style="color:var(--blue)" data-i18n="home.h1b">Maybe even a night.</span></h1>
-      <p class="lede up d3" data-i18n="home.lede">Buy a voucher for track sessions at Balaton Park Circuit. The person you give it to picks their own date — no need to decide for them.</p>
+      <p class="lede up d3" data-i18n="home.lede">Buy a voucher for track sessions at Balaton Park Circuit. The person you give it to picks their own date - no need to decide for them.</p>
 
       <div class="up d4" style="display:flex;flex-wrap:wrap;gap:14px;margin:40px 0 0">
         <a class="cta primary lift" href="purchase.html" data-i18n="home.buy">Buy a voucher</a>
@@ -262,7 +264,7 @@
 
 <script>
 // The banner records a choice and stays away afterwards. Nothing beyond the
-// essentials is loaded until there is a stored "all" — so the page is
+// essentials is loaded until there is a stored "all" - so the page is
 // compliant by doing nothing, rather than by promising to.
 (function () {
   // Season note has links inside it, so it is built from the dictionary

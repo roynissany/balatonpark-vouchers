@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title data-i18n-title="red.title">Redeem a gift voucher — Balaton Park Circuit</title>
+<title data-i18n-title="red.title">Redeem a gift voucher - Balaton Park Circuit</title>
 <meta name="description" content="Redeem your Balaton Park Circuit gift voucher and choose your track days.">
 <link rel="icon" type="image/png" href="favicon.png">
 <meta property="og:title" content="Redeem your Balaton Park Circuit voucher">
@@ -16,6 +16,8 @@
   :root{--ink:#0A1422;--blue:#427AB7;--pale:#A8CEF0;--text:#F5F7FB;
         --cond:'Barlow Condensed',sans-serif}
   *{box-sizing:border-box}
+  /* An inline display: beats the hidden attribute otherwise. */
+  [hidden]{display:none!important}
   body{margin:0;touch-action:manipulation;background:var(--ink);color:var(--text);
     font-family:Inter,-apple-system,system-ui,sans-serif;-webkit-font-smoothing:antialiased;
     overflow-x:hidden;display:flex;flex-direction:column;min-height:100vh}
@@ -227,7 +229,7 @@
     });
   }
 
-  var NOT_FOUND = 'We can’t find that code. Check it against your gift card — ' +
+  var NOT_FOUND = 'We can’t find that code. Check it against your gift card - ' +
     'letters and numbers only, spaces don’t matter.';
   var MESSAGES = {
     not_found: 'red.errNotFound',
@@ -334,7 +336,7 @@
       '<span style="display:flex;align-items:center;gap:12px;font-size:15px;font-weight:300">' +
         '<span class="dot pulse"></span>' +
         '<span><strong style="font-family:var(--cond);font-weight:800;font-size:19px;letter-spacing:.1em">' +
-          esc(state.code) + '</strong> — ' +
+          esc(state.code) + '</strong> - ' +
           t(left === 1 ? 'red.leftOne' : 'red.leftMany', { n: left }) + '</span></span>');
     var swap = el('button', 'linkish', t('red.different'));
     swap.type = 'button';

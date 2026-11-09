@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title data-i18n-title="ty.title">Thank you — Balaton Park Circuit</title>
+<title data-i18n-title="ty.title">Thank you - Balaton Park Circuit</title>
 <meta name="robots" content="noindex">
 <link rel="icon" type="image/png" href="favicon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -13,6 +13,8 @@
   :root{--ink:#0A1422;--blue:#427AB7;--pale:#A8CEF0;--text:#F5F7FB;
         --cond:'Barlow Condensed',sans-serif}
   *{box-sizing:border-box}
+  /* An inline display: beats the hidden attribute otherwise. */
+  [hidden]{display:none!important}
   body{margin:0;touch-action:manipulation;background:var(--ink);color:var(--text);
     font-family:Inter,-apple-system,system-ui,sans-serif;-webkit-font-smoothing:antialiased;
     overflow-x:hidden;display:flex;flex-direction:column;min-height:100vh}

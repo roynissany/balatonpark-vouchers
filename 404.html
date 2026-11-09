@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title data-i18n-title="nf.title">Page not found — Balaton Park Circuit</title>
+<title data-i18n-title="nf.title">Page not found - Balaton Park Circuit</title>
 <meta name="robots" content="noindex">
 <link rel="icon" type="image/png" href="favicon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -13,6 +13,8 @@
   :root{--ink:#0A1422;--blue:#427AB7;--pale:#A8CEF0;--text:#F5F7FB;
         --cond:'Barlow Condensed',sans-serif}
   *{box-sizing:border-box}
+  /* An inline display: beats the hidden attribute otherwise. */
+  [hidden]{display:none!important}
   body{margin:0;touch-action:manipulation;min-height:100vh;background:var(--ink);color:var(--text);
        font-family:Inter,-apple-system,system-ui,sans-serif;-webkit-font-smoothing:antialiased;
        display:flex;flex-direction:column;overflow-x:hidden}
@@ -84,7 +86,7 @@
   <div class="wrap pad" style="position:relative;padding-bottom:clamp(48px,8vw,80px)">
     <p class="code up">404</p>
     <h1 class="up d1" data-i18n="nf.h1">Wrong way round the circuit.</h1>
-    <p class="lede up d1" data-i18n="nf.lede">That page isn't here. The link may be old, or mistyped — nothing is broken on your end.</p>
+    <p class="lede up d1" data-i18n="nf.lede">That page isn't here. The link may be old, or mistyped - nothing is broken on your end.</p>
     <div class="up d2" style="display:flex;flex-wrap:wrap;gap:14px;margin:36px 0 0">
       <a class="cta primary lift" href="index.html" data-i18n="nf.vouchers">Gift vouchers</a>
       <a class="cta ghost lift" href="redeem.html" data-i18n="nf.redeem">Redeem a voucher</a>

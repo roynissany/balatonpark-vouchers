@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>BPC Vouchers — Backoffice</title>
+<title>BPC Vouchers - Backoffice</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
@@ -16,6 +16,8 @@
     --cond:'Barlow Condensed',system-ui,sans-serif;
   }
   *{box-sizing:border-box}
+  /* An inline display: beats the hidden attribute otherwise. */
+  [hidden]{display:none!important}
   body{margin:0;background:var(--ink);color:var(--text);
        font:400 14px/1.5 Inter,system-ui,sans-serif;-webkit-font-smoothing:antialiased}
   h1,h2,h3,.big{font-family:var(--cond);font-weight:800;letter-spacing:.01em;margin:0}
@@ -246,7 +248,7 @@ let session = null;
 try {
   const raw = localStorage.getItem(SESSION_KEY);
   if (raw) session = JSON.parse(raw);
-} catch (e) { /* private window, blocked storage — sign in again each time */ }
+} catch (e) { /* private window, blocked storage - sign in again each time */ }
 
 function keepSession(s) {
   session = s;
@@ -305,9 +307,9 @@ const esc = (s) => String(s ?? '').replace(/[&<>"]/g,
 const money = (c) => '€' + (Number(c || 0) / 100).toLocaleString('en-IE',
   { minimumFractionDigits: 0, maximumFractionDigits: 2 });
 const when = (s) => s ? new Date(s).toLocaleString('en-GB',
-  { day: '2-digit', month: 'short', year: '2-digit', hour: '2-digit', minute: '2-digit' }) : '—';
+  { day: '2-digit', month: 'short', year: '2-digit', hour: '2-digit', minute: '2-digit' }) : '-';
 const day = (s) => s ? new Date(s).toLocaleDateString('en-GB',
-  { day: 'numeric', month: 'short', year: 'numeric' }) : '—';
+  { day: 'numeric', month: 'short', year: 'numeric' }) : '-';
 const pill = (s) => `<span class="pill s-${esc(s)}">${esc(String(s).replace(/_/g, ' '))}</span>`;
 
 function flash(node, text, kind) {
@@ -362,7 +364,7 @@ $('#loginForm').addEventListener('submit', async (ev) => {
     await signIn($('#em').value.trim(), $('#pw').value);
   } catch (err) {
     // A network failure here says the browser could not reach Supabase at all,
-    // which looks nothing like a wrong password — say which it was.
+    // which looks nothing like a wrong password - say which it was.
     flash($('#loginErr'), err instanceof TypeError
       ? 'Could not reach the server. Check your connection, or open the backoffice from its own address.'
       : err.message);
@@ -411,7 +413,7 @@ async function loadOverview() {
   $('#lowPools').replaceChildren();
   if (d.low.length) {
     const list = d.low.map((p) =>
-      `<li>${day(p.event_date)} · ${esc(p.package_name)} — ${p.available} of ${p.total} left</li>`).join('');
+      `<li>${day(p.event_date)} · ${esc(p.package_name)} - ${p.available} of ${p.total} left</li>`).join('');
     $('#lowPools').append(el('div', 'alert',
       `<h3>Pools running low</h3><ul>${list}</ul>`));
   }
@@ -426,7 +428,7 @@ async function loadOverview() {
        <td style="width:200px"><div class="bar ${cls}"><i style="width:${pc}%"></i></div>
          <div class="tiny muted" style="margin-top:3px">${pc}%</div></td>`);
     return tr;
-  }) : [el('tr', null, '<td colspan="4"><div class="empty">No pools yet — mint some codes.</div></td>')]));
+  }) : [el('tr', null, '<td colspan="4"><div class="empty">No pools yet - mint some codes.</div></td>')]));
 }
 
 // ---------------------------------------------------------------- vouchers
@@ -439,7 +441,7 @@ async function loadVouchers() {
     { q: $('#q').value.trim(), status: $('#st').value, limit: PER, offset: page * PER });
 
   $('#vCount').textContent = d.total
-    ? `${d.offset + 1}–${Math.min(d.offset + PER, d.total)} of ${d.total}` : 'Nothing found';
+    ? `${d.offset + 1}-${Math.min(d.offset + PER, d.total)} of ${d.total}` : 'Nothing found';
   $('#prev').disabled = page === 0;
   $('#next').disabled = (page + 1) * PER >= d.total;
 
@@ -449,8 +451,8 @@ async function loadVouchers() {
       `<td class="mono">${esc(v.code)}<div class="tiny muted">${when(v.created_at)}</div></td>
        <td>${esc(v.packages?.name || '')}</td>
        <td class="mono">${v.sessions_remaining} / ${v.sessions_total}</td>
-       <td>${esc(o.recipient_name || '—')}<div class="tiny muted">${esc(o.recipient_email || '')}</div></td>
-       <td>${esc(o.buyer_name || '—')}<div class="tiny muted">${esc(o.buyer_email || '')}</div></td>
+       <td>${esc(o.recipient_name || '-')}<div class="tiny muted">${esc(o.recipient_email || '')}</div></td>
+       <td>${esc(o.buyer_name || '-')}<div class="tiny muted">${esc(o.buyer_email || '')}</div></td>
        <td class="mono">${money(v.paid_value_cents)}</td>
        <td>${pill(v.status)}</td>`);
     tr.style.cursor = 'pointer';
@@ -476,7 +478,7 @@ async function loadPickers() {
   const [a, b] = await Promise.all([api('track_days'), api('packages')]);
   days = a.track_days; packs = b.packages;
   $('#cDay').replaceChildren(...days.map((d) => {
-    const o = el('option', null, `${day(d.event_date)} — ${esc(d.public_label || '')}`);
+    const o = el('option', null, `${day(d.event_date)} - ${esc(d.public_label || '')}`);
     o.value = d.id; return o;
   }));
   $('#cPkg').replaceChildren(...packs.map((p) => {
@@ -510,9 +512,9 @@ async function openVoucher(id) {
        <dt>Package</dt><dd>${esc(v.packages?.name || '')}</dd>
        <dt>Sessions</dt><dd class="mono">${v.sessions_remaining} of ${v.sessions_total} left</dd>
        <dt>Valid until</dt><dd>${day(v.expires_on)}</dd>
-       <dt>Recipient</dt><dd>${esc(o.recipient_name || '—')}<br>
+       <dt>Recipient</dt><dd>${esc(o.recipient_name || '-')}<br>
          <span class="muted tiny">${esc(o.recipient_email || '')}</span></dd>
-       <dt>Buyer</dt><dd>${esc(o.buyer_name || '—')}<br>
+       <dt>Buyer</dt><dd>${esc(o.buyer_name || '-')}<br>
          <span class="muted tiny">${esc(o.buyer_email || '')}</span></dd>
        <dt>Delivery</dt><dd>${esc(o.delivery_method || '')}${
           o.deliver_at ? ' · ' + when(o.deliver_at) : ''}</dd>
@@ -561,7 +563,7 @@ async function openVoucher(id) {
     row.style.cssText = 'display:flex;gap:8px;margin-bottom:14px';
     const sel = el('select');
     packs.filter((p) => p.active && p.code !== v.packages?.code).forEach((p) => {
-      const op = el('option', null, `${p.name} — ${money(p.price_cents)}`); op.value = p.code; sel.append(op);
+      const op = el('option', null, `${p.name} - ${money(p.price_cents)}`); op.value = p.code; sel.append(op);
     });
     const go = el('button', 'ghost', 'Swap package');
     go.addEventListener('click', async () => {
@@ -584,7 +586,7 @@ async function openVoucher(id) {
     });
     actions.append(btn);
   } else {
-    actions.append(el('div', 'muted tiny', `Order is ${o.status} — nothing to refund.`));
+    actions.append(el('div', 'muted tiny', `Order is ${o.status} - nothing to refund.`));
   }
 
   const log = el('div', null, '<hr><h3 style="font-size:17px;margin-bottom:11px">History</h3>');
@@ -682,9 +684,9 @@ async function loadLog() {
       `<td class="tiny">${when(a.at)}</td>
        <td><span class="pill k-${esc(a.kind)}">${esc(a.kind)}</span>
          ${a.detail_text ? `<div class="tiny muted" style="margin-top:4px">${esc(a.detail_text)}</div>` : ''}</td>
-       <td class="mono tiny">${esc(a.voucher_code || '—')}
+       <td class="mono tiny">${esc(a.voucher_code || '-')}
          <div class="tiny muted">${esc(a.package_name || '')}</div></td>
-       <td class="tiny">${esc(a.actor_email || a.buyer_email || '—')}
+       <td class="tiny">${esc(a.actor_email || a.buyer_email || '-')}
          ${a.recipient_email && !a.actor_email
             ? `<div class="tiny muted">for ${esc(a.recipient_email)}</div>` : ''}</td>
        <td class="mono tiny">${a.amount_cents != null ? money(a.amount_cents) : ''}</td>`);
