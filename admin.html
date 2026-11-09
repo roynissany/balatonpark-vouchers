@@ -372,8 +372,12 @@ document.querySelectorAll('nav button').forEach((b) => {
 async function loadOverview() {
   const d = await api('overview');
   const L = d.liability || {};
+  const R = d.revenue || {};
 
   $('#tiles').replaceChildren(...[
+    ['Total earned', money(R.collected_cents),
+      `${money(R.net_of_vat_cents)} after VAT` +
+      (R.refunded_cents ? ` · ${money(R.refunded_cents)} refunded` : '')],
     ['Paid orders', d.paid_orders, ''],
     ['Unredeemed', L.vouchers_unredeemed ?? 0, 'vouchers not yet started'],
     ['Partly redeemed', L.vouchers_partial ?? 0, 'sessions still owed'],
