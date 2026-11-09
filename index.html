@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Balaton Park Circuit — Gift Vouchers</title>
+<title data-i18n-title="home.title">Balaton Park Circuit — Gift Vouchers</title>
 <meta name="description" content="Gift a day on track at Balaton Park Circuit. The person you give it to picks their own date.">
 <link rel="icon" type="image/png" href="favicon.png">
 
@@ -125,7 +125,20 @@
   #cookies .ess { padding:0 11px; background:rgba(255,255,255,.10); color:var(--text);
                   border:1px solid rgba(255,255,255,.38); font-weight:500 }
   #cookies .acc { padding:0 20px; background:var(--blue); color:#fff; border:none; font-weight:600 }
+
+  /* Language picker: large enough to find without hunting, quiet enough
+     not to compete with the headline. */
+  .langpick{display:flex;gap:6px;flex:0 0 auto}
+  .langpick button{min-height:44px;min-width:52px;padding:0 14px;cursor:pointer;
+    background:rgba(10,20,34,.55);color:rgba(245,247,251,.72);
+    border:1px solid rgba(255,255,255,.28);border-radius:0;
+    font-family:var(--cond);font-weight:800;font-size:17px;letter-spacing:.08em;
+    transition:background .2s,color .2s,border-color .2s}
+  .langpick button:hover{color:var(--text);border-color:rgba(255,255,255,.55)}
+  .langpick button[aria-pressed=true]{background:var(--blue);color:#fff;border-color:var(--blue)}
+  .headrow{display:flex;align-items:center;justify-content:space-between;gap:16px}
 </style>
+<script src="i18n.js"></script>
 </head>
 <body>
 
@@ -135,24 +148,25 @@
     <img class="bg kb" src="hero.jpg" alt="A car on the kerbs at Balaton Park Circuit">
     <div class="veil"></div>
 
-    <div class="fi wrap pad" style="position:relative;padding-top:34px">
+    <div class="fi wrap pad headrow" style="position:relative;padding-top:34px">
       <img src="bpc-logo.svg" alt="Balaton Park Circuit" style="height:clamp(26px,4vw,34px);width:auto">
+      <div id="langpick"></div>
     </div>
 
     <div class="wrap pad" style="position:relative;padding-bottom:clamp(48px,9vw,84px)">
       <p class="up" style="display:flex;align-items:center;gap:16px;margin:0 0 22px;font-size:12px;font-weight:600;letter-spacing:.26em;text-transform:uppercase">
         <span class="rule" style="display:inline-block;width:48px;height:2px;background:var(--blue)"></span>
-        Gift vouchers
+        <span data-i18n="home.eyebrow">Gift vouchers</span>
       </p>
-      <h1 class="up d1">Gift your loved ones a day on track. <span style="color:var(--blue)">Maybe even a night.</span></h1>
-      <p class="lede up d3">Buy a voucher for track sessions at Balaton Park Circuit. The person you give it to picks their own date — no need to decide for them.</p>
+      <h1 class="up d1"><span data-i18n="home.h1a">Gift your loved ones a day on track.</span> <span style="color:var(--blue)" data-i18n="home.h1b">Maybe even a night.</span></h1>
+      <p class="lede up d3" data-i18n="home.lede">Buy a voucher for track sessions at Balaton Park Circuit. The person you give it to picks their own date — no need to decide for them.</p>
 
       <div class="up d4" style="display:flex;flex-wrap:wrap;gap:14px;margin:40px 0 0">
-        <a class="cta primary lift" href="purchase.html">Buy a voucher</a>
-        <a class="cta ghost lift" href="redeem.html">Redeem a voucher</a>
+        <a class="cta primary lift" href="purchase.html" data-i18n="home.buy">Buy a voucher</a>
+        <a class="cta ghost lift" href="redeem.html" data-i18n="home.redeem">Redeem a voucher</a>
       </div>
 
-      <p class="cue" style="margin:52px 0 0;font-size:11px;font-weight:600;letter-spacing:.3em;text-transform:uppercase;color:rgba(245,247,251,.75)">Scroll</p>
+      <p class="cue" style="margin:52px 0 0;font-size:11px;font-weight:600;letter-spacing:.3em;text-transform:uppercase;color:rgba(245,247,251,.75)" data-i18n="home.scroll">Scroll</p>
     </div>
   </section>
 
@@ -166,22 +180,22 @@
   <main class="wrap pad" style="flex-grow:1">
 
     <section id="how" style="margin:clamp(56px,10vw,92px) 0 0">
-      <h2 class="up" style="margin:0 0 40px">How it <span style="color:var(--blue)">works.</span></h2>
+      <h2 class="up" style="margin:0 0 40px"><span data-i18n="home.howA">How it</span> <span style="color:var(--blue)" data-i18n="home.howB">works.</span></h2>
       <div class="steps">
         <div class="step up d1">
           <p class="n">01</p>
-          <h3 style="margin:0 0 10px">You buy</h3>
-          <p class="t">Pick a package. We email a beautiful gift card with voucher code or you print a physical one.</p>
+          <h3 style="margin:0 0 10px" data-i18n="home.step1h">You buy</h3>
+          <p class="t" data-i18n="home.step1p">Pick a package. We email a beautiful gift card with voucher code or you print a physical one.</p>
         </div>
         <div class="step up d3">
           <p class="n">02</p>
-          <h3 style="margin:0 0 10px">They choose a date</h3>
-          <p class="t">They enter the code here and pick from our published track days.</p>
+          <h3 style="margin:0 0 10px" data-i18n="home.step2h">They choose a date</h3>
+          <p class="t" data-i18n="home.step2p">They enter the code here and pick from our published track days.</p>
         </div>
         <div class="step up d5">
           <p class="n">03</p>
-          <h3 style="margin:0 0 10px">They book</h3>
-          <p class="t">We assist them with booking their desired date &amp; time.</p>
+          <h3 style="margin:0 0 10px" data-i18n="home.step3h">They book</h3>
+          <p class="t" data-i18n="home.step3p">We assist them with booking their desired date &amp; time.</p>
         </div>
       </div>
     </section>
@@ -195,27 +209,27 @@
     </section>
 
     <section style="margin:clamp(56px,9vw,88px) 0 0">
-      <h2 class="up" style="margin:0 0 28px">Track days <span style="color:var(--blue)">2027.</span></h2>
+      <h2 class="up" style="margin:0 0 28px"><span data-i18n="home.daysA">Track days</span> <span style="color:var(--blue)" data-i18n="home.daysB">2027.</span></h2>
       <div class="days">
         <div class="day lift up d1"><p class="big">17 April</p><p class="sub">Saturday · 2027</p></div>
         <div class="day lift up d2"><p class="big">22 May</p><p class="sub">Saturday · 2027</p></div>
         <div class="day lift up d3"><p class="big">26 June</p><p class="sub">Saturday · 2027</p></div>
-        <div class="day soon up d4"><p>More to come soon!</p></div>
+        <div class="day soon up d4"><p data-i18n="home.soon">More to come soon!</p></div>
       </div>
     </section>
 
     <div class="note sl">
-      <p>Vouchers are valid for the 2027 season and can be redeemed against any published 2027 track day while places last. Riding gear and licence requirements are the same as any public session. Track days may be moved or cancelled — see the <a href="https://www.balatonparkcircuit.com/tc" target="_blank" rel="noopener">terms</a>. For refund requests, <a href="mailto:info@balatonparkcircuit.com?subject=Gift%20voucher%20refund%20request">email us</a>.</p>
+      <p id="seasonNote"></p>
     </div>
 
   </main>
 
   <div id="cookies" hidden>
-    <p>Essential cookies keep the voucher system working! Other ones are important to us.
-      <a href="https://www.balatonparkcircuit.com/privacy-policy" target="_blank" rel="noopener" style="white-space:nowrap">More</a></p>
+    <p><span data-i18n="cookie.text">Essential cookies keep the voucher system working! Other ones are important to us.</span>
+      <a href="https://www.balatonparkcircuit.com/privacy-policy" target="_blank" rel="noopener" style="white-space:nowrap" data-i18n="cookie.more">More</a></p>
     <span style="flex:0 0 auto;display:flex;gap:8px">
-      <button type="button" class="ess" data-choice="essential">Essentials</button>
-      <button type="button" class="acc" data-choice="all">Accept</button>
+      <button type="button" class="ess" data-choice="essential" data-i18n="cookie.essentials">Essentials</button>
+      <button type="button" class="acc" data-choice="all" data-i18n="cookie.accept">Accept</button>
     </span>
   </div>
 
@@ -224,10 +238,10 @@
       <a href="https://balatonpark.com" target="_blank" rel="noopener" style="display:inline-flex">
         <img src="bpc-logo.svg" alt="Balaton Park Circuit" style="height:22px;width:auto;opacity:.75"></a>
       <span style="display:flex;flex-wrap:wrap;gap:24px">
-        <a href="https://balatonpark.com" target="_blank" rel="noopener">BalatonPark.com</a>
-        <a href="https://www.balatonparkcircuit.com/tc" target="_blank" rel="noopener">Terms</a>
-        <a href="https://www.balatonparkcircuit.com/privacy-policy" target="_blank" rel="noopener">Privacy</a>
-        <a href="mailto:info@balatonparkcircuit.com">Contact us</a>
+        <a href="https://balatonpark.com" target="_blank" rel="noopener" data-i18n="foot.site">BalatonPark.com</a>
+        <a href="https://www.balatonparkcircuit.com/tc" target="_blank" rel="noopener" data-i18n="foot.terms">Terms</a>
+        <a href="https://www.balatonparkcircuit.com/privacy-policy" target="_blank" rel="noopener" data-i18n="foot.privacy">Privacy</a>
+        <a href="mailto:info@balatonparkcircuit.com" data-i18n="foot.contact">Contact us</a>
       </span>
     </div>
   </footer>
@@ -239,6 +253,23 @@
 // essentials is loaded until there is a stored "all" — so the page is
 // compliant by doing nothing, rather than by promising to.
 (function () {
+  // Season note has links inside it, so it is built from the dictionary
+  // rather than marked up word by word.
+  function paintNote() {
+    var n = document.getElementById('seasonNote');
+    if (!n) return;
+    n.innerHTML = i18n.t('home.note', {
+      terms: '<a href="https://www.balatonparkcircuit.com/tc" target="_blank" rel="noopener">' +
+             i18n.t('common.terms') + '</a>',
+      email: '<a href="mailto:info@balatonparkcircuit.com?subject=Gift%20Voucher%20Refund%20Request">' +
+             i18n.t('common.emailUs') + '</a>'
+    });
+  }
+  i18n.apply();
+  i18n.mountSwitch(document.getElementById('langpick'));
+  paintNote();
+  i18n.onChange(paintNote);
+
   var KEY = 'bpc-cookie-choice';
   var box = document.getElementById('cookies');
   var saved = null;

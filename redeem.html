@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Redeem a gift voucher — Balaton Park Circuit</title>
+<title data-i18n-title="red.title">Redeem a gift voucher — Balaton Park Circuit</title>
 <meta name="description" content="Redeem your Balaton Park Circuit gift voucher and choose your track days.">
 <link rel="icon" type="image/png" href="favicon.png">
 <meta property="og:title" content="Redeem your Balaton Park Circuit voucher">
@@ -131,15 +131,27 @@
     font-size:13px;color:rgba(245,247,251,.55)}
   footer a{text-decoration:none;color:rgba(245,247,251,.55)}
   footer a:hover{color:var(--text)}
+
+  .langpick{display:flex;gap:6px;flex:0 0 auto}
+  .langpick button{min-height:44px;min-width:52px;padding:0 14px;cursor:pointer;
+    background:rgba(10,20,34,.55);color:rgba(245,247,251,.72);
+    border:1px solid rgba(255,255,255,.28);border-radius:0;
+    font-family:var(--cond);font-weight:800;font-size:17px;letter-spacing:.08em;
+    transition:background .2s,color .2s,border-color .2s}
+  .langpick button:hover{color:var(--text);border-color:rgba(255,255,255,.55)}
+  .langpick button[aria-pressed=true]{background:var(--blue);color:#fff;border-color:var(--blue)}
+  .headrow{display:flex;align-items:center;justify-content:space-between;gap:16px}
 </style>
+<script src="i18n.js"></script>
 </head>
 <body>
 
 <section class="hero">
   <img class="bg kb" src="gantry.jpg" alt="The gantry over the main straight at Balaton Park Circuit">
   <div class="veil"></div>
-  <div class="fi wrap pad" style="position:relative;padding-top:30px">
+  <div class="fi wrap pad headrow" style="position:relative;padding-top:30px">
     <a href="index.html" style="display:inline-flex"><img src="bpc-logo.svg" alt="Balaton Park Circuit" style="height:clamp(26px,4vw,30px);width:auto"></a>
+    <div id="langpick"></div>
   </div>
   <div class="wrap pad" style="position:relative;padding-bottom:clamp(30px,5vw,38px)">
     <p class="eyebrow up"><i class="rule"></i><span id="eyebrow">Step 1 of 2 · Your code</span></p>
@@ -156,10 +168,10 @@
     <a href="https://balatonpark.com" target="_blank" rel="noopener" style="display:inline-flex">
       <img src="bpc-logo.svg" alt="Balaton Park Circuit" style="height:22px;width:auto;opacity:.75"></a>
     <span style="display:flex;flex-wrap:wrap;gap:24px">
-      <a href="https://balatonpark.com" target="_blank" rel="noopener">BalatonPark.com</a>
-      <a href="https://www.balatonparkcircuit.com/tc" target="_blank" rel="noopener">Terms</a>
-      <a href="https://www.balatonparkcircuit.com/privacy-policy" target="_blank" rel="noopener">Privacy</a>
-      <a href="mailto:info@balatonparkcircuit.com">Contact us</a>
+      <a href="https://balatonpark.com" target="_blank" rel="noopener" data-i18n="foot.site">BalatonPark.com</a>
+      <a href="https://www.balatonparkcircuit.com/tc" target="_blank" rel="noopener" data-i18n="foot.terms">Terms</a>
+      <a href="https://www.balatonparkcircuit.com/privacy-policy" target="_blank" rel="noopener" data-i18n="foot.privacy">Privacy</a>
+      <a href="mailto:info@balatonparkcircuit.com" data-i18n="foot.contact">Contact us</a>
     </span>
   </div>
 </footer>

@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Thank you — Balaton Park Circuit</title>
+<title data-i18n-title="ty.title">Thank you — Balaton Park Circuit</title>
 <meta name="robots" content="noindex">
 <link rel="icon" type="image/png" href="favicon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -80,15 +80,27 @@
     font-size:13px;color:rgba(245,247,251,.55)}
   footer a{text-decoration:none;color:rgba(245,247,251,.55)}
   footer a:hover{color:var(--text)}
+
+  .langpick{display:flex;gap:6px;flex:0 0 auto}
+  .langpick button{min-height:44px;min-width:52px;padding:0 14px;cursor:pointer;
+    background:rgba(10,20,34,.55);color:rgba(245,247,251,.72);
+    border:1px solid rgba(255,255,255,.28);border-radius:0;
+    font-family:var(--cond);font-weight:800;font-size:17px;letter-spacing:.08em;
+    transition:background .2s,color .2s,border-color .2s}
+  .langpick button:hover{color:var(--text);border-color:rgba(255,255,255,.55)}
+  .langpick button[aria-pressed=true]{background:var(--blue);color:#fff;border-color:var(--blue)}
+  .headrow{display:flex;align-items:center;justify-content:space-between;gap:16px}
 </style>
+<script src="i18n.js"></script>
 </head>
 <body>
 
 <section class="hero">
   <img class="bg kb" src="garage.jpg" alt="">
   <div class="veil"></div>
-  <div class="fi wrap pad" style="position:relative;padding-top:30px">
+  <div class="fi wrap pad headrow" style="position:relative;padding-top:30px">
     <a href="index.html" style="display:inline-flex"><img src="bpc-logo.svg" alt="Balaton Park Circuit" style="height:clamp(26px,4vw,30px);width:auto"></a>
+    <div id="langpick"></div>
   </div>
   <div class="wrap pad" style="position:relative;padding-bottom:clamp(32px,5vw,42px)">
     <p class="eyebrow up"><i class="rule"></i><span id="eyebrow">Payment received</span></p>
@@ -105,9 +117,9 @@
     <a href="https://balatonpark.com" target="_blank" rel="noopener" style="display:inline-flex">
       <img src="bpc-logo.svg" alt="Balaton Park Circuit" style="height:22px;width:auto;opacity:.75"></a>
     <span style="display:flex;flex-wrap:wrap;gap:24px">
-      <a href="https://balatonpark.com" target="_blank" rel="noopener">BalatonPark.com</a>
-      <a href="https://www.balatonparkcircuit.com/tc" target="_blank" rel="noopener">Terms</a>
-      <a href="mailto:info@balatonparkcircuit.com">Contact us</a>
+      <a href="https://balatonpark.com" target="_blank" rel="noopener" data-i18n="foot.site">BalatonPark.com</a>
+      <a href="https://www.balatonparkcircuit.com/tc" target="_blank" rel="noopener" data-i18n="foot.terms">Terms</a>
+      <a href="mailto:info@balatonparkcircuit.com" data-i18n="foot.contact">Contact us</a>
     </span>
   </div>
 </footer>
@@ -119,17 +131,31 @@
   var orderId = new URLSearchParams(location.search).get('order') || '';
   var body = document.getElementById('body');
 
+  i18n.apply();
+  i18n.mountSwitch(document.getElementById('langpick'));
+  // Redraw whatever is on screen when the language changes, rather than
+  // leaving half the page in the old one.
+  i18n.onChange(function () {
+    if (!last) return;
+    if (last.kind === 'fail') fail(last.text);
+    else if (last.kind === 'order') show(last.d);
+  });
+
   var esc = function (s) { return String(s == null ? '' : s)
     .replace(/[&<>"]/g, function (c) {
       return { '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[c]; }); };
-  var money = function (c) { return '€' + (Number(c || 0) / 100).toLocaleString('en-IE',
-    { minimumFractionDigits: 0, maximumFractionDigits: 2 }); };
-  var day = function (s) { return s ? new Date(s).toLocaleDateString('en-GB',
-    { day: 'numeric', month: 'long', year: 'numeric' }) : ''; };
+  var money = function (c) { return i18n.money(c); };
+  var day = function (s) { return i18n.formatDate(s); };
+  var t = function (k, v) { return i18n.t(k, v); };
+  var contactLink = function () {
+    return '<a href="mailto:info@balatonparkcircuit.com?subject=Gift%20Voucher%20Order">' +
+           t('foot.contact') + '</a>';
+  };
+  var last = null;   // what was last rendered, so a language change can redraw it
 
-  if (!orderId) return fail('We could not tell which order this is. If you have just paid, check your inbox — your confirmation has the voucher code.');
+  if (!orderId) return fail(t('ty.noOrder'));
 
-  waiting('Confirming your payment…');
+  waiting(t('ty.confirming'));
   poll(0);
 
   // Stripe returns the buyer the instant the card clears, which is usually
@@ -149,12 +175,10 @@
       }
       if (r.d.status === 'paid' || r.d.status === 'refunded') return show(r.d);
       if (attempt < 12) return retry(attempt);
-      waiting('Your payment went through, but the voucher is taking longer than usual to appear. ' +
-              'It will arrive by email shortly — nothing is lost.', true);
+      waiting(t('ty.slow'), true);
     }).catch(function () {
       if (attempt < 12) return retry(attempt);
-      fail('We could not reach the server to confirm your order. Your payment is safe — ' +
-           'check your inbox, or contact us with this page’s address.');
+      fail(t('ty.unreachable'));
     });
   }
   function retry(attempt) { setTimeout(function () { poll(attempt + 1); }, 1500); }
@@ -168,60 +192,61 @@
   }
 
   function fail(text) {
-    document.getElementById('eyebrow').textContent = 'Something went sideways';
-    document.getElementById('headline').textContent = 'Hold on.';
-    body.innerHTML =
-      '<div class="notice up">' + esc(text) +
-      ' <a href="mailto:info@balatonparkcircuit.com?subject=Gift%20voucher%20order">Contact us</a>' +
-      ' and we will sort it.</div>';
+    last = { kind: 'fail', text: text };
+    document.getElementById('eyebrow').textContent = t('ty.problemEyebrow');
+    document.getElementById('headline').textContent = t('ty.problemH');
+    body.innerHTML = '<div class="notice up">' + esc(text) + ' ' +
+      t('ty.contactFix', { contact: contactLink() }) + '</div>';
   }
 
   function show(d) {
+    last = { kind: 'order', d: d };
+    document.getElementById('eyebrow').textContent = t('ty.eyebrow');
+
     if (d.status === 'refunded') {
-      document.getElementById('eyebrow').textContent = 'Order refunded';
-      document.getElementById('headline').textContent = 'This order was refunded.';
-      body.innerHTML = '<div class="notice up">The voucher from this order is no longer valid. ' +
-        'If that is unexpected, <a href="mailto:info@balatonparkcircuit.com">contact us</a>.</div>';
+      document.getElementById('eyebrow').textContent = t('ty.refundedEyebrow');
+      document.getElementById('headline').textContent = t('ty.refundedH');
+      body.innerHTML = '<div class="notice up">' +
+        t('ty.refundedBody', { contact: contactLink() }) + '</div>';
       return;
     }
 
     var many = d.vouchers.length > 1;
-    document.getElementById('headline').textContent = many
-      ? 'Your vouchers are ready.' : 'Your voucher is ready.';
+    var codes = many ? t('ty.codeMany') : t('ty.codeOne');
+    document.getElementById('headline').textContent = many ? t('ty.h1many') : t('ty.h1one');
 
     // Only claim an email was sent if one actually was. Saying "we've emailed
     // it" when nothing left the building sends people hunting through spam
     // folders for a message that does not exist.
     var next;
     if (d.delivery_method === 'print') {
-      next = 'Nothing has been sent to ' + esc(d.recipient_name || 'the recipient') +
-             '. Print or hand over the code' + (many ? 's' : '') + ' below whenever you like.';
+      next = t('ty.nextPrint', { name: esc(d.recipient_name || d.recipient_email), codes: codes });
     } else if (d.delivery_method === 'scheduled' && d.deliver_at) {
-      next = 'The gift goes to ' + esc(d.recipient_email) + ' on ' + esc(day(d.deliver_at)) +
-             '. The code' + (many ? 's are' : ' is') + ' below in the meantime — keep this page.';
+      next = t('ty.nextSched', { email: esc(d.recipient_email),
+                                 date: esc(day(d.deliver_at)), codes: codes });
     } else if (d.emailed) {
-      next = 'We’ve emailed the gift to ' + esc(d.recipient_email) +
-             ', and a copy to you at ' + esc(d.buyer_email) + '.';
+      next = t('ty.nextSent', { recipient: esc(d.recipient_email), buyer: esc(d.buyer_email) });
     } else {
-      next = 'Your voucher is below. We’ll send it to ' + esc(d.recipient_email) +
-             ' shortly — save this page or the code in the meantime.';
+      next = t('ty.nextPending', { recipient: esc(d.recipient_email) });
     }
 
     var cards = d.vouchers.map(function (v, i) {
       return '<div class="panel up d' + Math.min(i + 1, 3) + '" style="margin-top:' + (i ? '16px' : '0') + '">' +
         '<p style="margin:0 0 14px;font-size:12px;font-weight:600;letter-spacing:.18em;' +
           'text-transform:uppercase;color:rgba(245,247,251,.72)">' +
-          esc(v.package) + (many ? ' · voucher ' + (i + 1) + ' of ' + d.vouchers.length : '') + '</p>' +
+          (many ? t('ty.voucherOf', { name: esc(v.package), i: i + 1, n: d.vouchers.length })
+                : esc(v.package)) + '</p>' +
         '<div class="codebox">' +
           '<span class="code glow">' + esc(v.code) + '</span>' +
-          '<button type="button" class="copy lift" data-code="' + esc(v.code) + '">Copy code</button>' +
+          '<button type="button" class="copy lift" data-code="' + esc(v.code) + '">' +
+            t('common.copy') + '</button>' +
         '</div>' +
         '<dl class="meta">' +
-          '<div><dt>Covers</dt><dd>' + v.sessions_total +
-            ' session' + (v.sessions_total > 1 ? 's' : '') + '</dd></div>' +
-          '<div><dt>Valid until</dt><dd>' + esc(day(v.expires_on)) + '</dd></div>' +
-          '<div><dt>Redeem at</dt><dd><a href="redeem.html?code=' + encodeURIComponent(v.code) +
-            '">gifts.balatonpark.com</a></dd></div>' +
+          '<div><dt>' + t('ty.covers') + '</dt><dd>' + v.sessions_total + ' ' +
+            t(v.sessions_total > 1 ? 'common.sessionMany' : 'common.sessionOne') + '</dd></div>' +
+          '<div><dt>' + t('ty.validUntil') + '</dt><dd>' + esc(day(v.expires_on)) + '</dd></div>' +
+          '<div><dt>' + t('ty.redeemAt') + '</dt><dd><a href="redeem.html?code=' +
+            encodeURIComponent(v.code) + '">gifts.balatonpark.com</a></dd></div>' +
         '</dl></div>';
     }).join('');
 
@@ -230,22 +255,26 @@
         'color:rgba(245,247,251,.82)">' + next + '</p>' +
       cards +
       '<div class="up d3" style="display:flex;flex-wrap:wrap;gap:14px;margin:34px 0 0">' +
-        '<a class="cta primary lift" href="redeem.html">Redeem now</a>' +
-        '<a class="cta ghost lift" href="index.html">Buy another</a>' +
+        '<a class="cta primary lift" href="redeem.html">' + t('ty.redeemNow') + '</a>' +
+        '<a class="cta ghost lift" href="index.html">' + t('ty.buyAnother') + '</a>' +
       '</div>' +
       '<p class="up d3" style="margin:26px 0 0;font-size:13px;font-weight:300;line-height:1.7;' +
-        'color:rgba(245,247,251,.62)">Paid ' + money(d.total_cents) + ' on ' + esc(day(d.paid_at)) +
-        '. Keep this page or the email — the code' + (many ? 's are' : ' is') +
-        ' what gets redeemed. Lost it? <a href="mailto:info@balatonparkcircuit.com?subject=Gift%20voucher%20code">Contact us</a>.</p>';
+        'color:rgba(245,247,251,.62)">' +
+        t('ty.paidOn', { amount: money(d.total_cents), date: esc(day(d.paid_at)),
+                         codes: codes, contact: contactLink() }) + '</p>';
 
     body.addEventListener('click', function (ev) {
       var btn = ev.target.closest('.copy');
       if (!btn) return;
-      var done = function () { btn.textContent = 'Copied'; setTimeout(function () { btn.textContent = 'Copy code'; }, 2200); };
+      var done = function () {
+        btn.textContent = t('common.copied');
+        setTimeout(function () { btn.textContent = t('common.copy'); }, 2200);
+      };
       if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(btn.dataset.code).then(done, function () { btn.textContent = 'Select it manually'; });
+        navigator.clipboard.writeText(btn.dataset.code)
+          .then(done, function () { btn.textContent = t('common.copyManual'); });
       } else {
-        btn.textContent = 'Select it manually';
+        btn.textContent = t('common.copyManual');
       }
     });
   }

@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Page not found — Balaton Park Circuit</title>
+<title data-i18n-title="nf.title">Page not found — Balaton Park Circuit</title>
 <meta name="robots" content="noindex">
 <link rel="icon" type="image/png" href="favicon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -56,7 +56,18 @@
     font-size:13px;color:rgba(245,247,251,.55)}
   footer a{text-decoration:none;color:rgba(245,247,251,.55)}
   footer a:hover{color:var(--text)}
+
+  .langpick{display:flex;gap:6px;flex:0 0 auto}
+  .langpick button{min-height:44px;min-width:52px;padding:0 14px;cursor:pointer;
+    background:rgba(10,20,34,.55);color:rgba(245,247,251,.72);
+    border:1px solid rgba(255,255,255,.28);border-radius:0;
+    font-family:var(--cond);font-weight:800;font-size:17px;letter-spacing:.08em;
+    transition:background .2s,color .2s,border-color .2s}
+  .langpick button:hover{color:var(--text);border-color:rgba(255,255,255,.55)}
+  .langpick button[aria-pressed=true]{background:var(--blue);color:#fff;border-color:var(--blue)}
+  .headrow{display:flex;align-items:center;justify-content:space-between;gap:16px}
 </style>
+<script src="i18n.js"></script>
 </head>
 <body>
 
@@ -64,21 +75,21 @@
   <img class="bg kb" src="gantry.jpg" alt="">
   <div class="veil"></div>
 
-  <div class="wrap pad" style="position:relative;padding-top:34px">
+  <div class="wrap pad headrow" style="position:relative;padding-top:34px">
     <a href="index.html" style="display:inline-flex">
       <img src="bpc-logo.svg" alt="Balaton Park Circuit" style="height:clamp(26px,4vw,34px);width:auto"></a>
+    <div id="langpick"></div>
   </div>
 
   <div class="wrap pad" style="position:relative;padding-bottom:clamp(48px,8vw,80px)">
     <p class="code up">404</p>
-    <h1 class="up d1">Wrong way round the circuit.</h1>
-    <p class="lede up d1">That page isn't here. The link may be old, or mistyped — nothing is broken on your end.</p>
+    <h1 class="up d1" data-i18n="nf.h1">Wrong way round the circuit.</h1>
+    <p class="lede up d1" data-i18n="nf.lede">That page isn't here. The link may be old, or mistyped — nothing is broken on your end.</p>
     <div class="up d2" style="display:flex;flex-wrap:wrap;gap:14px;margin:36px 0 0">
-      <a class="cta primary lift" href="index.html">Gift vouchers</a>
-      <a class="cta ghost lift" href="redeem.html">Redeem a voucher</a>
+      <a class="cta primary lift" href="index.html" data-i18n="nf.vouchers">Gift vouchers</a>
+      <a class="cta ghost lift" href="redeem.html" data-i18n="nf.redeem">Redeem a voucher</a>
     </div>
-    <p class="up d2" style="margin:28px 0 0;font-size:13px;font-weight:300;color:rgba(245,247,251,.62)">
-      Looking for something specific? <a href="mailto:info@balatonparkcircuit.com?subject=Gift%20vouchers">Contact us</a> and we'll point you at it.</p>
+    <p class="up d2" id="helpLine" style="margin:28px 0 0;font-size:13px;font-weight:300;color:rgba(245,247,251,.62)"></p>
   </div>
 </div>
 
@@ -87,13 +98,28 @@
     <a href="https://balatonpark.com" target="_blank" rel="noopener" style="display:inline-flex">
       <img src="bpc-logo.svg" alt="Balaton Park Circuit" style="height:22px;width:auto;opacity:.75"></a>
     <span style="display:flex;flex-wrap:wrap;gap:24px">
-      <a href="https://balatonpark.com" target="_blank" rel="noopener">BalatonPark.com</a>
-      <a href="https://www.balatonparkcircuit.com/tc" target="_blank" rel="noopener">Terms</a>
-      <a href="https://www.balatonparkcircuit.com/privacy-policy" target="_blank" rel="noopener">Privacy</a>
-      <a href="mailto:info@balatonparkcircuit.com">Contact us</a>
+      <a href="https://balatonpark.com" target="_blank" rel="noopener" data-i18n="foot.site">BalatonPark.com</a>
+      <a href="https://www.balatonparkcircuit.com/tc" target="_blank" rel="noopener" data-i18n="foot.terms">Terms</a>
+      <a href="https://www.balatonparkcircuit.com/privacy-policy" target="_blank" rel="noopener" data-i18n="foot.privacy">Privacy</a>
+      <a href="mailto:info@balatonparkcircuit.com" data-i18n="foot.contact">Contact us</a>
     </span>
   </div>
 </footer>
 
+<script>
+(function () {
+  function paint() {
+    var n = document.getElementById('helpLine');
+    if (n) n.innerHTML = i18n.t('nf.help', {
+      contact: '<a href="mailto:info@balatonparkcircuit.com?subject=Gift%20Vouchers">' +
+               i18n.t('foot.contact') + '</a>'
+    });
+  }
+  i18n.apply();
+  i18n.mountSwitch(document.getElementById('langpick'));
+  paint();
+  i18n.onChange(paint);
+})();
+</script>
 </body>
 </html>
