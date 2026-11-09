@@ -1,0 +1,635 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BPC Vouchers — Backoffice</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#0A1422; --ink2:#111E31; --line:rgba(168,206,240,.16);
+    --blue:#427AB7; --pale:#A8CEF0; --text:#F5F7FB;
+    --dim:rgba(245,247,251,.56); --dimmer:rgba(245,247,251,.34);
+    --good:#4FB477; --warn:#E0A33E; --bad:#D9604F;
+    --cond:'Barlow Condensed',system-ui,sans-serif;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--ink);color:var(--text);
+       font:400 14px/1.5 Inter,system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+  h1,h2,h3,.big{font-family:var(--cond);font-weight:800;letter-spacing:.01em;margin:0}
+  a{color:var(--pale)}
+  button{font:inherit;cursor:pointer;border:0;border-radius:7px;padding:9px 15px;
+         background:var(--blue);color:#fff;font-weight:600}
+  button:hover{filter:brightness(1.1)}
+  button.ghost{background:transparent;color:var(--pale);border:1px solid var(--line)}
+  button.danger{background:transparent;color:var(--bad);border:1px solid rgba(217,96,79,.4)}
+  button:disabled{opacity:.45;cursor:default;filter:none}
+  input,select{font:inherit;background:rgba(255,255,255,.05);color:var(--text);
+    border:1px solid var(--line);border-radius:7px;padding:9px 11px;width:100%}
+  input:focus,select:focus{outline:0;border-color:var(--blue)}
+  select option{background:var(--ink2)}
+  label{display:block;font-size:11px;letter-spacing:.14em;text-transform:uppercase;
+        color:var(--dim);margin:0 0 6px;font-weight:600}
+
+  /* ---------- login ---------- */
+  #login{min-height:100vh;display:grid;place-items:center;padding:24px}
+  #login .box{width:100%;max-width:360px}
+  #login .mark{font-family:var(--cond);font-weight:800;font-size:30px;letter-spacing:.02em}
+  #login .sub{color:var(--dim);font-size:13px;margin:4px 0 26px}
+  #login .field{margin-bottom:14px}
+
+  /* ---------- shell ---------- */
+  #app{display:none;min-height:100vh;flex-direction:column}
+  header{display:flex;align-items:center;gap:18px;flex-wrap:wrap;
+    padding:16px 24px;border-bottom:1px solid var(--line);background:var(--ink2);
+    position:sticky;top:0;z-index:5}
+  header .mark{font-family:var(--cond);font-weight:800;font-size:19px;letter-spacing:.02em}
+  nav{display:flex;gap:4px;flex-wrap:wrap}
+  nav button{background:transparent;color:var(--dim);padding:7px 13px;font-weight:600;font-size:13px}
+  nav button[aria-current=page]{background:rgba(66,122,183,.2);color:var(--pale)}
+  header .who{margin-left:auto;display:flex;align-items:center;gap:12px;
+    font-size:12px;color:var(--dim)}
+  main{padding:24px;max-width:1360px;width:100%;margin:0 auto;flex:1}
+  section{display:none}
+  section[data-on]{display:block}
+
+  /* ---------- bits ---------- */
+  .tiles{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));margin-bottom:26px}
+  .tile{background:var(--ink2);border:1px solid var(--line);border-radius:11px;padding:16px 18px}
+  .tile .k{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--dim);font-weight:600}
+  .tile .v{font-family:var(--cond);font-weight:800;font-size:31px;margin-top:5px;color:var(--pale)}
+  .tile .n{font-size:12px;color:var(--dimmer);margin-top:2px}
+
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th{text-align:left;font-size:10px;letter-spacing:.14em;text-transform:uppercase;
+     color:var(--dim);font-weight:600;padding:9px 11px;border-bottom:1px solid var(--line);
+     white-space:nowrap}
+  td{padding:11px;border-bottom:1px solid rgba(168,206,240,.07);vertical-align:top}
+  tbody tr:hover{background:rgba(66,122,183,.07)}
+  .wrap{background:var(--ink2);border:1px solid var(--line);border-radius:11px;overflow:auto}
+  .mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px}
+
+  .pill{display:inline-block;padding:2px 9px;border-radius:999px;font-size:11px;font-weight:600;
+        letter-spacing:.03em;text-transform:uppercase}
+  .s-unredeemed{background:rgba(66,122,183,.22);color:var(--pale)}
+  .s-partially_redeemed{background:rgba(224,163,62,.18);color:var(--warn)}
+  .s-redeemed{background:rgba(79,180,119,.17);color:var(--good)}
+  .s-refunded,.s-burned{background:rgba(217,96,79,.17);color:var(--bad)}
+  .s-available{background:rgba(79,180,119,.17);color:var(--good)}
+  .s-issued{background:rgba(66,122,183,.22);color:var(--pale)}
+
+  .bar{height:5px;border-radius:3px;background:rgba(255,255,255,.09);overflow:hidden;margin-top:6px;min-width:90px}
+  .bar i{display:block;height:100%;background:var(--good)}
+  .bar.low i{background:var(--warn)} .bar.out i{background:var(--bad)}
+
+  .toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;margin-bottom:16px}
+  .toolbar .grow{flex:1;min-width:200px}
+  .toolbar > div{min-width:150px}
+
+  .alert{border:1px solid rgba(224,163,62,.4);background:rgba(224,163,62,.09);
+    border-radius:11px;padding:14px 16px;margin-bottom:22px}
+  .alert h3{font-size:16px;color:var(--warn);margin-bottom:5px}
+  .alert ul{margin:0;padding-left:18px;color:var(--dim);font-size:13px}
+
+  /* ---------- drawer ---------- */
+  #scrim{display:none;position:fixed;inset:0;background:rgba(5,9,16,.66);z-index:20}
+  #scrim[data-on]{display:block}
+  #drawer{position:fixed;top:0;right:0;bottom:0;width:min(560px,100%);background:var(--ink2);
+    border-left:1px solid var(--line);z-index:21;overflow-y:auto;padding:24px;
+    transform:translateX(100%);transition:transform .22s ease}
+  #drawer[data-on]{transform:none}
+  #drawer h2{font-size:25px}
+  .kv{display:grid;grid-template-columns:132px 1fr;gap:7px 14px;font-size:13px;margin:16px 0}
+  .kv dt{color:var(--dim)} .kv dd{margin:0}
+  .part{border:1px solid var(--line);border-radius:9px;padding:13px;margin-bottom:10px}
+  .part .top{display:flex;justify-content:space-between;gap:10px;align-items:baseline;margin-bottom:7px}
+  hr{border:0;border-top:1px solid var(--line);margin:22px 0}
+  .log{font-size:12px;color:var(--dim);border-left:2px solid var(--line);padding:0 0 0 11px;margin-bottom:10px}
+  .msg{padding:10px 13px;border-radius:8px;font-size:13px;margin-bottom:14px;display:none}
+  .msg[data-on]{display:block}
+  .msg.err{background:rgba(217,96,79,.13);color:#F0A99D;border:1px solid rgba(217,96,79,.3)}
+  .msg.ok{background:rgba(79,180,119,.13);color:#9BDCB6;border:1px solid rgba(79,180,119,.3)}
+  .empty{padding:34px;text-align:center;color:var(--dimmer);font-size:13px}
+  .muted{color:var(--dim)} .tiny{font-size:11.5px}
+</style>
+</head>
+<body>
+
+<div id="login">
+  <div class="box">
+    <div class="mark">BALATON PARK</div>
+    <div class="sub">Voucher backoffice</div>
+    <div class="msg err" id="loginErr"></div>
+    <form id="loginForm" onsubmit="return false">
+      <div class="field"><label for="em">Email</label>
+        <input id="em" type="email" autocomplete="username" required></div>
+      <div class="field"><label for="pw">Password</label>
+        <input id="pw" type="password" autocomplete="current-password" required></div>
+      <button style="width:100%;margin-top:8px" id="loginBtn">Sign in</button>
+    </form>
+  </div>
+</div>
+
+<div id="app">
+  <header>
+    <div class="mark">BALATON PARK</div>
+    <nav>
+      <button data-tab="overview" aria-current="page">Overview</button>
+      <button data-tab="vouchers">Vouchers</button>
+      <button data-tab="codes">Cooltix codes</button>
+      <button data-tab="log">Activity</button>
+    </nav>
+    <div class="who"><span id="whoami"></span>
+      <button class="ghost" id="out">Sign out</button></div>
+  </header>
+
+  <main>
+    <div class="msg err" id="appErr"></div>
+
+    <section data-tab="overview" data-on>
+      <div id="lowPools"></div>
+      <div class="tiles" id="tiles"></div>
+      <h2 style="font-size:19px;margin-bottom:11px">Code pools</h2>
+      <div class="wrap"><table>
+        <thead><tr><th>Date</th><th>Pool</th><th>Available</th><th>Level</th></tr></thead>
+        <tbody id="poolRows"></tbody></table></div>
+    </section>
+
+    <section data-tab="vouchers">
+      <div class="toolbar">
+        <div class="grow"><label for="q">Search</label>
+          <input id="q" placeholder="Voucher code, name or email"></div>
+        <div><label for="st">Status</label>
+          <select id="st">
+            <option value="">All</option>
+            <option value="unredeemed">Unredeemed</option>
+            <option value="partially_redeemed">Partly redeemed</option>
+            <option value="redeemed">Redeemed</option>
+            <option value="refunded">Refunded</option>
+          </select></div>
+      </div>
+      <div class="wrap"><table>
+        <thead><tr><th>Voucher</th><th>Package</th><th>Sessions</th><th>Recipient</th>
+          <th>Buyer</th><th>Paid</th><th>Status</th></tr></thead>
+        <tbody id="vRows"></tbody></table></div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:13px">
+        <span class="muted tiny" id="vCount"></span>
+        <span><button class="ghost" id="prev">Previous</button>
+          <button class="ghost" id="next">Next</button></span>
+      </div>
+    </section>
+
+    <section data-tab="codes">
+      <p class="muted" style="margin:0 0 18px;max-width:620px">
+        Mint a batch, download the CSV, upload it into Cooltix, then set that file's
+        discount amount and date inside Cooltix. One file per pool.</p>
+      <div class="toolbar">
+        <div><label for="cDay">Track day</label><select id="cDay"></select></div>
+        <div><label for="cPkg">Pool</label><select id="cPkg"></select></div>
+        <div><label for="cN">How many</label><input id="cN" type="number" value="200" min="1" max="1000"></div>
+        <button id="gen">Generate</button>
+        <button class="ghost" id="dl">Download available as CSV</button>
+      </div>
+      <div class="msg ok" id="codeMsg"></div>
+      <div class="wrap" style="max-height:320px"><table>
+        <thead><tr><th>New codes in this batch</th></tr></thead>
+        <tbody id="codeRows"></tbody></table></div>
+    </section>
+
+    <section data-tab="log">
+      <div class="wrap"><table>
+        <thead><tr><th>When</th><th>Who</th><th>Action</th><th>Detail</th></tr></thead>
+        <tbody id="logRows"></tbody></table></div>
+    </section>
+  </main>
+</div>
+
+<div id="scrim"></div>
+<div id="drawer" aria-label="Voucher detail"></div>
+
+<script>
+const SUPABASE_URL = 'https://hbosxvmprhzrheilwwfv.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_Vkz4kA1P_VlVr-NaxD-nDA_gL-xxBtm';
+const FN = SUPABASE_URL + '/functions/v1/admin';
+const AUTH = SUPABASE_URL + '/auth/v1';
+
+// Supabase Auth over plain fetch. The official client would do this too, but
+// it has to be fetched from a CDN, and a page that cannot reach that CDN shows
+// a login form whose button does nothing. No dependency, no silent failure.
+const SESSION_KEY = 'bpc-admin-session';
+let session = null;
+
+try {
+  const raw = localStorage.getItem(SESSION_KEY);
+  if (raw) session = JSON.parse(raw);
+} catch (e) { /* private window, blocked storage — sign in again each time */ }
+
+function keepSession(s) {
+  session = s;
+  try {
+    if (s) localStorage.setItem(SESSION_KEY, JSON.stringify(s));
+    else localStorage.removeItem(SESSION_KEY);
+  } catch (e) { /* in memory only for this tab */ }
+}
+
+async function authPost(path, body) {
+  const res = await fetch(AUTH + path, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', apikey: SUPABASE_KEY },
+    body: JSON.stringify(body),
+  });
+  const out = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new Error(out.error_description || out.msg || out.error || `Sign-in failed (${res.status})`);
+  }
+  return out;
+}
+
+const stamp = (s) => Object.assign(s, { expires_at: Date.now() + (s.expires_in ?? 3600) * 1000 });
+
+async function signIn(email, password) {
+  keepSession(stamp(await authPost('/token?grant_type=password', { email, password })));
+}
+
+// Access tokens last an hour; swap for a fresh one a minute before it lapses so
+// a long afternoon in the backoffice never drops someone mid-refund.
+async function accessToken() {
+  if (!session) return null;
+  if (Date.now() < session.expires_at - 60000) return session.access_token;
+  try {
+    const next = stamp(await authPost('/token?grant_type=refresh_token',
+      { refresh_token: session.refresh_token }));
+    keepSession(next);
+    return next.access_token;
+  } catch (e) { keepSession(null); return null; }
+}
+
+function signOutLocal() {
+  const token = session?.access_token;
+  keepSession(null);
+  if (token) {
+    fetch(AUTH + '/logout', { method: 'POST',
+      headers: { apikey: SUPABASE_KEY, Authorization: 'Bearer ' + token } }).catch(() => {});
+  }
+}
+
+const $ = (s) => document.querySelector(s);
+const el = (t, c, h) => { const n = document.createElement(t);
+  if (c) n.className = c; if (h !== undefined) n.innerHTML = h; return n; };
+const esc = (s) => String(s ?? '').replace(/[&<>"]/g,
+  (c) => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[c]));
+const money = (c) => '€' + (Number(c || 0) / 100).toLocaleString('en-IE',
+  { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+const when = (s) => s ? new Date(s).toLocaleString('en-GB',
+  { day: '2-digit', month: 'short', year: '2-digit', hour: '2-digit', minute: '2-digit' }) : '—';
+const day = (s) => s ? new Date(s).toLocaleDateString('en-GB',
+  { day: 'numeric', month: 'short', year: 'numeric' }) : '—';
+const pill = (s) => `<span class="pill s-${esc(s)}">${esc(String(s).replace(/_/g, ' '))}</span>`;
+
+function flash(node, text, kind) {
+  node.className = 'msg ' + (kind || 'err');
+  node.textContent = text;
+  node.setAttribute('data-on', '');
+  if (kind === 'ok') setTimeout(() => node.removeAttribute('data-on'), 6000);
+}
+
+// Every call carries the signed-in admin's token. A 401 means the session
+// died, so drop straight back to the login screen rather than showing
+// half-loaded pages.
+async function api(action, params = {}, raw = false) {
+  const token = await accessToken();
+  if (!token) { signedOut(); throw new Error('no session'); }
+  const res = await fetch(FN, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+    body: JSON.stringify({ action, ...params }),
+  });
+  if (res.status === 401) { signOutLocal(); signedOut(); throw new Error('unauthorised'); }
+  if (raw) return res;
+  const out = await res.json();
+  if (!res.ok) throw new Error(out.error || 'request failed');
+  return out;
+}
+
+// ---------------------------------------------------------------- session
+
+function signedOut() {
+  $('#app').style.display = 'none';
+  $('#login').style.display = 'grid';
+}
+
+async function signedIn() {
+  $('#login').style.display = 'none';
+  $('#app').style.display = 'flex';
+  try {
+    const { admin } = await api('me');
+    $('#whoami').textContent = admin.full_name || admin.email;
+    await Promise.all([loadOverview(), loadPickers()]);
+  } catch (e) {
+    if (e.message !== 'unauthorised') flash($('#appErr'), e.message);
+  }
+}
+
+$('#loginForm').addEventListener('submit', async (ev) => {
+  ev.preventDefault();
+  $('#loginErr').removeAttribute('data-on');
+  $('#loginBtn').disabled = true;
+  try {
+    await signIn($('#em').value.trim(), $('#pw').value);
+  } catch (err) {
+    // A network failure here says the browser could not reach Supabase at all,
+    // which looks nothing like a wrong password — say which it was.
+    flash($('#loginErr'), err instanceof TypeError
+      ? 'Could not reach the server. Check your connection, or open the backoffice from its own address.'
+      : err.message);
+    $('#loginBtn').disabled = false;
+    return;
+  }
+  $('#loginBtn').disabled = false;
+  $('#pw').value = '';
+  signedIn();
+});
+
+$('#out').addEventListener('click', () => { signOutLocal(); signedOut(); });
+
+// ---------------------------------------------------------------- tabs
+
+document.querySelectorAll('nav button').forEach((b) => {
+  b.addEventListener('click', () => {
+    document.querySelectorAll('nav button').forEach((x) => x.removeAttribute('aria-current'));
+    b.setAttribute('aria-current', 'page');
+    document.querySelectorAll('section').forEach((s) => s.removeAttribute('data-on'));
+    document.querySelector(`section[data-tab="${b.dataset.tab}"]`).setAttribute('data-on', '');
+    if (b.dataset.tab === 'vouchers') loadVouchers();
+    if (b.dataset.tab === 'log') loadLog();
+  });
+});
+
+// ---------------------------------------------------------------- overview
+
+async function loadOverview() {
+  const d = await api('overview');
+  const L = d.liability || {};
+
+  $('#tiles').replaceChildren(...[
+    ['Paid orders', d.paid_orders, ''],
+    ['Unredeemed', L.vouchers_unredeemed ?? 0, 'vouchers not yet started'],
+    ['Partly redeemed', L.vouchers_partial ?? 0, 'sessions still owed'],
+    ['Outstanding', money(L.outstanding_face_cents), 'track time still to honour'],
+  ].map(([k, v, n]) => el('div', 'tile',
+    `<div class="k">${k}</div><div class="v">${esc(v)}</div>` +
+    (n ? `<div class="n">${n}</div>` : ''))));
+
+  $('#lowPools').replaceChildren();
+  if (d.low.length) {
+    const list = d.low.map((p) =>
+      `<li>${day(p.event_date)} · ${esc(p.package_name)} — ${p.available} of ${p.total} left</li>`).join('');
+    $('#lowPools').append(el('div', 'alert',
+      `<h3>Pools running low</h3><ul>${list}</ul>`));
+  }
+
+  $('#poolRows').replaceChildren(...(d.pools.length ? d.pools.map((p) => {
+    const pc = p.total ? Math.round(p.available / p.total * 100) : 0;
+    const cls = pc === 0 ? 'out' : pc < 20 ? 'low' : '';
+    const tr = el('tr', null,
+      `<td>${day(p.event_date)}<div class="tiny muted">${esc(p.public_label || '')}</div></td>
+       <td>${esc(p.package_name)}</td>
+       <td class="mono">${p.available} / ${p.total}</td>
+       <td style="width:200px"><div class="bar ${cls}"><i style="width:${pc}%"></i></div>
+         <div class="tiny muted" style="margin-top:3px">${pc}%</div></td>`);
+    return tr;
+  }) : [el('tr', null, '<td colspan="4"><div class="empty">No pools yet — mint some codes.</div></td>')]));
+}
+
+// ---------------------------------------------------------------- vouchers
+
+let page = 0;
+const PER = 50;
+
+async function loadVouchers() {
+  const d = await api('vouchers',
+    { q: $('#q').value.trim(), status: $('#st').value, limit: PER, offset: page * PER });
+
+  $('#vCount').textContent = d.total
+    ? `${d.offset + 1}–${Math.min(d.offset + PER, d.total)} of ${d.total}` : 'Nothing found';
+  $('#prev').disabled = page === 0;
+  $('#next').disabled = (page + 1) * PER >= d.total;
+
+  $('#vRows').replaceChildren(...(d.vouchers.length ? d.vouchers.map((v) => {
+    const o = v.orders || {};
+    const tr = el('tr', null,
+      `<td class="mono">${esc(v.code)}<div class="tiny muted">${when(v.created_at)}</div></td>
+       <td>${esc(v.packages?.name || '')}</td>
+       <td class="mono">${v.sessions_remaining} / ${v.sessions_total}</td>
+       <td>${esc(o.recipient_name || '—')}<div class="tiny muted">${esc(o.recipient_email || '')}</div></td>
+       <td>${esc(o.buyer_name || '—')}<div class="tiny muted">${esc(o.buyer_email || '')}</div></td>
+       <td class="mono">${money(v.paid_value_cents)}</td>
+       <td>${pill(v.status)}</td>`);
+    tr.style.cursor = 'pointer';
+    tr.addEventListener('click', () => openVoucher(v.id));
+    return tr;
+  }) : [el('tr', null, '<td colspan="7"><div class="empty">No vouchers match.</div></td>')]));
+}
+
+let searchTimer;
+$('#q').addEventListener('input', () => {
+  clearTimeout(searchTimer);
+  searchTimer = setTimeout(() => { page = 0; loadVouchers(); }, 280);
+});
+$('#st').addEventListener('change', () => { page = 0; loadVouchers(); });
+$('#prev').addEventListener('click', () => { if (page > 0) { page--; loadVouchers(); } });
+$('#next').addEventListener('click', () => { page++; loadVouchers(); });
+
+// ---------------------------------------------------------------- drawer
+
+let days = [], packs = [];
+
+async function loadPickers() {
+  const [a, b] = await Promise.all([api('track_days'), api('packages')]);
+  days = a.track_days; packs = b.packages;
+  $('#cDay').replaceChildren(...days.map((d) => {
+    const o = el('option', null, `${day(d.event_date)} — ${esc(d.public_label || '')}`);
+    o.value = d.id; return o;
+  }));
+  $('#cPkg').replaceChildren(...packs.map((p) => {
+    const o = el('option', null, `${esc(p.name)} (${esc(p.code)})`);
+    o.value = p.code; return o;
+  }));
+}
+
+function closeDrawer() {
+  $('#drawer').removeAttribute('data-on');
+  $('#scrim').removeAttribute('data-on');
+}
+$('#scrim').addEventListener('click', closeDrawer);
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeDrawer(); });
+
+async function openVoucher(id) {
+  $('#scrim').setAttribute('data-on', '');
+  $('#drawer').setAttribute('data-on', '');
+  $('#drawer').replaceChildren(el('div', 'empty', 'Loading…'));
+
+  const d = await api('voucher', { voucher_id: id });
+  if (d.error) { $('#drawer').replaceChildren(el('div', 'empty', 'Not found')); return; }
+  const v = d.voucher, o = v.orders || {};
+
+  const head = el('div', null,
+    `<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px">
+       <div><h2 class="mono">${esc(v.code)}</h2>
+         <div style="margin-top:7px">${pill(v.status)}</div></div>
+       <button class="ghost" id="shut">Close</button></div>
+     <dl class="kv">
+       <dt>Package</dt><dd>${esc(v.packages?.name || '')}</dd>
+       <dt>Sessions</dt><dd class="mono">${v.sessions_remaining} of ${v.sessions_total} left</dd>
+       <dt>Valid until</dt><dd>${day(v.expires_on)}</dd>
+       <dt>Recipient</dt><dd>${esc(o.recipient_name || '—')}<br>
+         <span class="muted tiny">${esc(o.recipient_email || '')}</span></dd>
+       <dt>Buyer</dt><dd>${esc(o.buyer_name || '—')}<br>
+         <span class="muted tiny">${esc(o.buyer_email || '')}</span></dd>
+       <dt>Delivery</dt><dd>${esc(o.delivery_method || '')}${
+          o.deliver_at ? ' · ' + when(o.deliver_at) : ''}</dd>
+       <dt>Paid</dt><dd class="mono">${money(o.total_cents)}${
+          o.discount_cents ? ` <span class="muted tiny">(${money(o.discount_cents)} off)</span>` : ''}</dd>
+       <dt>Order</dt><dd>${pill(o.status)} <span class="muted tiny">${when(o.paid_at)}</span></dd>
+       ${o.gift_message ? `<dt>Message</dt><dd class="muted">${esc(o.gift_message)}</dd>` : ''}
+     </dl>`);
+
+  const parts = el('div', null, '<hr><h3 style="font-size:17px;margin-bottom:11px">Redeemed parts</h3>');
+  if (!d.parts.length) {
+    parts.append(el('div', 'muted tiny', 'Nothing redeemed yet.'));
+  } else {
+    d.parts.forEach((p) => {
+      const box = el('div', 'part',
+        `<div class="top"><strong>Part ${p.part_number} · ${p.sessions} session${p.sessions > 1 ? 's' : ''}</strong>
+           ${pill(p.cooltix_codes?.status || '')}</div>
+         <div class="mono">${esc(p.cooltix_codes?.code || '')}</div>
+         <div class="tiny muted" style="margin:5px 0 9px">${day(p.track_days?.event_date)} · claimed ${when(p.created_at)}</div>`);
+      if (v.status !== 'refunded') {
+        const row = el('div', null, '');
+        row.style.cssText = 'display:flex;gap:8px';
+        const sel = el('select');
+        days.filter((x) => x.id !== p.track_days?.id).forEach((x) => {
+          const op = el('option', null, day(x.event_date)); op.value = x.id; sel.append(op);
+        });
+        const go = el('button', 'ghost', 'Move');
+        go.addEventListener('click', async () => {
+          go.disabled = true;
+          try {
+            await api('change_date', { redemption_id: p.id, track_day_id: sel.value });
+            openVoucher(id);
+          } catch (e) { flash($('#appErr'), 'Move failed: ' + e.message); go.disabled = false; }
+        });
+        row.append(sel, go);
+        box.append(row);
+      }
+      parts.append(box);
+    });
+  }
+
+  const actions = el('div', null, '<hr><h3 style="font-size:17px;margin-bottom:11px">Actions</h3>');
+
+  if (v.status === 'unredeemed' && o.status === 'paid') {
+    const row = el('div', null, '');
+    row.style.cssText = 'display:flex;gap:8px;margin-bottom:14px';
+    const sel = el('select');
+    packs.filter((p) => p.active && p.code !== v.packages?.code).forEach((p) => {
+      const op = el('option', null, `${p.name} — ${money(p.price_cents)}`); op.value = p.code; sel.append(op);
+    });
+    const go = el('button', 'ghost', 'Swap package');
+    go.addEventListener('click', async () => {
+      go.disabled = true;
+      try { await api('change_package', { voucher_id: id, package_code: sel.value }); openVoucher(id); }
+      catch (e) { flash($('#appErr'), 'Swap failed: ' + e.message); go.disabled = false; }
+    });
+    row.append(sel, go);
+    actions.append(row);
+  }
+
+  if (o.status === 'paid') {
+    const btn = el('button', 'danger', `Refund ${money(o.total_cents)}`);
+    btn.addEventListener('click', async () => {
+      if (!confirm(`Refund ${money(o.total_cents)} to ${o.buyer_email}?\n\n` +
+                   `This voids the voucher and burns any Cooltix codes already issued. It cannot be undone.`)) return;
+      btn.disabled = true; btn.textContent = 'Refunding…';
+      try { await api('refund', { order_id: o.id }); openVoucher(id); loadOverview(); }
+      catch (e) { flash($('#appErr'), 'Refund failed: ' + e.message); btn.disabled = false; }
+    });
+    actions.append(btn);
+  } else {
+    actions.append(el('div', 'muted tiny', `Order is ${o.status} — nothing to refund.`));
+  }
+
+  const log = el('div', null, '<hr><h3 style="font-size:17px;margin-bottom:11px">History</h3>');
+  if (!d.audit.length) log.append(el('div', 'muted tiny', 'No changes recorded.'));
+  d.audit.forEach((a) => log.append(el('div', 'log',
+    `<strong>${esc(a.action.replace(/_/g, ' '))}</strong> · ${when(a.created_at)}<br>
+     ${esc(a.actor_email || 'system')}`)));
+
+  $('#drawer').replaceChildren(head, parts, actions, log);
+  $('#shut').addEventListener('click', closeDrawer);
+}
+
+// ---------------------------------------------------------------- codes
+
+$('#gen').addEventListener('click', async () => {
+  const btn = $('#gen'); btn.disabled = true;
+  try {
+    const d = await api('generate_codes', {
+      track_day_id: $('#cDay').value, package_code: $('#cPkg').value,
+      count: Number($('#cN').value) });
+    $('#codeRows').replaceChildren(...d.codes.map((c) =>
+      el('tr', null, `<td class="mono">${esc(c)}</td>`)));
+    flash($('#codeMsg'), `${d.codes.length} codes minted. Download the CSV and upload it into Cooltix.`, 'ok');
+    loadOverview();
+  } catch (e) { flash($('#appErr'), 'Could not generate: ' + e.message); }
+  btn.disabled = false;
+});
+
+// Served from our own domain an anchor is enough; inside the Claude artifact
+// viewer the frame cannot download on its own and has to ask the host. Try
+// the host first and fall back, so one file works in both places.
+async function handOver(blob, filename) {
+  const host = typeof window.claude?.use === 'function'
+    ? await window.claude.use('downloads').catch(() => null)
+    : null;
+  if (host) {
+    try { await host.save({ filename, data: blob }); return; }
+    catch (e) { if (e?.code === 'declined') return; }
+  }
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+$('#dl').addEventListener('click', async () => {
+  try {
+    const res = await api('export_csv',
+      { track_day_id: $('#cDay').value, package_code: $('#cPkg').value }, true);
+    if (!res.ok) { flash($('#appErr'), 'Nothing available to export for that pool.'); return; }
+    const name = `cooltix-${$('#cPkg').value}-${$('#cDay').selectedOptions[0].text.replace(/\W+/g, '-')}.csv`;
+    await handOver(await res.blob(), name);
+  } catch (e) { flash($('#appErr'), e.message); }
+});
+
+// ---------------------------------------------------------------- log
+
+async function loadLog() {
+  const d = await api('audit', { limit: 200 });
+  $('#logRows').replaceChildren(...(d.audit.length ? d.audit.map((a) => el('tr', null,
+    `<td class="tiny">${when(a.created_at)}</td>
+     <td class="tiny">${esc(a.actor_email || 'system')}</td>
+     <td>${esc(a.action.replace(/_/g, ' '))}</td>
+     <td class="tiny muted mono">${esc(JSON.stringify(a.detail || {}))}</td>`))
+    : [el('tr', null, '<td colspan="4"><div class="empty">Nothing logged yet.</div></td>')]));
+}
+
+// ---------------------------------------------------------------- boot
+
+if (session) signedIn(); else signedOut();
+</script>
+</body>
+</html>
