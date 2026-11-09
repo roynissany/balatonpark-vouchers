@@ -268,15 +268,29 @@
   var qty = {};              // package code -> how many
   var deliveryMode = 'now';
 
-  // The same ladder the checkout function applies. Shown here, enforced there.
-  function discountFor(n) {
+  // The ladder counts sessions in the basket, not vouchers. The 3- and
+  // 6-session prices already carry their own discount; this is the deeper
+  // tier you can only reach by combining. Shown here, enforced server-side.
+  function sessionsInBasket() {
+    return cat.packages.reduce(function (n, p) {
+      return n + (p.splittable ? (p.session_count || 0) * (qty[p.code] || 0) : 0);
+    }, 0);
+  }
+  function tierFor(sessions) {
     var pct = 0;
-    (cat.tiers || []).forEach(function (t) { if (n >= t.min_qty) pct = t.percent; });
+    (cat.tiers || []).forEach(function (t) { if (sessions >= t.min_sessions) pct = t.percent; });
     return pct;
   }
-  function nextTier(n) {
-    var up = (cat.tiers || []).filter(function (t) { return t.min_qty > n; });
+  function nextTier(sessions) {
+    var up = (cat.tiers || []).filter(function (t) { return t.min_sessions > sessions; })
+      .sort(function (a, b) { return a.min_sessions - b.min_sessions; });
     return up.length ? up[0] : null;
+  }
+  // What one voucher of this package costs right now.
+  function unitFor(p, sessions) {
+    var list = p.list_price_cents || p.price_cents;
+    var pct = p.splittable ? tierFor(sessions) : 0;
+    return pct ? Math.round(list * (1 - pct / 100)) : p.price_cents;
   }
 
   // ------------------------------------------------------------ render
@@ -325,10 +339,12 @@
   }
 
   function paintCards() {
+    var sessions = sessionsInBasket();
     cat.packages.forEach(function (p) {
       var n = qty[p.code] || 0;
-      var pct = discountFor(n);
-      var now = Math.round(p.price_cents * (1 - pct / 100));
+      var list = p.list_price_cents || p.price_cents;
+      var now = unitFor(p, sessions);
+      var pct = list > now ? Math.round((1 - now / list) * 100) : 0;
 
       if (p.includes_room) {
         var box = $('#hotelCard');
@@ -338,9 +354,9 @@
         box.querySelector('.h-now').textContent = money(now);
         var was = box.querySelector('.h-was');
         was.hidden = !pct;
-        was.textContent = money(p.price_cents);
+        was.textContent = money(list);
         box.querySelector('.h-note').textContent = pct
-          ? pct + '% volume discount'
+          ? pct + '% off'
           : (vip ? money(p.price_cents - vip.price_cents) + ' over the VIP day' : '');
         return;
       }
@@ -351,7 +367,7 @@
       card.querySelector('.now').textContent = money(now);
       var w = card.querySelector('.was');
       w.hidden = !pct;
-      w.textContent = money(p.price_cents);
+      w.textContent = money(list);
       var off = card.querySelector('.off');
       off.hidden = !pct;
       off.textContent = pct + '% off';
@@ -370,16 +386,18 @@
         'border-top:1px solid rgba(255,255,255,.10);border-bottom:1px solid rgba(255,255,255,.10)';
     }
 
+    var sessions = sessionsInBasket();
     var gross = 0, total = 0, count = 0;
 
     chosen.forEach(function (p) {
       var n = qty[p.code];
-      var pct = discountFor(n);
-      var was = p.price_cents * n;
-      var line = Math.round(p.price_cents * (1 - pct / 100)) * n;
+      var list = p.list_price_cents || p.price_cents;
+      var unit = unitFor(p, sessions);
+      var pct = list > unit ? Math.round((1 - unit / list) * 100) : 0;
+      var was = list * n;
+      var line = unit * n;
       gross += was; total += line; count += n;
 
-      var next = nextTier(n);
       var row = el('div', 'line');
       row.innerHTML =
         '<div class="top">' +
@@ -389,7 +407,7 @@
               '<button type="button" class="step" data-act="dec" aria-label="Remove one ' + esc(p.name) + '">−</button>' +
               '<span style="min-width:22px;text-align:center;font-size:14px;font-weight:600">' + n + '</span>' +
               '<button type="button" class="step" data-act="inc" aria-label="Add one more ' + esc(p.name) + '">+</button>' +
-              '<span style="font-size:12px;color:rgba(245,247,251,.50)">' + money(p.price_cents) + ' each</span>' +
+              '<span style="font-size:12px;color:rgba(245,247,251,.50)">' + money(unit) + ' each</span>' +
             '</span>' +
           '</span>' +
           '<span style="display:flex;flex-direction:column;align-items:flex-end;gap:3px;white-space:nowrap">' +
@@ -397,22 +415,28 @@
             (pct ? '<span style="font-size:12px;color:rgba(245,247,251,.45);text-decoration:line-through">' + money(was) + '</span>' : '') +
           '</span>' +
         '</div>' +
-        (pct ? '<p style="margin:11px 0 0;font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--pale)">' + pct + '% volume discount</p>' : '');
-
-      if (next) {
-        var add = next.min_qty - n;
-        var nudge = el('button', 'nudge',
-          '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>' +
-          '<span>Add ' + add + ' more for <strong style="font-weight:700;color:var(--text)">' + next.percent + '%</strong> off</span>');
-        nudge.type = 'button';
-        nudge.addEventListener('click', function () { bump(p.code, add); });
-        row.append(nudge);
-      }
+        (pct ? '<p style="margin:11px 0 0;font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--pale)">' + pct + '% off</p>' : '');
 
       row.querySelector('[data-act=dec]').addEventListener('click', function () { bump(p.code, -1); });
       row.querySelector('[data-act=inc]').addEventListener('click', function () { bump(p.code, 1); });
       host.append(row);
     });
+
+    // One nudge for the whole basket, not one per line: the tier is about
+    // total sessions, so a per-line prompt would be telling the buyer to do
+    // something that does not apply to that line.
+    var next = sessions > 0 ? nextTier(sessions) : null;
+    if (next) {
+      var add = next.min_sessions - sessions;
+      var nudge = el('button', 'nudge',
+        '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>' +
+        '<span>Add ' + add + ' more session' + (add > 1 ? 's' : '') +
+        ' for <strong style="font-weight:700;color:var(--text)">' + next.percent + '%</strong> off everything</span>');
+      nudge.type = 'button';
+      nudge.style.marginTop = '16px';
+      nudge.addEventListener('click', function () { bump('s1', add); });
+      host.append(nudge);
+    }
 
     $('#saving').hidden = gross <= total;
     $('#savingAmt').textContent = '−' + money(gross - total);
