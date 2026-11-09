@@ -163,87 +163,87 @@
       <div id="langpick"></div>
     </div>
     <div class="wrap pad" style="position:relative;padding-bottom:40px">
-      <p class="eyebrow up"><i class="rule"></i>Step 1 of 2 · Choose &amp; pay</p>
-      <h1 class="up d1">Gift a session. <span style="color:var(--pale)">Or more.</span></h1>
+      <p class="eyebrow up"><i class="rule"></i><span data-i18n="buy.eyebrow">Step 1 of 2 · Choose &amp; pay</span></p>
+      <h1 class="up d1"><span data-i18n="buy.h1a">Gift a session.</span> <span style="color:var(--pale)" data-i18n="buy.h1b">Or more.</span></h1>
     </div>
   </section>
 
   <main class="wrap pad" style="flex-grow:1;padding-top:44px;padding-bottom:84px">
-    <p class="up" style="margin:0 0 48px;font-size:17px;font-weight:300;color:rgba(245,247,251,.72)">Pick one package or several — they add up in the summary. The recipient picks their own track day later.</p>
+    <p class="up" data-i18n="buy.lede" style="margin:0 0 48px;font-size:17px;font-weight:300;color:rgba(245,247,251,.72)">Pick one package or several — they add up in the summary. The recipient picks their own track day later.</p>
 
     <form id="buy" class="cols" novalidate>
 
       <div class="main">
-        <h2 class="sec up" style="margin-top:0"><i class="rule"></i>1 · Packages</h2>
+        <h2 class="sec up" style="margin-top:0"><i class="rule"></i><span data-i18n="buy.sec1">1 · Packages</span></h2>
         <div class="cards" id="cards"></div>
         <button type="button" class="hotel lift zw up d2" id="hotelCard" aria-pressed="false"></button>
 
-        <p class="up" style="margin:18px 0 0;font-size:13px;font-weight:300;line-height:1.75;color:rgba(245,247,251,.62)">A session is 25 minutes of track time. The VIP Day is at least five 30-minute sessions, your own box garage, dedicated care on site and a direct contact for the whole day. Rooms and photos at <a href="https://balatonparkhotel.com" target="_blank" rel="noopener">balatonparkhotel.com</a>.</p>
+        <p class="up" id="smallprint" style="margin:18px 0 0;font-size:13px;font-weight:300;line-height:1.75;color:rgba(245,247,251,.62)"></p>
 
-        <h2 class="sec up"><i></i>2 · Who is it for</h2>
+        <h2 class="sec up"><i></i><span data-i18n="buy.sec2">2 · Who is it for</span></h2>
         <div class="grid2">
           <div>
-            <label class="f" for="rname">Recipient name</label>
+            <label class="f" for="rname" data-i18n="buy.rname">Recipient name</label>
             <input id="rname" class="fld" type="text" autocomplete="off" placeholder="Kovács Péter">
           </div>
           <div>
-            <label class="f" for="remail">Recipient email</label>
+            <label class="f" for="remail" data-i18n="buy.remail">Recipient email</label>
             <input id="remail" class="fld" type="email" required placeholder="peter@example.com">
           </div>
           <div style="grid-column:1/-1">
-            <label class="f" for="msg">Message on the gift card</label>
-            <textarea id="msg" class="fld" rows="3" maxlength="2000" placeholder="Boldog szülinapot! See you on track."></textarea>
+            <label class="f" for="msg" data-i18n="buy.msg">Message on the gift card</label>
+            <textarea id="msg" class="fld" rows="3" maxlength="2000" data-i18n-ph="buy.msgPlaceholder" placeholder="Boldog szülinapot! See you on track."></textarea>
           </div>
         </div>
 
-        <h2 class="sec up"><i></i>3 · Delivery</h2>
+        <h2 class="sec up"><i></i><span data-i18n="buy.sec3">3 · Delivery</span></h2>
         <div style="display:flex;flex-direction:column;gap:12px" id="delivery"></div>
         <div id="schedule" hidden style="margin-top:12px">
           <div class="half">
-            <label class="f" for="senddate">Send on</label>
+            <label class="f" for="senddate" data-i18n="buy.sendOn">Send on</label>
             <input id="senddate" class="fld" type="date" style="border-color:rgba(255,255,255,.22)">
           </div>
           <div class="half">
-            <label class="f" for="sendtime">At</label>
+            <label class="f" for="sendtime" data-i18n="buy.sendAt">At</label>
             <input id="sendtime" class="fld" type="time" value="08:00" style="border-color:rgba(255,255,255,.22)">
           </div>
-          <p style="flex:1 1 100%;margin:0;font-size:13px;font-weight:300;line-height:1.6;color:rgba(245,247,251,.70)">Budapest time. Nothing is sent until then — you'll get your own copy straight after payment, so you know it worked.</p>
+          <p data-i18n="buy.sendNote" style="flex:1 1 100%;margin:0;font-size:13px;font-weight:300;line-height:1.6;color:rgba(245,247,251,.70)">Budapest time.</p>
         </div>
 
-        <h2 class="sec up"><i></i>4 · Your details</h2>
+        <h2 class="sec up"><i></i><span data-i18n="buy.sec4">4 · Your details</span></h2>
         <div class="grid2">
           <div>
-            <label class="f" for="bname">Your name</label>
+            <label class="f" for="bname" data-i18n="buy.bname">Your name</label>
             <input id="bname" class="fld" type="text" autocomplete="name">
           </div>
           <div>
-            <label class="f" for="bemail">Your email</label>
+            <label class="f" for="bemail" data-i18n="buy.bemail">Your email</label>
             <input id="bemail" class="fld" type="email" required autocomplete="email">
           </div>
         </div>
       </div>
 
       <aside class="up d2">
-        <h2 style="margin:0 0 22px;font-size:30px;line-height:1">Summary</h2>
+        <h2 style="margin:0 0 22px;font-size:30px;line-height:1" data-i18n="buy.summary">Summary</h2>
         <p class="err" id="err" hidden></p>
         <div id="lines"></div>
         <div id="saving" hidden style="display:flex;align-items:baseline;justify-content:space-between;gap:16px;padding:16px 0 0">
-          <span style="font-size:14px;font-weight:500;color:var(--pale)">You save</span>
+          <span style="font-size:14px;font-weight:500;color:var(--pale)" data-i18n="buy.save">You save</span>
           <span style="font-size:16px;font-weight:600;color:var(--pale)" id="savingAmt"></span>
         </div>
         <div style="display:flex;align-items:baseline;justify-content:space-between;gap:16px;padding:22px 0 26px">
-          <span style="font-family:var(--cond);font-weight:800;font-size:24px;text-transform:uppercase">Total</span>
+          <span style="font-family:var(--cond);font-weight:800;font-size:24px;text-transform:uppercase" data-i18n="buy.total">Total</span>
           <span style="font-family:var(--cond);font-weight:800;font-size:40px;line-height:1;color:var(--pale)" id="total">€0</span>
         </div>
         <div id="payment" style="margin-bottom:20px"></div>
-        <button type="submit" class="pay lift" id="pay">Pay with card</button>
+        <button type="submit" class="pay lift" id="pay" data-i18n="buy.pay">Pay with card</button>
 
         <p style="margin:16px 0 0;font-size:12px;font-weight:300;line-height:1.7;color:rgba(245,247,251,.60)">
-          We never see your card details.<br><span id="codeNote"></span><br>
-          For refund requests, <a href="mailto:info@balatonparkcircuit.com?subject=Gift%20voucher%20refund%20request">email us</a>.</p>
+          <span data-i18n="buy.noCard">We never see your card details.</span><br><span id="codeNote"></span><br>
+          <span id="refundLine"></span></p>
         <div style="margin-top:24px;padding-top:20px;border-top:1px solid rgba(255,255,255,.10)">
-          <p style="margin:0;font-size:13px;font-weight:300;line-height:1.6;color:rgba(245,247,251,.72)">Already have a voucher? <a href="redeem.html" style="font-weight:500">Redeem it here</a>.</p>
-          <p style="margin:12px 0 0;font-size:12px;font-weight:300;line-height:1.65;color:rgba(245,247,251,.55)">Track days may be moved or cancelled — see the <a href="https://www.balatonparkcircuit.com/tc" target="_blank" rel="noopener">terms</a>.</p>
+          <p id="haveLine" style="margin:0;font-size:13px;font-weight:300;line-height:1.6;color:rgba(245,247,251,.72)"></p>
+          <p id="changeLine" style="margin:12px 0 0;font-size:12px;font-weight:300;line-height:1.65;color:rgba(245,247,251,.55)"></p>
         </div>
       </aside>
 
@@ -262,18 +262,19 @@
   var esc = function (s) { return String(s == null ? '' : s)
     .replace(/[&<>"]/g, function (c) {
       return { '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[c]; }); };
-  var money = function (cents) {
-    var n = Math.round(cents) / 100;
-    return '€' + n.toLocaleString('en-IE',
-      { minimumFractionDigits: n % 1 ? 2 : 0, maximumFractionDigits: 2 });
+  var money = function (cents) { return i18n.money(cents); };
+  var t = function (k, v) { return i18n.t(k, v); };
+  var link = function (href, label, blank) {
+    return '<a href="' + href + '"' + (blank ? ' target="_blank" rel="noopener"' : '') +
+           '>' + label + '</a>';
   };
 
   // Shape of each package card's headline number.
   var FACE = {
-    s1:  { big: '1',    kind: 'session' },
-    s3:  { big: '3',    kind: 'sessions' },
-    s6:  { big: '6',    kind: 'sessions' },
-    vip: { big: 'VIP',  kind: 'full day' }
+    s1:  { big: '1',    kind: 'buy.kindSession' },
+    s3:  { big: '3',    kind: 'buy.kindSessions' },
+    s6:  { big: '6',    kind: 'buy.kindSessions' },
+    vip: { big: 'VIP',  kind: 'buy.kindDay' }
   };
 
   var cat = null;            // catalogue from the server
@@ -315,12 +316,12 @@
   function buildCards() {
     var shop = cat.packages.filter(function (p) { return !p.includes_room; });
     $('#cards').replaceChildren.apply($('#cards'), shop.map(function (p) {
-      var face = FACE[p.code] || { big: String(p.session_count || ''), kind: 'sessions' };
+      var face = FACE[p.code] || { big: String(p.session_count || ''), kind: 'buy.kindSessions' };
       var b = el('button', 'card lift up');
       b.type = 'button';
       b.innerHTML =
         '<span class="big">' + esc(face.big) + '</span>' +
-        '<span class="kind">' + esc(face.kind) + '</span>' +
+        '<span class="kind" data-i18n="' + face.kind + '">' + t(face.kind) + '</span>' +
         '<span class="prices"><span class="now"></span><span class="was" hidden></span></span>' +
         '<span class="off" hidden></span>';
       b.addEventListener('click', function () { toggle(p.code); });
@@ -337,9 +338,12 @@
       '<span class="veil"></span>' +
       '<span class="body">' +
         '<span style="display:flex;align-items:center;gap:12px;font-size:11px;font-weight:600;letter-spacing:.22em;text-transform:uppercase;color:var(--pale)">' +
-          '<span style="display:inline-block;width:28px;height:2px;background:var(--blue)"></span>Stay the night</span>' +
-        '<span style="font-family:var(--cond);font-weight:800;font-size:clamp(28px,5vw,44px);line-height:.96;text-transform:uppercase">VIP Day + 1 night<br>at Balaton Park Hotel</span>' +
-        '<span style="font-size:14px;font-weight:300;line-height:1.7;color:rgba(245,247,251,.82);max-width:480px">The full VIP track day, then a room looking straight down the main straight. Double room with breakfast for one — breakfast for a second guest is extra.</span>' +
+          '<span style="display:inline-block;width:28px;height:2px;background:var(--blue)"></span>' +
+          t('buy.stayNight') + '</span>' +
+        '<span style="font-family:var(--cond);font-weight:800;font-size:clamp(28px,5vw,44px);line-height:.96;text-transform:uppercase">' +
+          t('buy.hotelName') + '</span>' +
+        '<span style="font-size:14px;font-weight:300;line-height:1.7;color:rgba(245,247,251,.82);max-width:480px">' +
+          t('buy.hotelBlurb') + '</span>' +
         '<span style="display:flex;flex-wrap:wrap;align-items:baseline;gap:14px;margin-top:10px">' +
           '<span class="h-now" style="font-family:var(--cond);font-weight:800;font-size:clamp(38px,7vw,54px);line-height:1;color:var(--pale)"></span>' +
           '<span class="h-was" hidden style="font-family:var(--cond);font-weight:700;font-size:26px;color:rgba(245,247,251,.45);text-decoration:line-through"></span>' +
@@ -368,8 +372,8 @@
         was.hidden = !pct;
         was.textContent = money(list);
         box.querySelector('.h-note').textContent = pct
-          ? pct + '% off'
-          : (vip ? money(p.price_cents - vip.price_cents) + ' over the VIP day' : '');
+          ? t('buy.off', { pct: pct })
+          : (vip ? t('buy.hotelOver', { amount: money(p.price_cents - vip.price_cents) }) : '');
         return;
       }
 
@@ -382,7 +386,7 @@
       w.textContent = money(list);
       var off = card.querySelector('.off');
       off.hidden = !pct;
-      off.textContent = pct + '% off';
+      off.textContent = pct ? t('buy.off', { pct: pct }) : '';
     });
   }
 
@@ -392,7 +396,7 @@
     host.replaceChildren();
 
     if (!chosen.length) {
-      host.append(el('p', null, 'Nothing picked yet. Choose one or more packages above.'));
+      host.append(el('p', null, t('buy.empty')));
       host.firstChild.style.cssText = 'margin:0 0 22px;padding:20px 0;font-size:14px;' +
         'font-weight:300;line-height:1.7;color:rgba(245,247,251,.60);' +
         'border-top:1px solid rgba(255,255,255,.10);border-bottom:1px solid rgba(255,255,255,.10)';
@@ -419,7 +423,8 @@
               '<button type="button" class="step" data-act="dec" aria-label="Remove one ' + esc(p.name) + '">−</button>' +
               '<span style="min-width:22px;text-align:center;font-size:14px;font-weight:600">' + n + '</span>' +
               '<button type="button" class="step" data-act="inc" aria-label="Add one more ' + esc(p.name) + '">+</button>' +
-              '<span style="font-size:12px;color:rgba(245,247,251,.50)">' + money(unit) + ' each</span>' +
+              '<span style="font-size:12px;color:rgba(245,247,251,.50)">' +
+                t('buy.each', { amount: money(unit) }) + '</span>' +
             '</span>' +
           '</span>' +
           '<span style="display:flex;flex-direction:column;align-items:flex-end;gap:3px;white-space:nowrap">' +
@@ -427,7 +432,8 @@
             (pct ? '<span style="font-size:12px;color:rgba(245,247,251,.45);text-decoration:line-through">' + money(was) + '</span>' : '') +
           '</span>' +
         '</div>' +
-        (pct ? '<p style="margin:11px 0 0;font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--pale)">' + pct + '% off</p>' : '');
+        (pct ? '<p style="margin:11px 0 0;font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--pale)">' +
+               t('buy.off', { pct: pct }) + '</p>' : '');
 
       row.querySelector('[data-act=dec]').addEventListener('click', function () { bump(p.code, -1); });
       row.querySelector('[data-act=inc]').addEventListener('click', function () { bump(p.code, 1); });
@@ -442,8 +448,11 @@
       var add = next.min_sessions - sessions;
       var nudge = el('button', 'nudge',
         '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>' +
-        '<span>Add ' + add + ' more session' + (add > 1 ? 's' : '') +
-        ' for <strong style="font-weight:700;color:var(--text)">' + next.percent + '%</strong> off everything</span>');
+        '<span>' + t('buy.nudge', {
+          n: add,
+          sessions: t(add === 1 ? 'common.sessionOne' : 'common.sessionMany'),
+          pct: next.percent
+        }) + '</span>');
       nudge.type = 'button';
       nudge.style.marginTop = '16px';
       nudge.addEventListener('click', function () { bump('s1', add); });
@@ -454,18 +463,17 @@
     $('#savingAmt').textContent = '−' + money(gross - total);
     $('#total').textContent = money(total);
     $('#pay').disabled = !chosen.length;
-    $('#pay').textContent = total ? 'Pay ' + money(total) : 'Pay with card';
+    $('#pay').textContent = total ? t('buy.payAmount', { amount: money(total) }) : t('buy.pay');
     syncPaymentForm(total);
     $('#codeNote').textContent = count > 1
-      ? 'You get ' + count + ' separate voucher codes, one per voucher.'
-      : 'Your code is issued the moment payment clears.';
+      ? t('buy.codeMany', { n: count }) : t('buy.codeOne');
   }
 
   function renderDelivery() {
     var defs = [
-      { id: 'now',   label: 'Email it now',       sub: 'Sent straight to the recipient after payment.' },
-      { id: 'date',  label: 'Email it on a date', sub: 'Pick the day and time it should land.' },
-      { id: 'print', label: 'Print it yourself',  sub: 'Download a PDF gift card after payment. We keep the recipient’s email on file but send them nothing.' }
+      { id: 'now',   label: t('buy.delNow'),   sub: t('buy.delNowSub') },
+      { id: 'date',  label: t('buy.delDate'),  sub: t('buy.delDateSub') },
+      { id: 'print', label: t('buy.delPrint'), sub: t('buy.delPrintSub') }
     ];
     var host = $('#delivery');
     host.replaceChildren.apply(host, defs.map(function (o) {
@@ -515,37 +523,37 @@
     var items = Object.keys(qty)
       .filter(function (c) { return qty[c] > 0; })
       .map(function (c) { return { package_code: c, qty: qty[c] }; });
-    if (!items.length) return fail('Choose at least one package.');
+    if (!items.length) return fail(t('buy.errPackage'));
 
     if (!validEmail($('#remail').value)) {
-      return fail('We need a valid email for the person receiving the gift.', $('#remail'));
+      return fail(t('buy.errRecipient'), $('#remail'));
     }
     if (!validEmail($('#bemail').value)) {
-      return fail('We need your email, so we can send you the receipt.', $('#bemail'));
+      return fail(t('buy.errBuyer'), $('#bemail'));
     }
 
     var deliverAt = null;
     if (deliveryMode === 'date') {
       var d = $('#senddate').value, t = $('#sendtime').value || '08:00';
-      if (!d) return fail('Pick the day the gift should arrive.', $('#senddate'));
+      if (!d) return fail(t('buy.errDate'), $('#senddate'));
       // The field is Budapest time; send an explicit offset so the server is
       // not left guessing which clock the buyer meant.
       var when = new Date(d + 'T' + t + ':00');
       if (isNaN(when.getTime()) || when.getTime() < Date.now()) {
-        return fail('That send date is in the past.', $('#senddate'));
+        return fail(t('buy.errPast'), $('#senddate'));
       }
       deliverAt = d + 'T' + t + ':00' + budapestOffset(when);
     }
 
     var btn = $('#pay');
     btn.disabled = true;
-    btn.textContent = 'Paying…';
+    btn.textContent = t('buy.paying');
 
     // Validate the card fields before creating anything server-side, so a
     // mistyped card never leaves a stray order behind.
     var ready = pay.elements
       ? pay.elements.submit().then(function (r) {
-          if (r.error) throw new Error(r.error.message || 'Check your card details.');
+          if (r.error) throw new Error(r.error.message || t('buy.errCard'));
         })
       : Promise.resolve();
 
@@ -567,9 +575,8 @@
       return res.json().then(function (body) { return { ok: res.ok, body: body }; });
     }).then(function (r) {
       if (!r.ok) {
-        throw new Error(r.body && r.body.error === 'payments_not_configured'
-          ? 'Card payments are not switched on yet. Please try again shortly.'
-          : 'We could not start the payment. Nothing has been charged.');
+        throw new Error(t(r.body && r.body.error === 'payments_not_configured'
+          ? 'buy.errNoPay' : 'buy.errStart'));
       }
       // The card form on this page takes it from here. Without a publishable
       // key the server hands back a hosted URL instead, and we send them
@@ -583,22 +590,19 @@
           // Reached only when the payment did NOT go through; a success
           // leaves the page for the return URL.
           throw new Error(c.error && (c.error.type === 'card_error' || c.error.type === 'validation_error')
-            ? c.error.message
-            : 'That payment did not go through. Nothing has been charged — try again or use another card.');
+            ? c.error.message : t('buy.errCard'));
         });
       }
       if (r.body.checkout_url) {
         window.location.href = r.body.checkout_url;
         return;
       }
-      throw new Error('We could not start the payment. Nothing has been charged.');
+      throw new Error(t('buy.errStart'));
     });
     }).catch(function (e) {
-      fail(e instanceof TypeError
-        ? 'Could not reach the server. Check your connection and try again — nothing has been charged.'
-        : e.message);
+      fail(e instanceof TypeError ? t('buy.errNet') : e.message);
       btn.disabled = false;
-      btn.textContent = 'Pay with card';
+      btn.textContent = t('buy.pay');
     });
   });
 
@@ -703,6 +707,31 @@
 
   // ------------------------------------------------------------ boot
 
+  // Lines with links inside them are built from the dictionary.
+  function paintProse() {
+    var terms = link('https://www.balatonparkcircuit.com/tc', t('common.terms'), true);
+    $('#smallprint').innerHTML = t('buy.smallprint', {
+      hotel: link('https://balatonparkhotel.com', 'balatonparkhotel.com', true)
+    });
+    $('#refundLine').innerHTML = t('buy.refund', {
+      email: link('mailto:info@balatonparkcircuit.com?subject=Gift%20Voucher%20Refund%20Request',
+                  t('common.emailUs'))
+    });
+    $('#haveLine').innerHTML = t('buy.haveVoucher', {
+      link: '<a href="redeem.html" style="font-weight:500">' + t('buy.redeemHere') + '</a>'
+    });
+    $('#changeLine').innerHTML = t('buy.mayChange', { terms: terms });
+  }
+
+  i18n.apply();
+  i18n.mountSwitch(document.getElementById('langpick'));
+  paintProse();
+  i18n.onChange(function () {
+    paintProse();
+    renderDelivery();
+    if (cat) draw();
+  });
+
   renderDelivery();
   $('#senddate').min = new Date().toISOString().slice(0, 10);
 
@@ -716,8 +745,8 @@
     })
     .catch(function () {
       $('#cards').innerHTML =
-        '<p style="color:rgba(245,247,251,.6);font-size:14px">Could not load the packages. ' +
-        'Please refresh, or <a href="mailto:info@balatonparkcircuit.com">email us</a>.</p>';
+        '<p style="color:rgba(245,247,251,.6);font-size:14px">' +
+        t('buy.errLoad', { email: link('mailto:info@balatonparkcircuit.com', t('common.emailUs')) }) + '</p>';
       $('#pay').disabled = true;
     });
 })();

@@ -187,11 +187,19 @@
       return { '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[c]; }); };
   var el = function (t, c, h) { var n = document.createElement(t);
     if (c) n.className = c; if (h !== undefined) n.innerHTML = h; return n; };
-  var day = function (s) { return s ? new Date(s).toLocaleDateString('en-GB',
-    { day: 'numeric', month: 'long', year: 'numeric' }) : ''; };
-  var plural = function (n, one, many) { return n + ' ' + (n === 1 ? one : many); };
+  var day = function (s) { return i18n.formatDate(s); };
+  var t = function (k, v) { return i18n.t(k, v); };
+  var sessionWord = function (n) {
+    return t(n === 1 ? 'common.sessionOne' : 'common.sessionMany');
+  };
+  var plural = function (n) { return n + ' ' + sessionWord(n); };
+  var emailLink = function (subject, label) {
+    return '<a href="mailto:info@balatonparkcircuit.com?subject=' + subject + '">' +
+           (label || t('common.emailUs')) + '</a>';
+  };
 
   var state = { code: '', data: null, pickedDay: null, pickedCount: 1, busy: false };
+  var screen = null;   // what is on screen, so a language change can redraw it
 
   function setHead(eyebrow, headline) {
     document.getElementById('eyebrow').textContent = eyebrow;
@@ -222,38 +230,40 @@
   var NOT_FOUND = 'We can’t find that code. Check it against your gift card — ' +
     'letters and numbers only, spaces don’t matter.';
   var MESSAGES = {
-    not_found: NOT_FOUND,
-    voucher_not_found: NOT_FOUND,
-    voucher_expired: 'That voucher has expired. Email us and we’ll see what we can do.',
-    voucher_not_redeemable: 'That voucher can’t be redeemed — it may have been refunded. If that’s unexpected, email us.',
-    rate_limited: 'Too many tries. Wait a few minutes and have another go.',
-    pool_empty: 'That day has just run out of codes for this voucher type. Pick another date, or email us.',
-    no_pool_for_session_count: 'That combination isn’t available for this day. Try a different number of sessions.',
-    bad_session_count: 'That doesn’t match what’s left on the voucher. Refresh and try again.',
-    not_splittable: 'This voucher is redeemed in one go, on a single day.',
-    server_error: 'Something broke on our side, not yours. Try again in a moment.'
+    not_found: 'red.errNotFound',
+    voucher_not_found: 'red.errNotFound',
+    expired: 'red.errExpired',
+    voucher_expired: 'red.errExpired',
+    voucher_void: 'red.errVoid',
+    voucher_not_redeemable: 'red.errVoid',
+    too_many_attempts: 'red.errRate',
+    rate_limited: 'red.errRate',
+    pool_empty: 'red.errPool',
+    no_pool_for_session_count: 'red.errCombo',
+    bad_session_count: 'red.errCount',
+    not_splittable: 'red.errSplit',
+    server_error: 'red.errServer'
   };
   function human(e) {
-    return MESSAGES[e.code] || (e instanceof TypeError
-      ? 'Could not reach the server. Check your connection and try again.'
-      : 'Something went wrong. Try again, or email us.');
+    if (MESSAGES[e.code]) return t(MESSAGES[e.code]);
+    return t(e instanceof TypeError ? 'red.errNet' : 'red.errGeneric');
   }
 
   // ---------------------------------------------------------------- step 1
 
   function askForCode(prefill, problem) {
-    setHead('Step 1 of 2 · Your code', 'Redeem your voucher.');
+    screen = { kind: 'code', prefill: prefill, problem: problem };
+    setHead(t('red.step1'), t('red.h1'));
     view.replaceChildren();
 
     var box = el('div', 'panel up',
-      '<label class="f" for="code">Voucher code</label>' +
+      '<label class="f" for="code">' + t('red.codeLabel') + '</label>' +
       '<input id="code" type="text" inputmode="latin" autocomplete="off" spellcheck="false" placeholder="BPC-XXXX-XXXX">' +
       '<p class="err" id="e1" hidden></p>' +
-      '<button type="button" class="go lift" id="goBtn">Continue</button>' +
+      '<button type="button" class="go lift" id="goBtn">' + t('red.continue') + '</button>' +
       '<p style="margin:20px 0 0;font-size:13px;font-weight:300;line-height:1.7;color:rgba(245,247,251,.60)">' +
-        'Lost the code? <a href="mailto:info@balatonparkcircuit.com?subject=Lost%20Voucher%20Code">Email us</a> ' +
-        'with the buyer’s name and we’ll find it.</p>');
-    view.append(el('p', 'up', 'Enter the code from your gift card. You’ll choose your track days next.'));
+        t('red.lost', { email: emailLink('Lost%20Voucher%20Code', t('red.emailUs')) }) + '</p>');
+    view.append(el('p', 'up', t('red.lede')));
     view.firstChild.style.cssText = 'margin:0 0 32px;font-size:17px;font-weight:300;color:rgba(245,247,251,.72)';
     view.append(box);
 
@@ -284,20 +294,23 @@
     // than a real voucher, so it has to skip the length check.
     if (code !== 'DEMO' && (!code || code.length < 8)) {
       document.getElementById('code').setAttribute('aria-invalid', 'true');
-      return showErr('e1', 'That code looks too short. It’s twelve characters, like BPC-ABCD-1234.');
+      return showErr('e1', t('red.tooShort'));
     }
     btn.disabled = true;
-    btn.textContent = 'Checking…';
+    btn.textContent = t('red.checking');
+    // Two arguments rather than .catch: a failure while drawing the next
+    // screen must not be reported as a bad voucher code.
     call({ action: 'lookup', code: code }).then(function (d) {
       state.code = d.voucher && d.voucher.code ? d.voucher.code : code;
       state.data = d;
       state.pickedDay = null;
       state.pickedCount = 1;
       render();
-    }).catch(function (e) {
+    }, function (e) {
       btn.disabled = false;
-      btn.textContent = 'Continue';
-      document.getElementById('code').setAttribute('aria-invalid', 'true');
+      btn.textContent = t('red.continue');
+      var input = document.getElementById('code');
+      if (input) input.setAttribute('aria-invalid', 'true');
       showErr('e1', human(e));
     });
   }
@@ -305,13 +318,14 @@
   // ---------------------------------------------------------------- step 2
 
   function render() {
+    screen = { kind: 'pick' };
     var d = state.data;
     if (d.fully_redeemed && (!d.sessions_remaining || d.sessions_remaining === 0)) return renderSpent(d);
 
     var left = d.sessions_remaining;
     var total = d.sessions_total;
-    setHead('Step 2 of 2 · ' + left + ' of ' + total + ' left',
-            left === total ? 'Pick a day and how many.' : 'Spend the rest when you like.');
+    setHead(t('red.step2', { left: left, total: total }),
+            t(left === total ? 'red.h2fresh' : 'red.h2more'));
 
     view.replaceChildren();
 
@@ -320,29 +334,30 @@
       '<span style="display:flex;align-items:center;gap:12px;font-size:15px;font-weight:300">' +
         '<span class="dot pulse"></span>' +
         '<span><strong style="font-family:var(--cond);font-weight:800;font-size:19px;letter-spacing:.1em">' +
-          esc(state.code) + '</strong> — ' + plural(left, 'session left', 'sessions left') + '</span></span>');
-    var swap = el('button', 'linkish', 'Use a different code');
+          esc(state.code) + '</strong> — ' +
+          t(left === 1 ? 'red.leftOne' : 'red.leftMany', { n: left }) + '</span></span>');
+    var swap = el('button', 'linkish', t('red.different'));
     swap.type = 'button';
     swap.addEventListener('click', function () { state.data = null; askForCode(''); });
     banner.append(swap);
     view.append(banner);
 
-    if (d.parts && d.parts.length) view.append(partsPanel(d.parts, 'Codes you already have'));
+    if (d.parts && d.parts.length) view.append(partsPanel(d.parts, t('red.already')));
 
     var intro = el('p', 'up d1', d.parts && d.parts.length
-      ? 'Spend as many of the rest as you like on this day — or come back another time for the others.'
-      : 'Your ' + plural(total, 'session', 'sessions') + ' can all run on one day, or be spread across different days.');
+      ? t('red.introMore') : t('red.introFresh', { n: total }));
     intro.style.cssText = 'margin:32px 0 22px;font-size:17px;font-weight:300;line-height:1.7;color:rgba(245,247,251,.72)';
     view.append(intro);
 
     view.append(el('div', 'note up d1',
       '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#A8CEF0" stroke-width="2" stroke-linecap="round" style="flex:0 0 auto;margin-top:1px" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 11v5M12 7.5v.5"></path></svg>' +
-      '<p>Registration for the 2027 track days opens on Cooltix in January 2027. Redeem now and your code is held for you. ' +
-      'We’ll announce the opening on our socials and in the newsletter — ' +
-      '<a href="https://balatonpark.com" target="_blank" rel="noopener">subscribe here</a>. Sessions are 25 minutes.</p>'));
+      '<p>' + t('red.notice', {
+        subscribe: '<a href="https://balatonpark.com" target="_blank" rel="noopener">' +
+                   t('red.subscribe') + '</a>'
+      }) + '</p>'));
 
     // --- day
-    var h1 = el('h2', 'sec', '<i></i>1 · Which day');
+    var h1 = el('h2', 'sec', '<i></i>' + t('red.whichDay'));
     h1.style.marginTop = '40px';
     view.append(h1);
 
@@ -351,21 +366,22 @@
     var col = el('div');
     col.style.cssText = 'flex:999 1 380px;min-width:0;display:flex;flex-direction:column;gap:10px';
 
-    (d.dates || []).forEach(function (t) {
+    // Named td, not t: a loop variable called t would shadow the translator.
+    (d.dates || []).forEach(function (td) {
       var spent = (d.parts || []).filter(function (p) {
-        return p.track_day && p.track_day.date === t.event_date;
+        return p.track_day && p.track_day.date === td.event_date;
       }).reduce(function (s, p) { return s + (p.sessions || 0); }, 0);
 
       var b = el('button', 'day lift',
         '<span style="display:flex;align-items:baseline;gap:16px;text-align:left;min-width:0;flex-wrap:wrap">' +
-          '<span class="lab">' + esc(day(t.event_date)) + '</span>' +
-          '<span class="sub">Saturday</span></span>' +
-        '<span class="tag">' + (spent ? plural(spent, 'session already here', 'sessions already here') : '') + '</span>');
+          '<span class="lab">' + esc(day(td.event_date)) + '</span>' +
+          '<span class="sub">' + t('common.saturday') + '</span></span>' +
+        '<span class="tag">' + (spent ? t('red.alreadyHere', { n: spent }) : '') + '</span>');
       b.type = 'button';
-      b.setAttribute('aria-pressed', state.pickedDay === t.track_day_id ? 'true' : 'false');
-      if (t.selectable === false) { b.disabled = true; b.style.opacity = '.45'; b.style.cursor = 'default'; }
+      b.setAttribute('aria-pressed', state.pickedDay === td.track_day_id ? 'true' : 'false');
+      if (td.selectable === false) { b.disabled = true; b.style.opacity = '.45'; b.style.cursor = 'default'; }
       b.addEventListener('click', function () {
-        state.pickedDay = t.track_day_id;
+        state.pickedDay = td.track_day_id;
         state.pickedCount = Math.min(state.pickedCount, left) || 1;
         render();
       });
@@ -373,18 +389,19 @@
     });
 
     days.append(col);
-    days.append(el('div', 'soon', '<span>More to come soon!</span>'));
+    days.append(el('div', 'soon', '<span>' + t('red.soon') + '</span>'));
     view.append(days);
 
     // --- how many
-    var picked = (d.dates || []).filter(function (t) { return t.track_day_id === state.pickedDay; })[0];
-    var h2 = el('h2', 'sec', '<i></i>2 · How many sessions' + (picked ? ' on ' + esc(day(picked.event_date)) : ''));
+    var picked = (d.dates || []).filter(function (td) { return td.track_day_id === state.pickedDay; })[0];
+    var h2 = el('h2', 'sec', '<i></i>' + (picked
+      ? t('red.howManyOn', { day: esc(day(picked.event_date)) })
+      : t('red.howMany')));
     h2.style.margin = '44px 0 10px';
     view.append(h2);
 
     var hint = el('p', null, picked
-      ? 'You have ' + plural(left, 'session', 'sessions') + ' left. Each group you pick becomes its own Cooltix code for that day.'
-      : 'Choose a day first.');
+      ? t('red.hint', { n: plural(left) }) : t('red.hintPickDay'));
     hint.style.cssText = 'margin:0 0 18px;font-size:14px;font-weight:300;color:rgba(245,247,251,.60)';
     view.append(hint);
 
@@ -393,7 +410,7 @@
     var options = picked ? (picked.options || []) : [];
     options.filter(function (o) { return o.sessions <= left; }).forEach(function (o) {
       var c = el('button', 'chip',
-        o.sessions === left && left > 1 ? 'All ' + o.sessions : String(o.sessions));
+        o.sessions === left && left > 1 ? t('red.all', { n: o.sessions }) : String(o.sessions));
       c.type = 'button';
       c.setAttribute('aria-pressed', state.pickedCount === o.sessions ? 'true' : 'false');
       if (o.available === false) { c.disabled = true; c.style.opacity = '.4'; c.title = 'Sold out for this day'; }
@@ -411,21 +428,23 @@
 
     var go = el('button', 'go lift',
       state.pickedCount === left
-        ? 'Get my code'
-        : 'Get my code for ' + plural(state.pickedCount, 'session', 'sessions'));
+        ? t('red.getCode')
+        : t('red.getCodeFor', { n: state.pickedCount, sessions: sessionWord(state.pickedCount) }));
     go.type = 'button';
     go.style.marginTop = '24px';
     go.disabled = !picked || state.busy;
     go.addEventListener('click', function () { claim(go); });
     view.append(go);
 
+    var rest = left - state.pickedCount;
     var foot = el('p', null,
       (state.pickedCount === left
-        ? 'Choosing a date doesn’t book your place — you get a discount code to use on Cooltix.'
-        : 'You’ll still have ' + plural(left - state.pickedCount, 'session', 'sessions') +
-          ' to spend, any time in the 2027 season.') +
-      ' Track days may be moved or cancelled — see the ' +
-      '<a href="https://www.balatonparkcircuit.com/tc" target="_blank" rel="noopener">terms</a>.');
+        ? t('red.footAll')
+        : t('red.footSome', { n: rest, sessions: sessionWord(rest) })) + ' ' +
+      t('buy.mayChange', {
+        terms: '<a href="https://www.balatonparkcircuit.com/tc" target="_blank" rel="noopener">' +
+               t('common.terms') + '</a>'
+      }));
     foot.style.cssText = 'margin:20px 0 0;font-size:13px;font-weight:300;line-height:1.7;color:rgba(245,247,251,.60)';
     view.append(foot);
   }
@@ -433,7 +452,7 @@
   function claim(btn) {
     state.busy = true;
     btn.disabled = true;
-    btn.textContent = 'Issuing your code…';
+    btn.textContent = t('red.issuing');
     call({ action: 'claim', code: state.code,
            track_day_id: state.pickedDay, sessions: state.pickedCount })
       .then(function (r) {
@@ -464,7 +483,7 @@
       'letter-spacing:.18em;text-transform:uppercase;color:rgba(245,247,251,.72)';
     parts.forEach(function (p) {
       box.append(el('div', 'part',
-        '<span class="what">' + plural(p.sessions, 'session', 'sessions') +
+        '<span class="what">' + plural(p.sessions) +
           ' · ' + esc(day(p.track_day && p.track_day.date)) + '</span>' +
         '<span class="pc">' + esc(p.cooltix_code) + '</span>'));
     });
@@ -472,29 +491,30 @@
   }
 
   function renderIssued(r) {
+    screen = { kind: 'issued', r: r };
     var left = r.sessions_left;
-    setHead('Voucher redeemed', left > 0 ? 'Code issued.' : 'You’re all set.');
+    setHead(t('red.issued'), t(left > 0 ? 'red.issuedH' : 'red.doneH'));
     view.replaceChildren();
 
-    view.append(el('p', 'up',
-      'Your Cooltix discount code for <strong style="font-weight:600">' +
-      esc(day(r.track_day && r.track_day.date)) + '</strong> is below. ' +
-      'Registration opens in January 2027 — the code is held for you until then.'));
+    view.append(el('p', 'up', t('red.issuedLede', {
+      day: esc(day(r.track_day && r.track_day.date))
+    })));
     view.firstChild.style.cssText = 'margin:0 0 30px;font-size:17px;font-weight:300;line-height:1.7;color:rgba(245,247,251,.82)';
 
     var panel = el('div', 'panel up d1',
       '<p style="margin:0 0 14px;font-size:12px;font-weight:600;letter-spacing:.18em;' +
-        'text-transform:uppercase;color:rgba(245,247,251,.72)">Your Cooltix discount code</p>' +
+        'text-transform:uppercase;color:rgba(245,247,251,.72)">' + t('red.yourCode') + '</p>' +
       '<div class="codebox"><span class="ticket glow">' + esc(r.cooltix_code) + '</span>' +
-      '<button type="button" class="copy lift" id="cp">Copy code</button></div>' +
+      '<button type="button" class="copy lift" id="cp">' + t('common.copy') + '</button></div>' +
       '<dl style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:20px;' +
         'margin:28px 0 0;padding-top:24px;border-top:1px solid rgba(255,255,255,.10)">' +
-        '<div><dt style="font-size:11px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:rgba(245,247,251,.60)">Valid for</dt>' +
-          '<dd style="margin:8px 0 0;font-size:15px;font-weight:300">' + esc(day(r.track_day && r.track_day.date)) + ' only</dd></div>' +
-        '<div><dt style="font-size:11px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:rgba(245,247,251,.60)">Covers</dt>' +
-          '<dd style="margin:8px 0 0;font-size:15px;font-weight:300">' + plural(r.sessions_claimed, 'session', 'sessions') + '</dd></div>' +
-        '<div><dt style="font-size:11px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:rgba(245,247,251,.60)">Uses</dt>' +
-          '<dd style="margin:8px 0 0;font-size:15px;font-weight:300">Single use</dd></div>' +
+        '<div><dt style="font-size:11px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:rgba(245,247,251,.60)">' + t('red.validFor') + '</dt>' +
+          '<dd style="margin:8px 0 0;font-size:15px;font-weight:300">' +
+            t('red.validForV', { day: esc(day(r.track_day && r.track_day.date)) }) + '</dd></div>' +
+        '<div><dt style="font-size:11px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:rgba(245,247,251,.60)">' + t('red.covers') + '</dt>' +
+          '<dd style="margin:8px 0 0;font-size:15px;font-weight:300">' + plural(r.sessions_claimed) + '</dd></div>' +
+        '<div><dt style="font-size:11px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:rgba(245,247,251,.60)">' + t('red.uses') + '</dt>' +
+          '<dd style="margin:8px 0 0;font-size:15px;font-weight:300">' + t('red.usesV') + '</dd></div>' +
       '</dl>');
     view.append(panel);
 
@@ -502,20 +522,22 @@
       var b = ev.currentTarget;
       if (navigator.clipboard && navigator.clipboard.writeText) {
         navigator.clipboard.writeText(r.cooltix_code).then(function () {
-          b.textContent = 'Copied';
-          setTimeout(function () { b.textContent = 'Copy code'; }, 2200);
-        }, function () { b.textContent = 'Select it manually'; });
-      } else { b.textContent = 'Select it manually'; }
+          b.textContent = t('common.copied');
+          setTimeout(function () { b.textContent = t('common.copy'); }, 2200);
+        }, function () { b.textContent = t('common.copyManual'); });
+      } else { b.textContent = t('common.copyManual'); }
     });
 
     var steps = el('section', 'up d2');
     steps.style.marginTop = '46px';
     steps.innerHTML =
-      '<h2 style="margin:0 0 24px;font-size:clamp(26px,5vw,36px);line-height:1.05">What happens <span style="color:var(--blue)">on Cooltix.</span></h2>' +
+      '<h2 style="margin:0 0 24px;font-size:clamp(26px,5vw,36px);line-height:1.05">' +
+        t('red.stepsA') + ' <span style="color:var(--blue)">' + t('red.stepsB') + '</span></h2>' +
       '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:26px">' +
-        ['Paste the code into the discount field <strong style="color:#F5F7FB;font-weight:600">before you add anything</strong> to the basket.',
-         'Add your ' + plural(r.sessions_claimed, 'session', 'sessions') + ' for ' + esc(day(r.track_day && r.track_day.date)) + ' to the basket.',
-         'The sessions are listed as free. Finish the checkout to get your ticket.']
+        [t('red.cstep1'),
+         t('red.cstep2', { n: r.sessions_claimed, sessions: sessionWord(r.sessions_claimed),
+                           day: esc(day(r.track_day && r.track_day.date)) }),
+         t('red.cstep3')]
         .map(function (t, i) {
           return '<div style="border-top:2px solid var(--blue);padding-top:20px">' +
             '<p style="margin:0 0 12px;font-family:var(--cond);font-weight:800;font-size:17px;' +
@@ -528,47 +550,60 @@
     var warn = el('div', 'up d2');
     warn.style.cssText = 'margin:44px 0 0;padding:24px 28px;background:rgba(255,255,255,.04);border-left:2px solid var(--pale)';
     warn.innerHTML = '<p style="margin:0;font-size:15px;font-weight:300;line-height:1.75;color:rgba(245,247,251,.85)">' +
-      'The code only works for ' + esc(day(r.track_day && r.track_day.date)) +
-      ' and expires when that day’s sales close. If you need a different date, don’t use it — ' +
-      '<a href="mailto:info@balatonparkcircuit.com?subject=Change%20of%20date">email us</a> and we’ll swap it.</p>';
+      t('red.warn', { day: esc(day(r.track_day && r.track_day.date)),
+                      email: emailLink('Change%20Of%20Date') }) + '</p>';
     view.append(warn);
 
     if (left > 0) {
-      var more = el('button', 'go lift', 'Redeem ' + plural(left, 'more session', 'more sessions'));
+      var more = el('button', 'go lift', t('red.more', { n: left, sessions: sessionWord(left) }));
       more.type = 'button';
       more.style.marginTop = '38px';
       more.addEventListener('click', function () {
         more.disabled = true;
-        more.textContent = 'Loading…';
+        more.textContent = t('common.loading');
         call({ action: 'lookup', code: state.code }).then(function (d) {
           state.data = d; state.pickedDay = null; state.pickedCount = 1; render();
           window.scrollTo({ top: 0, behavior: 'smooth' });
-        }).catch(function () { more.disabled = false; more.textContent = 'Redeem the rest'; });
+        }).catch(function () {
+          more.disabled = false;
+          more.textContent = t('red.more', { n: left, sessions: sessionWord(left) });
+        });
       });
       view.append(more);
     } else {
-      var back = el('p', 'up d2', '<a href="index.html" style="font-weight:500">Back to gift vouchers</a>');
+      var back = el('p', 'up d2',
+        '<a href="index.html" style="font-weight:500">' + t('red.back') + '</a>');
       back.style.cssText = 'margin:38px 0 0;font-size:14px;font-weight:300';
       view.append(back);
     }
   }
 
   function renderSpent(d) {
-    setHead('Voucher fully redeemed', 'All sessions used.');
+    screen = { kind: 'spent', d: d };
+    setHead(t('red.spent'), t('red.spentH'));
     view.replaceChildren();
-    view.append(el('p', 'up',
-      'Every session on <strong style="font-weight:600">' + esc(state.code) +
-      '</strong> has been redeemed. Here are the codes it produced — they still work.'));
+    view.append(el('p', 'up', t('red.spentLede', { code: esc(state.code) })));
     view.firstChild.style.cssText = 'margin:0 0 8px;font-size:17px;font-weight:300;line-height:1.7;color:rgba(245,247,251,.82)';
-    view.append(partsPanel(d.parts || [], 'Your Cooltix codes'));
-    var p = el('p', 'up d1',
-      'Need a different date? <a href="mailto:info@balatonparkcircuit.com?subject=Change%20of%20date">Email us</a> ' +
-      'and we’ll swap it. · <a href="index.html">Buy another voucher</a>');
+    view.append(partsPanel(d.parts || [], t('red.yourCodes')));
+    var p = el('p', 'up d1', t('red.needDate', {
+      email: emailLink('Change%20Of%20Date'),
+      buy: '<a href="index.html">' + t('red.buyAnother') + '</a>'
+    }));
     p.style.cssText = 'margin:30px 0 0;font-size:14px;font-weight:300;line-height:1.7;color:rgba(245,247,251,.70)';
     view.append(p);
   }
 
   // ---------------------------------------------------------------- boot
+
+  i18n.apply();
+  i18n.mountSwitch(document.getElementById('langpick'));
+  i18n.onChange(function () {
+    if (!screen) return;
+    if (screen.kind === 'code') askForCode(screen.prefill, screen.problem);
+    else if (screen.kind === 'pick') render();
+    else if (screen.kind === 'issued') renderIssued(screen.r);
+    else if (screen.kind === 'spent') renderSpent(screen.d);
+  });
 
   var prefill = new URLSearchParams(location.search).get('code') || '';
   askForCode(prefill ? tidy(prefill) : '');

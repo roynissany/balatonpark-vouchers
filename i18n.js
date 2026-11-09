@@ -314,7 +314,9 @@
       'buy.pay': 'Fizetés kártyával',
       'buy.payAmount': 'Fizetés — {amount}',
       'buy.paying': 'Fizetés…',
-      'buy.nudge': 'Végy még {n} {sessions}, és <strong>{pct}%</strong> kedvezményt kapsz mindenre',
+      /* Hungarian wants the accusative here, so the noun is written into the
+         sentence rather than slotted in as a bare word. */
+      'buy.nudge': 'Végy még {n} szessziót, és <strong>{pct}%</strong> kedvezményt kapsz mindenre',
       'buy.noCard': 'A kártyaadataidat soha nem látjuk.',
       'buy.codeOne': 'A kódot a fizetés beérkezésekor azonnal kiállítjuk.',
       'buy.codeMany': '{n} külön utalványkódot kapsz, utalványonként egyet.',
