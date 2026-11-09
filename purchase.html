@@ -117,9 +117,11 @@
   input[type=date]::-webkit-calendar-picker-indicator,
   input[type=time]::-webkit-calendar-picker-indicator{filter:invert(1) opacity(.55);cursor:pointer}
 
-  aside{flex:1 1 320px;position:sticky;top:24px;margin-top:38px;padding:30px;
+  /* Wide enough for Stripe to lay the payment methods out side by side
+     rather than folding the extras into a dropdown. */
+  aside{flex:1 1 420px;position:sticky;top:24px;margin-top:38px;padding:30px;
     background:rgba(10,20,34,.96);border:1px solid rgba(255,255,255,.14)}
-  @media (max-width:900px){ aside{position:static;margin-top:8px} }
+  @media (max-width:900px){ aside{position:static;margin-top:8px;padding:22px 18px} }
   .line{padding:16px 0;border-bottom:1px solid rgba(255,255,255,.10)}
   .line .top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
   .step{width:30px;height:30px;display:flex;align-items:center;justify-content:center;
