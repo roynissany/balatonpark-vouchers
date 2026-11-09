@@ -79,6 +79,15 @@
   .s-refunded,.s-burned{background:rgba(217,96,79,.17);color:var(--bad)}
   .s-available{background:rgba(79,180,119,.17);color:var(--good)}
   .s-issued{background:rgba(66,122,183,.22);color:var(--pale)}
+  .k-purchased{background:rgba(79,180,119,.17);color:var(--good)}
+  .k-redeemed{background:rgba(66,122,183,.22);color:var(--pale)}
+  .k-refunded{background:rgba(217,96,79,.17);color:var(--bad)}
+  .k-admin{background:rgba(245,247,251,.09);color:var(--dim)}
+
+  .seg{display:flex;gap:4px;flex-wrap:wrap}
+  .seg button{background:transparent;color:var(--dim);border:1px solid var(--line);
+    padding:8px 14px;font-size:13px}
+  .seg button[aria-current=page]{background:rgba(66,122,183,.2);color:var(--pale);border-color:var(--blue)}
 
   .bar{height:5px;border-radius:3px;background:rgba(255,255,255,.09);overflow:hidden;margin-top:6px;min-width:90px}
   .bar i{display:block;height:100%;background:var(--good)}
@@ -199,9 +208,22 @@
     </section>
 
     <section data-tab="log">
+      <div class="toolbar">
+        <div style="min-width:0"><label>Show</label>
+          <div class="seg" id="kinds">
+            <button data-kind="" aria-current="page">All</button>
+            <button data-kind="purchased">Purchased</button>
+            <button data-kind="redeemed">Redeemed</button>
+            <button data-kind="refunded">Refunded</button>
+            <button data-kind="admin">Staff changes</button>
+          </div>
+        </div>
+      </div>
       <div class="wrap"><table>
-        <thead><tr><th>When</th><th>Who</th><th>Action</th><th>Detail</th></tr></thead>
+        <thead><tr><th>When</th><th>What</th><th>Voucher</th><th>Who</th>
+          <th>Amount</th><th></th></tr></thead>
         <tbody id="logRows"></tbody></table></div>
+      <p class="muted tiny" id="actCount" style="margin-top:13px"></p>
     </section>
   </main>
 </div>
@@ -621,14 +643,73 @@ $('#dl').addEventListener('click', async () => {
 
 // ---------------------------------------------------------------- log
 
+let actKind = '';
+
+document.querySelectorAll('#kinds button').forEach((b) => {
+  b.addEventListener('click', () => {
+    document.querySelectorAll('#kinds button').forEach((x) => x.removeAttribute('aria-current'));
+    b.setAttribute('aria-current', 'page');
+    actKind = b.dataset.kind;
+    loadLog();
+  });
+});
+
+// Refunding from the timeline hits the same endpoint as the voucher drawer,
+// so a refund started here and one started in Stripe end up in the same
+// place: order refunded, voucher void, issued Cooltix codes burned.
+async function refundOrder(orderId, amountCents, who, btn) {
+  if (!confirm(`Refund ${money(amountCents)} to ${who}?\n\n` +
+               `This voids the voucher and burns any Cooltix codes already issued. It cannot be undone.`)) return;
+  btn.disabled = true;
+  btn.textContent = 'Refunding…';
+  try {
+    await api('refund', { order_id: orderId });
+    await Promise.all([loadLog(), loadOverview()]);
+  } catch (e) {
+    flash($('#appErr'), 'Refund failed: ' + e.message);
+    btn.disabled = false;
+    btn.textContent = 'Refund';
+  }
+}
+
 async function loadLog() {
-  const d = await api('audit', { limit: 200 });
-  $('#logRows').replaceChildren(...(d.audit.length ? d.audit.map((a) => el('tr', null,
-    `<td class="tiny">${when(a.created_at)}</td>
-     <td class="tiny">${esc(a.actor_email || 'system')}</td>
-     <td>${esc(a.action.replace(/_/g, ' '))}</td>
-     <td class="tiny muted mono">${esc(JSON.stringify(a.detail || {}))}</td>`))
-    : [el('tr', null, '<td colspan="4"><div class="empty">Nothing logged yet.</div></td>')]));
+  const d = await api('activity', { kind: actKind, limit: 200 });
+  $('#actCount').textContent = d.total
+    ? `${Math.min(d.limit, d.total)} of ${d.total}` : '';
+
+  $('#logRows').replaceChildren(...(d.activity.length ? d.activity.map((a) => {
+    const tr = el('tr', null,
+      `<td class="tiny">${when(a.at)}</td>
+       <td><span class="pill k-${esc(a.kind)}">${esc(a.kind)}</span>
+         ${a.detail_text ? `<div class="tiny muted" style="margin-top:4px">${esc(a.detail_text)}</div>` : ''}</td>
+       <td class="mono tiny">${esc(a.voucher_code || '—')}
+         <div class="tiny muted">${esc(a.package_name || '')}</div></td>
+       <td class="tiny">${esc(a.actor_email || a.buyer_email || '—')}
+         ${a.recipient_email && !a.actor_email
+            ? `<div class="tiny muted">for ${esc(a.recipient_email)}</div>` : ''}</td>
+       <td class="mono tiny">${a.amount_cents != null ? money(a.amount_cents) : ''}</td>`);
+
+    const cell = el('td');
+    cell.style.textAlign = 'right';
+    if (a.order_id && a.order_status === 'paid') {
+      const btn = el('button', 'danger', 'Refund');
+      btn.style.cssText = 'padding:5px 12px;font-size:12px';
+      btn.addEventListener('click', (ev) => {
+        ev.stopPropagation();
+        refundOrder(a.order_id, a.order_total_cents ?? a.amount_cents ?? 0,
+                    a.buyer_email || 'the buyer', btn);
+      });
+      cell.append(btn);
+    }
+    tr.append(cell);
+
+    if (a.voucher_id) {
+      tr.style.cursor = 'pointer';
+      tr.addEventListener('click', () => openVoucher(a.voucher_id));
+    }
+    return tr;
+  }) : [el('tr', null,
+    '<td colspan="6"><div class="empty">Nothing here yet.</div></td>')]));
 }
 
 // ---------------------------------------------------------------- boot
