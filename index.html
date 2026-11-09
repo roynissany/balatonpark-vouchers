@@ -3,21 +3,258 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Balaton Park Circuit — Gift vouchers</title>
-<meta name="robots" content="noindex">
+<title>Balaton Park Circuit — Gift Vouchers</title>
+<meta name="description" content="Gift a day on track at Balaton Park Circuit. The person you give it to picks their own date.">
+<link rel="icon" href="bpc-logo.svg" type="image/svg+xml">
+
+<meta property="og:type" content="website">
+<meta property="og:title" content="Gift a day on track at Balaton Park Circuit">
+<meta property="og:description" content="Track session vouchers for the 2027 season. They pick their own date — no need to decide for them.">
+<meta property="og:image" content="https://gifts.balatonpark.com/og-share.jpg">
+<meta property="og:url" content="https://gifts.balatonpark.com/">
+<meta name="twitter:card" content="summary_large_image">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap">
 <style>
-  body { margin: 0; min-height: 100vh; display: grid; place-items: center;
-         background: #0A1422; color: #F5F7FB; text-align: center;
-         font: 400 15px/1.6 Inter, system-ui, sans-serif; padding: 24px; }
-  h1 { font-family: 'Barlow Condensed', system-ui, sans-serif; font-weight: 800;
-       font-size: 38px; letter-spacing: .02em; text-transform: uppercase; margin: 0 0 10px; }
-  p { color: rgba(245,247,251,.56); margin: 0; }
+  :root { --ink:#0A1422; --blue:#427AB7; --pale:#A8CEF0; --text:#F5F7FB;
+          --cond:'Barlow Condensed',sans-serif; }
+  *{box-sizing:border-box}
+  body { margin:0; background:var(--ink); color:var(--text);
+         font-family:Inter,-apple-system,system-ui,sans-serif;
+         -webkit-font-smoothing:antialiased; overflow-x:hidden; }
+  a { color:var(--pale) } a:hover { color:var(--text) }
+  h1,h2,h3 { font-family:var(--cond); font-weight:800; text-transform:uppercase; margin:0 }
+
+  @keyframes fadeUp { from{opacity:0;transform:translateY(44px)} to{opacity:1;transform:none} }
+  @keyframes fadeIn { from{opacity:0} to{opacity:1} }
+  @keyframes slideLeft { from{opacity:0;transform:translateX(-54px)} to{opacity:1;transform:none} }
+  @keyframes kenburns { from{transform:scale(1.06)} to{transform:scale(1.19) translateY(-2%)} }
+  @keyframes cueBounce { 0%,100%{transform:translateY(0);opacity:.75} 50%{transform:translateY(9px);opacity:1} }
+  @keyframes marquee { from{transform:translateX(0)} to{transform:translateX(-50%)} }
+  @keyframes rule { from{transform:scaleX(0)} to{transform:scaleX(1)} }
+  .up{animation:fadeUp 1s cubic-bezier(.22,.61,.36,1) both}
+  .sl{animation:slideLeft 1s cubic-bezier(.22,.61,.36,1) both}
+  .fi{animation:fadeIn 1.4s ease both}
+  .d1{animation-delay:.12s} .d2{animation-delay:.24s} .d3{animation-delay:.36s}
+  .d4{animation-delay:.48s} .d5{animation-delay:.62s}
+  .kb{animation:kenburns 26s ease-out both alternate infinite}
+  .cue{animation:cueBounce 2.4s ease-in-out infinite}
+  .mq{animation:marquee 38s linear infinite}
+  .rule{transform-origin:left;animation:rule .9s cubic-bezier(.22,.61,.36,1) both;animation-delay:.1s}
+  .lift{transition:transform .4s cubic-bezier(.22,.61,.36,1),background .3s,border-color .3s,box-shadow .4s}
+  .lift:hover{transform:translateY(-5px);box-shadow:0 18px 40px rgba(0,0,0,.45)}
+  .zw{overflow:hidden} .zw img{transition:transform .9s cubic-bezier(.22,.61,.36,1);display:block}
+  .zw:hover img{transform:scale(1.07)}
+  @media (prefers-reduced-motion: reduce){
+    .up,.sl,.fi,.kb,.cue,.mq,.rule{animation:none!important;opacity:1!important;transform:none!important}
+    .lift,.zw img{transition:none!important}
+  }
+
+  .hero { position:relative; min-height:min(780px,92svh); display:flex;
+          flex-direction:column; justify-content:space-between; overflow:hidden }
+  .hero img.bg { position:absolute; inset:0; width:100%; height:100%;
+                 object-fit:cover; filter:brightness(.62) saturate(.95) }
+  .hero .veil { position:absolute; inset:0;
+    background:linear-gradient(180deg,rgba(10,20,34,.78) 0%,rgba(10,20,34,.45) 38%,rgba(10,20,34,.96) 100%) }
+  .pad { padding-left:clamp(20px,5vw,56px); padding-right:clamp(20px,5vw,56px) }
+  .wrap { width:100%; max-width:1180px; margin:0 auto }
+
+  h1 { font-size:clamp(40px,8vw,76px); line-height:.94; letter-spacing:-.01em; max-width:780px }
+  h2 { font-size:clamp(30px,5vw,44px); line-height:1 }
+  h3 { font-size:clamp(21px,3vw,26px) }
+  .lede { margin:28px 0 0; font-size:clamp(16px,2.2vw,18px); font-weight:300;
+          line-height:1.65; color:rgba(245,247,251,.88); max-width:580px }
+
+  .cta { display:inline-flex; align-items:center; justify-content:center;
+         min-height:clamp(64px,9vw,86px); padding:0 clamp(28px,6vw,62px);
+         text-decoration:none; font-family:var(--cond); font-weight:800;
+         font-size:clamp(22px,4.4vw,34px); letter-spacing:.04em; text-transform:uppercase }
+  .cta.primary{background:var(--blue);color:#fff}
+  .cta.ghost{background:rgba(10,20,34,.55);color:var(--text);border:1px solid rgba(255,255,255,.5)}
+
+  .ticker { overflow:hidden; border-top:1px solid rgba(255,255,255,.10);
+            border-bottom:1px solid rgba(255,255,255,.10); background:rgba(255,255,255,.03) }
+  .ticker .mq { display:flex; width:max-content; padding:16px 0; font-family:var(--cond);
+    font-weight:800; font-size:20px; letter-spacing:.14em; text-transform:uppercase;
+    color:rgba(245,247,251,.72); white-space:nowrap }
+  .ticker b { color:var(--blue); padding:0 22px; font-weight:800 }
+
+  .steps,.shots { display:grid; gap:clamp(18px,3vw,36px);
+                  grid-template-columns:repeat(auto-fit,minmax(240px,1fr)) }
+  .shots { gap:14px }
+  .shots img { width:100%; height:clamp(180px,28vw,260px); object-fit:cover }
+  .step { border-top:2px solid var(--blue); padding-top:24px }
+  .step .n { margin:0 0 14px; font-family:var(--cond); font-weight:800;
+             font-size:18px; color:var(--pale); letter-spacing:.1em }
+  .step p.t { margin:0; font-size:15px; font-weight:300; line-height:1.7;
+              color:rgba(245,247,251,.72) }
+  .days { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:14px }
+  .day { padding:26px 28px; background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.10) }
+  .day p.big { margin:0; font-family:var(--cond); font-weight:800;
+               font-size:clamp(28px,4vw,34px); text-transform:uppercase; line-height:1 }
+  .day p.sub { margin:8px 0 0; font-size:13px; color:rgba(245,247,251,.72) }
+  .day.soon { border:1px dashed var(--blue); display:flex; align-items:center;
+              background:none }
+  .day.soon p { margin:0; font-family:var(--cond); font-weight:800; font-size:26px;
+                line-height:1.1; text-transform:uppercase; color:var(--pale) }
+
+  .note { margin:64px 0 0; padding:28px 32px; background:rgba(255,255,255,.04);
+          border-left:2px solid var(--blue) }
+  .note p { margin:0; font-size:15px; font-weight:300; line-height:1.75;
+            color:rgba(245,247,251,.85) }
+
+  footer { margin-top:92px; padding:34px clamp(20px,5vw,56px);
+    border-top:1px solid rgba(255,255,255,.10); display:flex; flex-wrap:wrap;
+    gap:20px; align-items:center; justify-content:space-between;
+    font-size:13px; color:rgba(245,247,251,.55) }
+  footer a { text-decoration:none; color:rgba(245,247,251,.55) }
+
+  #cookies { position:fixed; left:50%; transform:translateX(-50%); bottom:20px;
+    z-index:60; width:calc(100% - 40px); max-width:600px; display:flex;
+    flex-wrap:wrap; align-items:center; gap:14px; padding:13px 16px;
+    background:rgba(10,20,34,.70); backdrop-filter:blur(12px);
+    -webkit-backdrop-filter:blur(12px); border:1px solid rgba(255,255,255,.16) }
+  #cookies[hidden]{display:none}
+  #cookies p { flex:1 1 250px; margin:0; font-size:12.5px; font-weight:300;
+               line-height:1.55; color:rgba(245,247,251,.82) }
+  #cookies button { min-height:44px; font-family:Inter,sans-serif; font-size:13px;
+                    cursor:pointer; white-space:nowrap }
+  #cookies .ess { padding:0 11px; background:rgba(255,255,255,.10); color:var(--text);
+                  border:1px solid rgba(255,255,255,.38); font-weight:500 }
+  #cookies .acc { padding:0 20px; background:var(--blue); color:#fff; border:none; font-weight:600 }
 </style>
 </head>
 <body>
-  <div>
-    <h1>Balaton Park Circuit</h1>
-    <p>Gift vouchers — opening soon.</p>
+
+<div style="min-height:100%;display:flex;flex-direction:column">
+
+  <section class="hero">
+    <img class="bg kb" src="hero.jpg" alt="A car on the kerbs at Balaton Park Circuit">
+    <div class="veil"></div>
+
+    <div class="fi pad" style="position:relative;padding-top:34px">
+      <img src="bpc-logo.svg" alt="Balaton Park Circuit" style="height:34px;width:auto">
+    </div>
+
+    <div class="wrap pad" style="position:relative;padding-bottom:clamp(48px,9vw,84px)">
+      <p class="up" style="display:flex;align-items:center;gap:16px;margin:0 0 22px;font-size:12px;font-weight:600;letter-spacing:.26em;text-transform:uppercase">
+        <span class="rule" style="display:inline-block;width:48px;height:2px;background:var(--blue)"></span>
+        Gift vouchers
+      </p>
+      <h1 class="up d1">Gift your loved ones a day on track. <span style="color:var(--blue)">Maybe even a night.</span></h1>
+      <p class="lede up d3">Buy a voucher for track sessions at Balaton Park Circuit. The person you give it to picks their own date — no need to decide for them.</p>
+
+      <div class="up d4" style="display:flex;flex-wrap:wrap;gap:14px;margin:40px 0 0">
+        <a class="cta primary lift" href="purchase.html">Buy a voucher</a>
+        <a class="cta ghost lift" href="redeem.html">Redeem a voucher</a>
+      </div>
+
+      <p class="cue" style="margin:52px 0 0;font-size:11px;font-weight:600;letter-spacing:.3em;text-transform:uppercase;color:rgba(245,247,251,.75)">Scroll</p>
+    </div>
+  </section>
+
+  <div class="ticker">
+    <div class="mq">
+      <span>Mid April 2027<b>/</b>Mid May 2027<b>/</b>Late June 2027<b>/</b>More to come soon<b>/</b>Mid April 2027<b>/</b>Mid May 2027<b>/</b>Late June 2027<b>/</b>More to come soon<b>/</b></span>
+      <span aria-hidden="true">Mid April 2027<b>/</b>Mid May 2027<b>/</b>Late June 2027<b>/</b>More to come soon<b>/</b>Mid April 2027<b>/</b>Mid May 2027<b>/</b>Late June 2027<b>/</b>More to come soon<b>/</b></span>
+    </div>
   </div>
+
+  <main class="wrap pad" style="flex-grow:1">
+
+    <section id="how" style="margin:clamp(56px,10vw,92px) 0 0">
+      <h2 class="up" style="margin:0 0 40px">How it <span style="color:var(--blue)">works.</span></h2>
+      <div class="steps">
+        <div class="step up d1">
+          <p class="n">01</p>
+          <h3 style="margin:0 0 10px">You buy</h3>
+          <p class="t">Pick a package. We email a beautiful gift card with voucher code or you print a physical one.</p>
+        </div>
+        <div class="step up d3">
+          <p class="n">02</p>
+          <h3 style="margin:0 0 10px">They choose a date</h3>
+          <p class="t">They enter the code here and pick from our published track days.</p>
+        </div>
+        <div class="step up d5">
+          <p class="n">03</p>
+          <h3 style="margin:0 0 10px">They book</h3>
+          <p class="t">We assist them with booking their desired date &amp; time.</p>
+        </div>
+      </div>
+    </section>
+
+    <section style="margin:clamp(56px,9vw,88px) 0 0">
+      <div class="shots">
+        <div class="zw up d1"><img src="driver-wave.jpg" alt="A driver waving from the car" loading="lazy"></div>
+        <div class="zw up d3"><img src="pit-overhead.jpg" alt="Pit boxes seen from above" loading="lazy"></div>
+        <div class="zw up d5"><img src="grid-cars.jpg" alt="Cars lined up in the paddock" loading="lazy"></div>
+      </div>
+    </section>
+
+    <section style="margin:clamp(56px,9vw,88px) 0 0">
+      <h2 class="up" style="margin:0 0 28px">Track days <span style="color:var(--blue)">2027.</span></h2>
+      <div class="days">
+        <div class="day lift up d1"><p class="big">Mid April</p><p class="sub">Saturday</p></div>
+        <div class="day lift up d2"><p class="big">Mid May</p><p class="sub">Saturday</p></div>
+        <div class="day lift up d3"><p class="big">Late June</p><p class="sub">Saturday</p></div>
+        <div class="day soon up d4"><p>More to come soon!</p></div>
+      </div>
+    </section>
+
+    <div class="note sl">
+      <p>Vouchers are valid for the 2027 season and can be redeemed against any published 2027 track day while places last. Riding gear and licence requirements are the same as any public session. Track days may be moved or cancelled — see the <a href="https://www.balatonparkcircuit.com/tc" target="_blank" rel="noopener">terms</a>. For refund requests, <a href="mailto:info@balatonparkcircuit.com?subject=Gift%20voucher%20refund%20request">email us</a>.</p>
+    </div>
+
+  </main>
+
+  <div id="cookies" hidden>
+    <p>Essential cookies keep the voucher system working! Other ones are important to us.
+      <a href="https://www.balatonparkcircuit.com/tc" target="_blank" rel="noopener" style="white-space:nowrap">More</a></p>
+    <span style="flex:0 0 auto;display:flex;gap:8px">
+      <button type="button" class="ess" data-choice="essential">Essentials</button>
+      <button type="button" class="acc" data-choice="all">Accept</button>
+    </span>
+  </div>
+
+  <footer>
+    <img src="bpc-logo.svg" alt="Balaton Park Circuit" style="height:22px;width:auto;opacity:.75">
+    <span style="display:flex;flex-wrap:wrap;gap:24px">
+      <a href="https://www.balatonparkcircuit.com/tc" target="_blank" rel="noopener">Terms</a>
+      <a href="https://www.balatonparkcircuit.com/tc" target="_blank" rel="noopener">Privacy</a>
+      <a href="mailto:info@balatonparkcircuit.com">info@balatonparkcircuit.com</a>
+    </span>
+  </footer>
+
+</div>
+
+<script>
+// The banner records a choice and stays away afterwards. Nothing beyond the
+// essentials is loaded until there is a stored "all" — so the page is
+// compliant by doing nothing, rather than by promising to.
+(function () {
+  var KEY = 'bpc-cookie-choice';
+  var box = document.getElementById('cookies');
+  var saved = null;
+  try { saved = localStorage.getItem(KEY); } catch (e) { /* blocked storage */ }
+
+  if (!saved) box.hidden = false;
+
+  box.addEventListener('click', function (ev) {
+    var btn = ev.target.closest('button[data-choice]');
+    if (!btn) return;
+    try { localStorage.setItem(KEY, btn.dataset.choice); } catch (e) {}
+    box.hidden = true;
+    if (btn.dataset.choice === 'all') loadOptional();
+  });
+
+  if (saved === 'all') loadOptional();
+
+  // Where the Meta pixel and anything else non-essential will go. Called only
+  // with consent, so adding a tag here cannot leak before the choice is made.
+  function loadOptional() { /* analytics go here */ }
+})();
+</script>
 </body>
 </html>
