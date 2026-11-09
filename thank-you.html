@@ -189,16 +189,22 @@
     document.getElementById('headline').textContent = many
       ? 'Your vouchers are ready.' : 'Your voucher is ready.';
 
+    // Only claim an email was sent if one actually was. Saying "we've emailed
+    // it" when nothing left the building sends people hunting through spam
+    // folders for a message that does not exist.
     var next;
     if (d.delivery_method === 'print') {
       next = 'Nothing has been sent to ' + esc(d.recipient_name || 'the recipient') +
              '. Print or hand over the code' + (many ? 's' : '') + ' below whenever you like.';
     } else if (d.delivery_method === 'scheduled' && d.deliver_at) {
-      next = 'We’ll email the gift to ' + esc(d.recipient_email) +
-             ' on ' + esc(day(d.deliver_at)) + '. Your own copy is on its way now.';
-    } else {
+      next = 'The gift goes to ' + esc(d.recipient_email) + ' on ' + esc(day(d.deliver_at)) +
+             '. The code' + (many ? 's are' : ' is') + ' below in the meantime — keep this page.';
+    } else if (d.emailed) {
       next = 'We’ve emailed the gift to ' + esc(d.recipient_email) +
              ', and a copy to you at ' + esc(d.buyer_email) + '.';
+    } else {
+      next = 'Your voucher is below. We’ll send it to ' + esc(d.recipient_email) +
+             ' shortly — save this page or the code in the meantime.';
     }
 
     var cards = d.vouchers.map(function (v, i) {
