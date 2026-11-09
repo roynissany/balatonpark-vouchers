@@ -220,6 +220,16 @@
       </aside>
 
     </form>
+
+    <section id="paysection" hidden style="margin-top:8px">
+      <h2 class="sec" style="margin-top:0"><i class="rule"></i>5 · Payment</h2>
+      <p id="payTotal" style="margin:0 0 22px;font-size:17px;font-weight:300;color:rgba(245,247,251,.72)"></p>
+      <div id="payment"></div>
+      <p style="margin:22px 0 0;font-size:13px;font-weight:300;line-height:1.7;color:rgba(245,247,251,.60)">
+        Card details go straight to Stripe — they never touch our servers.
+        <button type="button" id="backToForm" style="background:none;border:none;color:var(--pale);
+          font-size:13px;font-weight:500;cursor:pointer;padding:6px 4px;min-height:44px">Change my order</button></p>
+    </section>
   </main>
 </div>
 
@@ -503,12 +513,22 @@
     }).then(function (res) {
       return res.json().then(function (body) { return { ok: res.ok, body: body }; });
     }).then(function (r) {
-      if (!r.ok || !r.body.checkout_url) {
+      if (!r.ok) {
         throw new Error(r.body && r.body.error === 'payments_not_configured'
           ? 'Card payments are not switched on yet. Please try again shortly.'
           : 'We could not start the payment. Nothing has been charged.');
       }
-      window.location.href = r.body.checkout_url;
+      // Preferred: the card form opens on this page. If no publishable key is
+      // configured the server hands back a hosted URL instead, and we send
+      // them there rather than failing.
+      if (r.body.client_secret && r.body.publishable_key) {
+        return mountPayment(r.body);
+      }
+      if (r.body.checkout_url) {
+        window.location.href = r.body.checkout_url;
+        return;
+      }
+      throw new Error('We could not start the payment. Nothing has been charged.');
     }).catch(function (e) {
       fail(e instanceof TypeError
         ? 'Could not reach the server. Check your connection and try again — nothing has been charged.'
@@ -516,6 +536,64 @@
       btn.disabled = false;
       btn.textContent = 'Pay with card';
     });
+  });
+
+  // ------------------------------------------------------ embedded payment
+
+  var stripeJs = null;
+  function loadStripeJs() {
+    if (stripeJs) return stripeJs;
+    stripeJs = new Promise(function (resolve, reject) {
+      if (window.Stripe) return resolve(window.Stripe);
+      var s = document.createElement('script');
+      s.src = 'https://js.stripe.com/v3/';
+      s.onload = function () { window.Stripe ? resolve(window.Stripe) : reject(new Error('stripe')); };
+      s.onerror = function () { reject(new Error('stripe')); };
+      document.head.appendChild(s);
+    });
+    return stripeJs;
+  }
+
+  var mounted = null;
+
+  function mountPayment(res) {
+    return loadStripeJs().then(function (Stripe) {
+      // Tearing down any previous form first: leaving two mounted at once
+      // puts the buyer in front of a stale amount.
+      if (mounted) { try { mounted.destroy(); } catch (e) {} mounted = null; }
+
+      $('#payTotal').textContent = 'Paying ' + money(res.total_cents) +
+        (res.discount_cents ? ' — ' + money(res.discount_cents) + ' off' : '') + '.';
+      $('#paysection').hidden = false;
+      $('#buy').style.display = 'none';
+
+      return Stripe(res.publishable_key)
+        .initEmbeddedCheckout({ clientSecret: res.client_secret })
+        .then(function (checkout) {
+          mounted = checkout;
+          checkout.mount('#payment');
+          $('#paysection').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
+    }).catch(function () {
+      $('#paysection').hidden = true;
+      $('#buy').style.display = '';
+      fail('We could not open the card form. Nothing has been charged — please try again.');
+      var btn = $('#pay');
+      btn.disabled = false;
+      btn.textContent = 'Pay with card';
+    });
+  }
+
+  $('#backToForm').addEventListener('click', function () {
+    // The order they go back to adjust is abandoned, not cancelled: it stays
+    // pending and unpaid, and a fresh one is created when they pay.
+    if (mounted) { try { mounted.destroy(); } catch (e) {} mounted = null; }
+    $('#paysection').hidden = true;
+    $('#buy').style.display = '';
+    var btn = $('#pay');
+    btn.disabled = false;
+    btn.textContent = 'Pay with card';
+    $('#buy').scrollIntoView({ behavior: 'smooth', block: 'start' });
   });
 
   // Hungary is UTC+1, UTC+2 between the last Sundays of March and October.
