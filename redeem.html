@@ -156,7 +156,7 @@
     <a href="https://balatonpark.com" target="_blank" rel="noopener" style="display:inline-flex">
       <img src="bpc-logo.svg" alt="Balaton Park Circuit" style="height:22px;width:auto;opacity:.75"></a>
     <span style="display:flex;flex-wrap:wrap;gap:24px">
-      <a href="https://balatonpark.com" target="_blank" rel="noopener">balatonpark.com</a>
+      <a href="https://balatonpark.com" target="_blank" rel="noopener">BalatonPark.com</a>
       <a href="https://www.balatonparkcircuit.com/tc" target="_blank" rel="noopener">Terms</a>
       <a href="https://www.balatonparkcircuit.com/privacy-policy" target="_blank" rel="noopener">Privacy</a>
       <a href="mailto:info@balatonparkcircuit.com">Contact us</a>
@@ -239,7 +239,7 @@
       '<p class="err" id="e1" hidden></p>' +
       '<button type="button" class="go lift" id="goBtn">Continue</button>' +
       '<p style="margin:20px 0 0;font-size:13px;font-weight:300;line-height:1.7;color:rgba(245,247,251,.60)">' +
-        'Lost the code? <a href="mailto:info@balatonparkcircuit.com?subject=Lost%20voucher%20code">Email us</a> ' +
+        'Lost the code? <a href="mailto:info@balatonparkcircuit.com?subject=Lost%20Voucher%20Code">Email us</a> ' +
         'with the buyer’s name and we’ll find it.</p>');
     view.append(el('p', 'up', 'Enter the code from your gift card. You’ll choose your track days next.'));
     view.firstChild.style.cssText = 'margin:0 0 32px;font-size:17px;font-weight:300;color:rgba(245,247,251,.72)';
@@ -268,7 +268,9 @@
 
   function lookup(raw, btn) {
     var code = tidy(raw);
-    if (!code || code.length < 8) {
+    // "DEMO" is a permanently valid code for showing the flow; it is shorter
+    // than a real voucher, so it has to skip the length check.
+    if (code !== 'DEMO' && (!code || code.length < 8)) {
       document.getElementById('code').setAttribute('aria-invalid', 'true');
       return showErr('e1', 'That code looks too short. It’s twelve characters, like BPC-ABCD-1234.');
     }
