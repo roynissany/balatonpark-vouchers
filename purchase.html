@@ -534,30 +534,34 @@
 
     var deliverAt = null;
     if (deliveryMode === 'date') {
-      var d = $('#senddate').value, t = $('#sendtime').value || '08:00';
+      // Named clock, not t: a variable called t here is hoisted over the
+      // whole handler and leaves the translator undefined from its first line.
+      var d = $('#senddate').value, clock = $('#sendtime').value || '08:00';
       if (!d) return fail(t('buy.errDate'), $('#senddate'));
       // The field is Budapest time; send an explicit offset so the server is
       // not left guessing which clock the buyer meant.
-      var when = new Date(d + 'T' + t + ':00');
+      var when = new Date(d + 'T' + clock + ':00');
       if (isNaN(when.getTime()) || when.getTime() < Date.now()) {
         return fail(t('buy.errPast'), $('#senddate'));
       }
-      deliverAt = d + 'T' + t + ':00' + budapestOffset(when);
+      deliverAt = d + 'T' + clock + ':00' + budapestOffset(when);
     }
 
     var btn = $('#pay');
     btn.disabled = true;
-    btn.textContent = t('buy.paying');
 
-    // Validate the card fields before creating anything server-side, so a
-    // mistyped card never leaves a stray order behind.
-    var ready = pay.elements
-      ? pay.elements.submit().then(function (r) {
-          if (r.error) throw new Error(r.error.message || t('buy.errCard'));
-        })
-      : Promise.resolve();
-
-    ready.then(function () {
+    // Everything below runs inside a promise, so a thrown error always lands
+    // in the catch at the end. Thrown outside one it would leave the button
+    // disabled with no message — a Pay press that hangs for good.
+    Promise.resolve().then(function () {
+      btn.textContent = t('buy.paying');
+      // Validate the card fields before creating anything server-side, so a
+      // mistyped card never leaves a stray order behind.
+      if (!pay.elements) return;
+      return pay.elements.submit().then(function (r) {
+        if (r.error) throw new Error(r.error.message || t('buy.errCard'));
+      });
+    }).then(function () {
     return fetch(API + '/checkout', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -600,7 +604,7 @@
       throw new Error(t('buy.errStart'));
     });
     }).catch(function (e) {
-      fail(e instanceof TypeError ? t('buy.errNet') : e.message);
+      fail(e instanceof TypeError ? t('buy.errNet') : (e && e.message) || t('buy.errStart'));
       btn.disabled = false;
       btn.textContent = t('buy.pay');
     });
