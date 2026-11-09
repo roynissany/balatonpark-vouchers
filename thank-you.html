@@ -1,0 +1,249 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Thank you — Balaton Park Circuit</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="bpc-logo.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Inter:wght@300;400;500;600&display=swap">
+<style>
+  :root{--ink:#0A1422;--blue:#427AB7;--pale:#A8CEF0;--text:#F5F7FB;
+        --cond:'Barlow Condensed',sans-serif}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--ink);color:var(--text);
+    font-family:Inter,-apple-system,system-ui,sans-serif;-webkit-font-smoothing:antialiased;
+    overflow-x:hidden;display:flex;flex-direction:column;min-height:100vh}
+  a{color:var(--pale)} a:hover{color:var(--text)}
+  h1,h2{font-family:var(--cond);font-weight:800;text-transform:uppercase;margin:0}
+  .pad{padding-left:clamp(20px,5vw,56px);padding-right:clamp(20px,5vw,56px)}
+  .wrap{width:100%;max-width:920px;margin:0 auto}
+
+  @keyframes fadeUp{from{opacity:0;transform:translateY(40px)}to{opacity:1;transform:none}}
+  @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+  @keyframes kenburns{from{transform:scale(1.05)}to{transform:scale(1.17)}}
+  @keyframes rule{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+  @keyframes glow{0%,100%{box-shadow:0 0 0 0 rgba(66,122,183,0)}50%{box-shadow:0 0 0 6px rgba(66,122,183,.14)}}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .up{animation:fadeUp .95s cubic-bezier(.22,.61,.36,1) both}
+  .fi{animation:fadeIn 1.3s ease both}
+  .d1{animation-delay:.12s}.d2{animation-delay:.26s}.d3{animation-delay:.4s}
+  .kb{animation:kenburns 28s ease-out both alternate infinite}
+  .rule{transform-origin:left;animation:rule .8s cubic-bezier(.22,.61,.36,1) both}
+  .glow{animation:glow 3s ease-in-out infinite}
+  .lift{transition:transform .35s cubic-bezier(.22,.61,.36,1),background .25s,border-color .25s,box-shadow .35s}
+  .lift:hover{transform:translateY(-4px);box-shadow:0 16px 34px rgba(0,0,0,.42)}
+  @media (prefers-reduced-motion:reduce){
+    .up,.fi,.kb,.rule,.glow{animation:none!important;opacity:1!important;transform:none!important}
+    .lift{transition:none!important}
+  }
+
+  .hero{position:relative;min-height:clamp(250px,36vw,340px);display:flex;
+    flex-direction:column;justify-content:space-between;overflow:hidden}
+  .hero img.bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+  .hero .veil{position:absolute;inset:0;
+    background:linear-gradient(180deg,rgba(10,20,34,.66) 0%,rgba(10,20,34,.36) 36%,rgba(10,20,34,.97) 100%)}
+  h1{font-size:clamp(36px,7vw,62px);line-height:.96}
+  .eyebrow{display:flex;align-items:center;gap:14px;margin:0 0 18px;font-size:12px;
+    font-weight:600;letter-spacing:.24em;text-transform:uppercase;color:rgba(245,247,251,.9)}
+  .eyebrow i{display:inline-block;width:40px;height:2px;background:var(--blue)}
+
+  .panel{padding:clamp(24px,4vw,36px);background:rgba(255,255,255,.04);
+    border:1px solid rgba(255,255,255,.10)}
+  .codebox{display:flex;flex-wrap:wrap;gap:14px;align-items:stretch}
+  .code{flex:1 1 300px;display:flex;align-items:center;padding:20px clamp(16px,3vw,26px);
+    background:var(--ink);border:1px dashed var(--blue);font-family:var(--cond);
+    font-size:clamp(26px,6vw,38px);font-weight:800;letter-spacing:.14em;line-height:1;
+    color:var(--pale);word-break:break-all}
+  .copy{min-height:62px;padding:0 28px;background:rgba(255,255,255,.06);color:var(--text);
+    border:1px solid rgba(255,255,255,.22);font-family:Inter,sans-serif;font-size:15px;
+    font-weight:500;cursor:pointer}
+  dl.meta{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:20px;
+    margin:30px 0 0;padding-top:26px;border-top:1px solid rgba(255,255,255,.10)}
+  dl.meta dt{font-size:11px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;
+    color:rgba(245,247,251,.60)}
+  dl.meta dd{margin:8px 0 0;font-size:15px;font-weight:300}
+  .cta{display:inline-flex;align-items:center;justify-content:center;min-height:62px;
+    padding:0 clamp(24px,5vw,40px);text-decoration:none;font-family:var(--cond);
+    font-weight:800;font-size:clamp(18px,3.4vw,22px);letter-spacing:.04em;text-transform:uppercase}
+  .cta.primary{background:var(--blue);color:#fff}
+  .cta.ghost{background:transparent;color:var(--text);border:1px solid rgba(255,255,255,.5)}
+  .spinner{width:26px;height:26px;border:2px solid rgba(168,206,240,.28);
+    border-top-color:var(--pale);border-radius:50%;animation:spin .9s linear infinite}
+  .notice{padding:22px 26px;background:rgba(66,122,183,.12);border:1px solid rgba(66,122,183,.45);
+    font-size:15px;font-weight:300;line-height:1.7;color:rgba(245,247,251,.88)}
+  footer{border-top:1px solid rgba(255,255,255,.10);margin-top:auto}
+  footer .inner{display:flex;flex-wrap:wrap;gap:20px;align-items:center;
+    justify-content:space-between;padding-top:26px;padding-bottom:26px;
+    font-size:13px;color:rgba(245,247,251,.55)}
+  footer a{text-decoration:none;color:rgba(245,247,251,.55)}
+  footer a:hover{color:var(--text)}
+</style>
+</head>
+<body>
+
+<section class="hero">
+  <img class="bg kb" src="garage.jpg" alt="">
+  <div class="veil"></div>
+  <div class="fi wrap pad" style="position:relative;padding-top:30px">
+    <a href="index.html" style="display:inline-flex"><img src="bpc-logo.svg" alt="Balaton Park Circuit" style="height:clamp(26px,4vw,30px);width:auto"></a>
+  </div>
+  <div class="wrap pad" style="position:relative;padding-bottom:clamp(32px,5vw,42px)">
+    <p class="eyebrow up"><i class="rule"></i><span id="eyebrow">Payment received</span></p>
+    <h1 class="up d1" id="headline">Thank you.</h1>
+  </div>
+</section>
+
+<main class="wrap pad" style="padding-top:clamp(32px,5vw,46px);padding-bottom:clamp(48px,8vw,84px)">
+  <div id="body"></div>
+</main>
+
+<footer>
+  <div class="inner wrap pad">
+    <a href="https://balatonpark.com" target="_blank" rel="noopener" style="display:inline-flex">
+      <img src="bpc-logo.svg" alt="Balaton Park Circuit" style="height:22px;width:auto;opacity:.75"></a>
+    <span style="display:flex;flex-wrap:wrap;gap:24px">
+      <a href="https://balatonpark.com" target="_blank" rel="noopener">balatonpark.com</a>
+      <a href="https://www.balatonparkcircuit.com/tc" target="_blank" rel="noopener">Terms</a>
+      <a href="mailto:info@balatonparkcircuit.com">Contact us</a>
+    </span>
+  </div>
+</footer>
+
+<script>
+(function () {
+  'use strict';
+  var API = 'https://hbosxvmprhzrheilwwfv.supabase.co/functions/v1';
+  var orderId = new URLSearchParams(location.search).get('order') || '';
+  var body = document.getElementById('body');
+
+  var esc = function (s) { return String(s == null ? '' : s)
+    .replace(/[&<>"]/g, function (c) {
+      return { '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[c]; }); };
+  var money = function (c) { return '€' + (Number(c || 0) / 100).toLocaleString('en-IE',
+    { minimumFractionDigits: 0, maximumFractionDigits: 2 }); };
+  var day = function (s) { return s ? new Date(s).toLocaleDateString('en-GB',
+    { day: 'numeric', month: 'long', year: 'numeric' }) : ''; };
+
+  if (!orderId) return fail('We could not tell which order this is. If you have just paid, check your inbox — your confirmation has the voucher code.');
+
+  waiting('Confirming your payment…');
+  poll(0);
+
+  // Stripe returns the buyer the instant the card clears, which is usually
+  // before the webhook has finished minting the voucher. Wait it out rather
+  // than telling someone who has just paid that nothing happened.
+  function poll(attempt) {
+    fetch(API + '/order-status', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ order_id: orderId })
+    }).then(function (r) {
+      return r.json().then(function (d) { return { ok: r.ok, d: d }; });
+    }).then(function (r) {
+      if (!r.ok) {
+        if (r.d.error === 'not_found' && attempt < 12) return retry(attempt);
+        throw new Error('lookup');
+      }
+      if (r.d.status === 'paid' || r.d.status === 'refunded') return show(r.d);
+      if (attempt < 12) return retry(attempt);
+      waiting('Your payment went through, but the voucher is taking longer than usual to appear. ' +
+              'It will arrive by email shortly — nothing is lost.', true);
+    }).catch(function () {
+      if (attempt < 12) return retry(attempt);
+      fail('We could not reach the server to confirm your order. Your payment is safe — ' +
+           'check your inbox, or contact us with this page’s address.');
+    });
+  }
+  function retry(attempt) { setTimeout(function () { poll(attempt + 1); }, 1500); }
+
+  function waiting(text, done) {
+    body.innerHTML =
+      '<div class="panel up" style="display:flex;align-items:center;gap:18px">' +
+        (done ? '' : '<div class="spinner"></div>') +
+        '<p style="margin:0;font-size:16px;font-weight:300;line-height:1.7;color:rgba(245,247,251,.85)">' +
+          esc(text) + '</p></div>';
+  }
+
+  function fail(text) {
+    document.getElementById('eyebrow').textContent = 'Something went sideways';
+    document.getElementById('headline').textContent = 'Hold on.';
+    body.innerHTML =
+      '<div class="notice up">' + esc(text) +
+      ' <a href="mailto:info@balatonparkcircuit.com?subject=Gift%20voucher%20order">Contact us</a>' +
+      ' and we will sort it.</div>';
+  }
+
+  function show(d) {
+    if (d.status === 'refunded') {
+      document.getElementById('eyebrow').textContent = 'Order refunded';
+      document.getElementById('headline').textContent = 'This order was refunded.';
+      body.innerHTML = '<div class="notice up">The voucher from this order is no longer valid. ' +
+        'If that is unexpected, <a href="mailto:info@balatonparkcircuit.com">contact us</a>.</div>';
+      return;
+    }
+
+    var many = d.vouchers.length > 1;
+    document.getElementById('headline').textContent = many
+      ? 'Your vouchers are ready.' : 'Your voucher is ready.';
+
+    var next;
+    if (d.delivery_method === 'print') {
+      next = 'Nothing has been sent to ' + esc(d.recipient_name || 'the recipient') +
+             '. Print or hand over the code' + (many ? 's' : '') + ' below whenever you like.';
+    } else if (d.delivery_method === 'scheduled' && d.deliver_at) {
+      next = 'We’ll email the gift to ' + esc(d.recipient_email) +
+             ' on ' + esc(day(d.deliver_at)) + '. Your own copy is on its way now.';
+    } else {
+      next = 'We’ve emailed the gift to ' + esc(d.recipient_email) +
+             ', and a copy to you at ' + esc(d.buyer_email) + '.';
+    }
+
+    var cards = d.vouchers.map(function (v, i) {
+      return '<div class="panel up d' + Math.min(i + 1, 3) + '" style="margin-top:' + (i ? '16px' : '0') + '">' +
+        '<p style="margin:0 0 14px;font-size:12px;font-weight:600;letter-spacing:.18em;' +
+          'text-transform:uppercase;color:rgba(245,247,251,.72)">' +
+          esc(v.package) + (many ? ' · voucher ' + (i + 1) + ' of ' + d.vouchers.length : '') + '</p>' +
+        '<div class="codebox">' +
+          '<span class="code glow">' + esc(v.code) + '</span>' +
+          '<button type="button" class="copy lift" data-code="' + esc(v.code) + '">Copy code</button>' +
+        '</div>' +
+        '<dl class="meta">' +
+          '<div><dt>Covers</dt><dd>' + v.sessions_total +
+            ' session' + (v.sessions_total > 1 ? 's' : '') + '</dd></div>' +
+          '<div><dt>Valid until</dt><dd>' + esc(day(v.expires_on)) + '</dd></div>' +
+          '<div><dt>Redeem at</dt><dd><a href="redeem.html?code=' + encodeURIComponent(v.code) +
+            '">gifts.balatonpark.com</a></dd></div>' +
+        '</dl></div>';
+    }).join('');
+
+    body.innerHTML =
+      '<p class="up" style="margin:0 0 28px;font-size:17px;font-weight:300;line-height:1.7;' +
+        'color:rgba(245,247,251,.82)">' + next + '</p>' +
+      cards +
+      '<div class="up d3" style="display:flex;flex-wrap:wrap;gap:14px;margin:34px 0 0">' +
+        '<a class="cta primary lift" href="redeem.html">Redeem now</a>' +
+        '<a class="cta ghost lift" href="index.html">Buy another</a>' +
+      '</div>' +
+      '<p class="up d3" style="margin:26px 0 0;font-size:13px;font-weight:300;line-height:1.7;' +
+        'color:rgba(245,247,251,.62)">Paid ' + money(d.total_cents) + ' on ' + esc(day(d.paid_at)) +
+        '. Keep this page or the email — the code' + (many ? 's are' : ' is') +
+        ' what gets redeemed. Lost it? <a href="mailto:info@balatonparkcircuit.com?subject=Gift%20voucher%20code">Contact us</a>.</p>';
+
+    body.addEventListener('click', function (ev) {
+      var btn = ev.target.closest('.copy');
+      if (!btn) return;
+      var done = function () { btn.textContent = 'Copied'; setTimeout(function () { btn.textContent = 'Copy code'; }, 2200); };
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(btn.dataset.code).then(done, function () { btn.textContent = 'Select it manually'; });
+      } else {
+        btn.textContent = 'Select it manually';
+      }
+    });
+  }
+})();
+</script>
+</body>
+</html>
