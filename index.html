@@ -62,8 +62,11 @@
   /* "Ajándékutalványok" is far wider than "Gift vouchers" and on a phone it
      ran right up under the language buttons. Guarantee a gap and tighten the
      tracking so the word keeps clear of them. */
+  /* The hero spaces its header row and its text block apart, so a margin on
+     the header row is simply absorbed. Giving the hero the full small
+     viewport is what actually opens a gap under the language buttons. */
   @media (max-width:760px){
-    .headrow { margin-bottom:30px }
+    .hero { min-height:100svh }
     .eyebrow { letter-spacing:.16em }
   }
   .pad { padding-left:clamp(20px,5vw,56px); padding-right:clamp(20px,5vw,56px) }
