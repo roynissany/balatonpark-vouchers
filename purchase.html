@@ -265,41 +265,31 @@
 
   // ------------------------------------------------------------ render
 
-  function packageCard(p) {
-    var face = FACE[p.code] || { big: String(p.session_count || ''), kind: 'sessions' };
-    var n = qty[p.code] || 0;
-    var pct = discountFor(n);
-    var now = Math.round(p.price_cents * (1 - pct / 100));
+  // The cards are built once and then patched. Rebuilding them on every click
+  // restarted the entrance animation on all of them, which read as a flash.
+  var built = false;
+  var cardFor = {};
 
-    var b = el('button', 'card lift up');
-    b.type = 'button';
-    b.setAttribute('aria-pressed', n > 0 ? 'true' : 'false');
-    b.innerHTML =
-      '<span class="big">' + esc(face.big) + '</span>' +
-      '<span class="kind">' + esc(face.kind) + '</span>' +
-      '<span class="prices"><span class="now">' + money(now) + '</span>' +
-      (pct ? '<span class="was">' + money(p.price_cents) + '</span>' : '') + '</span>' +
-      (pct ? '<span class="off">' + pct + '% off</span>' : '');
-    b.addEventListener('click', function () { toggle(p.code); });
-    return b;
-  }
-
-  function renderCards() {
+  function buildCards() {
     var shop = cat.packages.filter(function (p) { return !p.includes_room; });
-    $('#cards').replaceChildren.apply($('#cards'), shop.map(packageCard));
+    $('#cards').replaceChildren.apply($('#cards'), shop.map(function (p) {
+      var face = FACE[p.code] || { big: String(p.session_count || ''), kind: 'sessions' };
+      var b = el('button', 'card lift up');
+      b.type = 'button';
+      b.innerHTML =
+        '<span class="big">' + esc(face.big) + '</span>' +
+        '<span class="kind">' + esc(face.kind) + '</span>' +
+        '<span class="prices"><span class="now"></span><span class="was" hidden></span></span>' +
+        '<span class="off" hidden></span>';
+      b.addEventListener('click', function () { toggle(p.code); });
+      cardFor[p.code] = b;
+      return b;
+    }));
 
     var stay = cat.packages.filter(function (p) { return p.includes_room; })[0];
     var box = $('#hotelCard');
-    if (!stay) { box.hidden = true; return; }
+    if (!stay) { box.hidden = true; built = true; return; }
 
-    var n = qty[stay.code] || 0;
-    var pct = discountFor(n);
-    var now = Math.round(stay.price_cents * (1 - pct / 100));
-    var vip = cat.packages.filter(function (p) { return p.code === 'vip'; })[0];
-    var note = pct ? pct + '% volume discount'
-      : (vip ? money(stay.price_cents - vip.price_cents) + ' over the VIP day' : '');
-
-    box.setAttribute('aria-pressed', n > 0 ? 'true' : 'false');
     box.innerHTML =
       '<span class="shot"><img src="hotel-room.jpg" alt="" aria-hidden="true" loading="lazy"></span>' +
       '<span class="veil"></span>' +
@@ -309,12 +299,47 @@
         '<span style="font-family:var(--cond);font-weight:800;font-size:clamp(28px,5vw,44px);line-height:.96;text-transform:uppercase">VIP Day + 1 night<br>at Balaton Park Hotel</span>' +
         '<span style="font-size:14px;font-weight:300;line-height:1.7;color:rgba(245,247,251,.82);max-width:480px">The full VIP track day, then a room looking straight down the main straight. Double room with breakfast for one — breakfast for a second guest is extra.</span>' +
         '<span style="display:flex;flex-wrap:wrap;align-items:baseline;gap:14px;margin-top:10px">' +
-          '<span style="font-family:var(--cond);font-weight:800;font-size:clamp(38px,7vw,54px);line-height:1;color:var(--pale)">' + money(now) + '</span>' +
-          (pct ? '<span style="font-family:var(--cond);font-weight:700;font-size:26px;color:rgba(245,247,251,.45);text-decoration:line-through">' + money(stay.price_cents) + '</span>' : '') +
-          '<span style="font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:rgba(245,247,251,.65)">' + esc(note) + '</span>' +
+          '<span class="h-now" style="font-family:var(--cond);font-weight:800;font-size:clamp(38px,7vw,54px);line-height:1;color:var(--pale)"></span>' +
+          '<span class="h-was" hidden style="font-family:var(--cond);font-weight:700;font-size:26px;color:rgba(245,247,251,.45);text-decoration:line-through"></span>' +
+          '<span class="h-note" style="font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:rgba(245,247,251,.65)"></span>' +
         '</span>' +
       '</span>';
-    box.onclick = function () { toggle(stay.code); };
+    box.addEventListener('click', function () { toggle(stay.code); });
+    built = true;
+  }
+
+  function paintCards() {
+    cat.packages.forEach(function (p) {
+      var n = qty[p.code] || 0;
+      var pct = discountFor(n);
+      var now = Math.round(p.price_cents * (1 - pct / 100));
+
+      if (p.includes_room) {
+        var box = $('#hotelCard');
+        if (box.hidden) return;
+        var vip = cat.packages.filter(function (x) { return x.code === 'vip'; })[0];
+        box.setAttribute('aria-pressed', n > 0 ? 'true' : 'false');
+        box.querySelector('.h-now').textContent = money(now);
+        var was = box.querySelector('.h-was');
+        was.hidden = !pct;
+        was.textContent = money(p.price_cents);
+        box.querySelector('.h-note').textContent = pct
+          ? pct + '% volume discount'
+          : (vip ? money(p.price_cents - vip.price_cents) + ' over the VIP day' : '');
+        return;
+      }
+
+      var card = cardFor[p.code];
+      if (!card) return;
+      card.setAttribute('aria-pressed', n > 0 ? 'true' : 'false');
+      card.querySelector('.now').textContent = money(now);
+      var w = card.querySelector('.was');
+      w.hidden = !pct;
+      w.textContent = money(p.price_cents);
+      var off = card.querySelector('.off');
+      off.hidden = !pct;
+      off.textContent = pct + '% off';
+    });
   }
 
   function renderSummary() {
@@ -402,7 +427,11 @@
     }));
   }
 
-  function draw() { renderCards(); renderSummary(); }
+  function draw() {
+    if (!built) buildCards();
+    paintCards();
+    renderSummary();
+  }
 
   function toggle(code) { qty[code] = (qty[code] || 0) > 0 ? 0 : 1; draw(); }
   function bump(code, by) {
