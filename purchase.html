@@ -221,15 +221,8 @@
           <span style="font-family:var(--cond);font-weight:800;font-size:24px;text-transform:uppercase">Total</span>
           <span style="font-family:var(--cond);font-weight:800;font-size:40px;line-height:1;color:var(--pale)" id="total">€0</span>
         </div>
+        <div id="payment" style="margin-bottom:20px"></div>
         <button type="submit" class="pay lift" id="pay">Pay with card</button>
-
-        <div id="payWrap" hidden>
-          <div id="payment"></div>
-          <button type="button" class="pay lift" id="confirm" style="margin-top:18px">Pay now</button>
-          <button type="button" id="backToForm" style="width:100%;margin-top:10px;background:none;
-            border:none;color:var(--pale);font-size:13px;font-weight:500;cursor:pointer;min-height:44px">
-            Change my order</button>
-        </div>
 
         <p style="margin:16px 0 0;font-size:12px;font-weight:300;line-height:1.7;color:rgba(245,247,251,.60)">
           We never see your card details.<br><span id="codeNote"></span><br>
@@ -423,6 +416,8 @@
     $('#savingAmt').textContent = '−' + money(gross - total);
     $('#total').textContent = money(total);
     $('#pay').disabled = !chosen.length;
+    $('#pay').textContent = total ? 'Pay ' + money(total) : 'Pay with card';
+    syncPaymentForm(total);
     $('#codeNote').textContent = count > 1
       ? 'You get ' + count + ' separate voucher codes, one per voucher.'
       : 'Your code is issued the moment payment clears.';
@@ -506,9 +501,18 @@
 
     var btn = $('#pay');
     btn.disabled = true;
-    btn.textContent = 'Taking you to payment…';
+    btn.textContent = 'Paying…';
 
-    fetch(API + '/checkout', {
+    // Validate the card fields before creating anything server-side, so a
+    // mistyped card never leaves a stray order behind.
+    var ready = pay.elements
+      ? pay.elements.submit().then(function (r) {
+          if (r.error) throw new Error(r.error.message || 'Check your card details.');
+        })
+      : Promise.resolve();
+
+    ready.then(function () {
+    return fetch(API + '/checkout', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -529,17 +533,28 @@
           ? 'Card payments are not switched on yet. Please try again shortly.'
           : 'We could not start the payment. Nothing has been charged.');
       }
-      // Preferred: the card form opens on this page. If no publishable key is
-      // configured the server hands back a hosted URL instead, and we send
-      // them there rather than failing.
-      if (r.body.client_secret && r.body.publishable_key) {
-        return mountPayment(r.body);
+      // The card form on this page takes it from here. Without a publishable
+      // key the server hands back a hosted URL instead, and we send them
+      // there rather than failing.
+      if (r.body.client_secret && pay.stripe && pay.elements) {
+        return pay.stripe.confirmPayment({
+          elements: pay.elements,
+          clientSecret: r.body.client_secret,
+          confirmParams: { return_url: r.body.return_url }
+        }).then(function (c) {
+          // Reached only when the payment did NOT go through; a success
+          // leaves the page for the return URL.
+          throw new Error(c.error && (c.error.type === 'card_error' || c.error.type === 'validation_error')
+            ? c.error.message
+            : 'That payment did not go through. Nothing has been charged — try again or use another card.');
+        });
       }
       if (r.body.checkout_url) {
         window.location.href = r.body.checkout_url;
         return;
       }
       throw new Error('We could not start the payment. Nothing has been charged.');
+    });
     }).catch(function (e) {
       fail(e instanceof TypeError
         ? 'Could not reach the server. Check your connection and try again — nothing has been charged.'
@@ -602,68 +617,39 @@
     }
   };
 
-  var pay = { stripe: null, elements: null, element: null, returnUrl: null };
+  var pay = { stripe: null, elements: null, element: null, ready: false };
 
-  function mountPayment(res) {
-    return loadStripeJs().then(function (Stripe) {
-      // Tear down any previous form: two mounted at once would leave the
-      // buyer looking at a stale amount.
-      if (pay.element) { try { pay.element.destroy(); } catch (e) {} }
+  // The card form is drawn before any order exists: Stripe is told the
+  // amount up front and the payment intent is only created when Pay is
+  // pressed. That keeps the form visible from the first paint, and stops the
+  // database filling with pending orders from people who never pay.
+  function syncPaymentForm(totalCents) {
+    if (!cat || !cat.stripe_publishable_key) return;
+    if (totalCents < 50) return;                    // Stripe's floor
 
-      pay.stripe = Stripe(res.publishable_key);
-      pay.elements = pay.stripe.elements({ clientSecret: res.client_secret, appearance: APPEARANCE });
+    if (pay.elements) {
+      pay.elements.update({ amount: totalCents });
+      return;
+    }
+    if (pay.ready) return;                           // already being set up
+    pay.ready = true;
+
+    loadStripeJs().then(function (Stripe) {
+      pay.stripe = Stripe(cat.stripe_publishable_key);
+      pay.elements = pay.stripe.elements({
+        mode: 'payment',
+        amount: totalCents,
+        currency: (cat.currency || 'eur').toLowerCase(),
+        appearance: APPEARANCE
+      });
       pay.element = pay.elements.create('payment', { layout: 'tabs' });
-      pay.returnUrl = res.return_url;
-
-      $('#pay').hidden = true;
-      $('#payWrap').hidden = false;
-      $('#confirm').textContent = 'Pay ' + money(res.total_cents);
       pay.element.mount('#payment');
-      $('#payWrap').scrollIntoView({ behavior: 'smooth', block: 'center' });
     }).catch(function () {
-      resetPayment();
-      fail('We could not open the card form. Nothing has been charged — please try again.');
+      pay.ready = false;
+      // Without the card form the page still works: the server falls back to
+      // Stripe's hosted page and the Pay button sends them there.
     });
   }
-
-  function resetPayment() {
-    if (pay.element) { try { pay.element.destroy(); } catch (e) {} }
-    pay = { stripe: null, elements: null, element: null, returnUrl: null };
-    $('#payWrap').hidden = true;
-    $('#pay').hidden = false;
-    $('#pay').disabled = false;
-    $('#pay').textContent = 'Pay with card';
-    $('#confirm').disabled = false;
-  }
-
-  $('#backToForm').addEventListener('click', function () {
-    // The abandoned order stays pending and unpaid; paying creates a fresh
-    // one, so nothing has to be cancelled here.
-    resetPayment();
-    $('#buy').scrollIntoView({ behavior: 'smooth', block: 'start' });
-  });
-
-  $('#confirm').addEventListener('click', function () {
-    if (!pay.stripe) return;
-    var btn = $('#confirm');
-    btn.disabled = true;
-    btn.textContent = 'Paying…';
-    $('#err').hidden = true;
-
-    pay.stripe.confirmPayment({
-      elements: pay.elements,
-      confirmParams: { return_url: pay.returnUrl }
-    }).then(function (r) {
-      // We only get here when the payment did NOT go through; a success
-      // leaves the page for the return URL.
-      var m = r.error && (r.error.type === 'card_error' || r.error.type === 'validation_error')
-        ? r.error.message
-        : 'That payment did not go through. Nothing has been charged — try again or use another card.';
-      fail(m);
-      btn.disabled = false;
-      btn.textContent = 'Pay now';
-    });
-  });
 
   // Hungary is UTC+1, UTC+2 between the last Sundays of March and October.
   function budapestOffset(when) {
