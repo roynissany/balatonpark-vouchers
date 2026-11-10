@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title data-i18n-title="faq.title">Questions - Balaton Park Circuit gift vouchers</title>
+<meta name="description" content="Common questions about Balaton Park Circuit gift vouchers.">
+<link rel="icon" type="image/png" href="favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Inter:wght@300;400;500&display=swap">
+<style>
+  :root{--ink:#0A1422;--blue:#427AB7;--pale:#A8CEF0;--text:#F5F7FB;
+        --cond:'Barlow Condensed',sans-serif}
+  *{box-sizing:border-box}
+  /* An inline display: beats the hidden attribute otherwise. */
+  [hidden]{display:none!important}
+  body{margin:0;touch-action:manipulation;min-height:100vh;background:var(--ink);color:var(--text);
+       font-family:Inter,-apple-system,system-ui,sans-serif;-webkit-font-smoothing:antialiased;
+       overflow-x:hidden;display:flex;flex-direction:column}
+  a{color:var(--pale)}
+  .pad{padding-left:clamp(20px,5vw,56px);padding-right:clamp(20px,5vw,56px)}
+  .wrap{width:100%;max-width:860px;margin:0 auto}
+
+  @keyframes fadeUp{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:none}}
+  .up{animation:fadeUp .85s cubic-bezier(.22,.61,.36,1) both}
+  .d1{animation-delay:.10s}.d2{animation-delay:.22s}
+  @media (prefers-reduced-motion:reduce){ .up{animation:none!important;opacity:1!important;transform:none!important} }
+
+  header.top{border-bottom:1px solid rgba(255,255,255,.10)}
+  .headrow{display:flex;align-items:center;justify-content:space-between;gap:16px;
+           padding-top:28px;padding-bottom:24px}
+  .langpick{display:flex;gap:6px;flex:0 0 auto}
+  .langpick button{min-height:44px;min-width:52px;padding:0 14px;cursor:pointer;
+    background:rgba(10,20,34,.55);color:rgba(245,247,251,.72);
+    border:1px solid rgba(255,255,255,.28);border-radius:0;
+    font-family:var(--cond);font-weight:800;font-size:17px;letter-spacing:.08em;
+    transition:background .2s,color .2s,border-color .2s}
+  .langpick button:hover{color:var(--text);border-color:rgba(255,255,255,.55)}
+  .langpick button[aria-pressed=true]{background:var(--blue);color:#fff;border-color:var(--blue)}
+
+  main{flex:1;padding-top:clamp(40px,7vw,72px);padding-bottom:clamp(56px,9vw,96px)}
+  .eyebrow{display:flex;align-items:center;gap:16px;margin:0 0 18px;
+    font-size:11px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--pale)}
+  .eyebrow i{display:inline-block;width:40px;height:2px;background:var(--blue);font-style:normal}
+  h1{font-family:var(--cond);font-weight:800;text-transform:uppercase;
+     font-size:clamp(36px,7.5vw,62px);line-height:.96;margin:0}
+  .lede{margin:20px 0 0;font-size:clamp(15px,2.2vw,17px);font-weight:300;
+        line-height:1.7;color:rgba(245,247,251,.80);max-width:620px}
+
+  .qa{margin-top:clamp(36px,6vw,54px);border-top:1px solid rgba(255,255,255,.12)}
+  details{border-bottom:1px solid rgba(255,255,255,.12)}
+  summary{display:flex;align-items:flex-start;justify-content:space-between;gap:20px;
+    padding:22px 0;cursor:pointer;list-style:none;
+    font-family:var(--cond);font-weight:700;text-transform:uppercase;
+    font-size:clamp(18px,3.1vw,23px);line-height:1.2;letter-spacing:.02em;
+    transition:color .2s}
+  summary::-webkit-details-marker{display:none}
+  summary:hover{color:var(--pale)}
+  summary .mk{flex:0 0 auto;position:relative;width:16px;height:16px;margin-top:4px}
+  summary .mk::before,summary .mk::after{content:'';position:absolute;background:var(--blue);
+    transition:transform .3s cubic-bezier(.22,.61,.36,1),opacity .3s}
+  summary .mk::before{top:7px;left:0;width:16px;height:2px}
+  summary .mk::after{top:0;left:7px;width:2px;height:16px}
+  details[open] summary .mk::after{transform:rotate(90deg);opacity:0}
+  details[open] summary{color:var(--pale)}
+  .ans{padding:0 0 24px;max-width:640px;font-size:15px;font-weight:300;
+       line-height:1.75;color:rgba(245,247,251,.80)}
+  .ans a{text-underline-offset:3px}
+
+  .back{display:inline-flex;align-items:center;justify-content:center;margin-top:clamp(40px,6vw,56px);
+    min-height:60px;padding:0 34px;background:var(--blue);color:#fff;text-decoration:none;
+    font-family:var(--cond);font-weight:800;font-size:22px;letter-spacing:.04em;text-transform:uppercase;
+    transition:background .3s}
+  .back:hover{background:rgba(66,122,183,.5)}
+
+  footer{border-top:1px solid rgba(255,255,255,.10)}
+  footer .inner{display:flex;flex-wrap:wrap;gap:20px;align-items:center;
+    justify-content:space-between;padding-top:26px;padding-bottom:26px;
+    font-size:13px;color:rgba(245,247,251,.55)}
+  footer a{text-decoration:none;color:rgba(245,247,251,.55)}
+  footer a:hover{color:var(--text)}
+</style>
+<script src="i18n.js"></script>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap pad headrow">
+    <a href="index.html" style="display:inline-flex">
+      <img src="bpc-logo.svg" alt="Balaton Park Circuit" style="height:clamp(26px,4vw,34px);width:auto"></a>
+    <div id="langpick"></div>
+  </div>
+</header>
+
+<main class="wrap pad">
+  <p class="eyebrow up"><i></i><span data-i18n="faq.eyebrow">Gift vouchers</span></p>
+  <h1 class="up" data-i18n="faq.h1">Questions.</h1>
+  <p class="lede up d1" data-i18n="faq.lede">Everything worth knowing before you buy, and everything the person you give it to will want to know.</p>
+
+  <div class="qa up d2" id="qa"></div>
+
+  <a class="back" href="purchase.html" data-i18n="faq.cta">Buy a voucher</a>
+  <p style="margin:26px 0 0;font-size:13px;font-weight:300;color:rgba(245,247,251,.62)" id="askLine"></p>
+</main>
+
+<footer>
+  <div class="inner wrap pad">
+    <a href="https://balatonpark.com" target="_blank" rel="noopener" style="display:inline-flex">
+      <img src="bpc-logo.svg" alt="Balaton Park Circuit" style="height:22px;width:auto;opacity:.75"></a>
+    <span style="display:flex;flex-wrap:wrap;gap:24px">
+      <a href="https://balatonpark.com" target="_blank" rel="noopener" data-i18n="foot.site">BalatonPark.com</a>
+      <a href="faq.html" data-i18n="foot.faq">FAQ</a>
+      <a href="https://www.balatonparkcircuit.com/tc" target="_blank" rel="noopener" data-i18n="foot.terms">Terms</a>
+      <a href="https://www.balatonparkcircuit.com/privacy-policy" target="_blank" rel="noopener" data-i18n="foot.privacy">Privacy</a>
+      <a href="mailto:info@balatonparkcircuit.com" data-i18n="foot.contact">Contact us</a>
+    </span>
+  </div>
+</footer>
+
+<script>
+(function () {
+  // The list lives here rather than in the markup so one array drives both
+  // languages; i18n.t resolves each pair when the page is drawn.
+  var KEYS = ['how','dates','book','split','length','vip','hotel','delivery',
+              'lost','transfer','refund','bring','vat','moved'];
+  var t = i18n.t;
+
+  function paint() {
+    var terms = '<a href="https://www.balatonparkcircuit.com/tc" target="_blank" rel="noopener">' +
+                t('foot.terms').toLowerCase() + '</a>';
+    var contact = '<a href="mailto:info@balatonparkcircuit.com?subject=Gift%20Vouchers">' +
+                  t('foot.contact').toLowerCase() + '</a>';
+    document.getElementById('qa').innerHTML = KEYS.map(function (k) {
+      return '<details><summary>' + t('faq.' + k + '.q') +
+             '<span class="mk" aria-hidden="true"></span></summary>' +
+             '<div class="ans">' + t('faq.' + k + '.a', { terms: terms, contact: contact }) +
+             '</div></details>';
+    }).join('');
+    document.getElementById('askLine').innerHTML = t('faq.ask', { contact: contact });
+  }
+
+  i18n.apply();
+  i18n.mountSwitch(document.getElementById('langpick'));
+  paint();
+  i18n.onChange(paint);
+})();
+</script>
+</body>
+</html>

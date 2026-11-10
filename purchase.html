@@ -63,9 +63,24 @@
   h2.sec i{display:inline-block;width:28px;height:2px;background:var(--blue)}
 
   .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px}
-  .card{display:flex;flex-direction:column;align-items:flex-start;min-height:172px;
+  .card{position:relative;display:flex;flex-direction:column;align-items:flex-start;min-height:172px;
     padding:22px;cursor:pointer;text-align:left;color:var(--text);
     background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.10)}
+
+  /* The "i" sits inside a button, so it is a span rather than a nested
+     button, and it swallows the click so it never toggles the package. */
+  .info{position:absolute;top:10px;right:10px;z-index:2;
+    display:grid;place-items:center;width:26px;height:26px;border-radius:50%;
+    border:1px solid rgba(255,255,255,.34);background:rgba(10,20,34,.45);
+    font-family:var(--cond);font-weight:800;font-size:15px;line-height:1;
+    color:rgba(245,247,251,.78);cursor:pointer;transition:background .2s,color .2s,border-color .2s}
+  .info:hover,.info:focus-visible{background:var(--blue);border-color:var(--blue);color:#fff;outline:none}
+  #tip{position:fixed;z-index:60;max-width:290px;padding:16px 18px;
+    background:#16293F;border:1px solid var(--blue);
+    font-size:13px;font-weight:300;line-height:1.6;color:var(--text);
+    box-shadow:0 18px 44px rgba(0,0,0,.5)}
+  #tip b{display:block;margin-bottom:6px;font-family:var(--cond);font-weight:800;
+    font-size:16px;letter-spacing:.04em;text-transform:uppercase;color:var(--pale)}
   .card[aria-pressed=true]{background:#16293F;border:2px solid var(--blue)}
   .card .big{font-family:var(--cond);font-weight:800;font-size:clamp(40px,7vw,50px);line-height:.86;text-transform:uppercase}
   .card .kind{margin-top:8px;font-size:11px;font-weight:600;letter-spacing:.18em;
@@ -249,6 +264,8 @@
         <div style="margin-top:24px;padding-top:20px;border-top:1px solid rgba(255,255,255,.10)">
           <p id="haveLine" style="margin:0;font-size:13px;font-weight:300;line-height:1.6;color:rgba(245,247,251,.72)"></p>
           <p id="changeLine" style="margin:12px 0 0;font-size:12px;font-weight:300;line-height:1.65;color:rgba(245,247,251,.55)"></p>
+          <p style="margin:12px 0 0;font-size:12px;font-weight:300">
+            <a href="faq.html" data-i18n="buy.faqLink">Questions? Read the FAQ</a></p>
         </div>
       </aside>
 
@@ -325,11 +342,16 @@
       var b = el('button', 'card lift up');
       b.type = 'button';
       b.innerHTML =
+        '<span class="info" role="button" tabindex="0" data-tip="' + esc(p.code) + '"' +
+          ' aria-label="' + esc(t('buy.whatsThis')) + '">i</span>' +
         '<span class="big">' + esc(face.big) + '</span>' +
         '<span class="kind" data-i18n="' + face.kind + '">' + t(face.kind) + '</span>' +
         '<span class="prices"><span class="now"></span><span class="was" hidden></span></span>' +
         '<span class="off" hidden></span>';
-      b.addEventListener('click', function () { toggle(p.code); });
+      b.addEventListener('click', function (ev) {
+        if (ev.target.closest('.info')) return;   // the "i" is not a buy click
+        toggle(p.code);
+      });
       cardFor[p.code] = b;
       return b;
     }));
@@ -341,6 +363,8 @@
     box.innerHTML =
       '<span class="shot"><img src="hotel-room.jpg" alt="" aria-hidden="true" loading="lazy"></span>' +
       '<span class="veil"></span>' +
+      '<span class="info" role="button" tabindex="0" data-tip="' + esc(stay.code) + '"' +
+        ' aria-label="' + esc(t('buy.whatsThis')) + '">i</span>' +
       '<span class="body">' +
         '<span style="display:flex;align-items:center;gap:12px;font-size:11px;font-weight:600;letter-spacing:.22em;text-transform:uppercase;color:var(--pale)">' +
           '<span style="display:inline-block;width:28px;height:2px;background:var(--blue)"></span>' +
@@ -358,7 +382,10 @@
           '<span class="h-note" style="font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:rgba(245,247,251,.65)"></span>' +
         '</span>' +
       '</span>';
-    box.addEventListener('click', function () { toggle(stay.code); });
+    box.addEventListener('click', function (ev) {
+      if (ev.target.closest('.info')) return;     // the "i" is not a buy click
+      toggle(stay.code);
+    });
     built = true;
   }
 
@@ -373,15 +400,12 @@
       if (p.includes_room) {
         var box = $('#hotelCard');
         if (box.hidden) return;
-        var vip = cat.packages.filter(function (x) { return x.code === 'vip'; })[0];
         box.setAttribute('aria-pressed', n > 0 ? 'true' : 'false');
         box.querySelector('.h-now').textContent = money(now);
         var was = box.querySelector('.h-was');
         was.hidden = !pct;
         was.textContent = money(list);
-        box.querySelector('.h-note').textContent = pct
-          ? t('buy.off', { pct: pct })
-          : (vip ? t('buy.hotelOver', { amount: money(p.price_cents - vip.price_cents) }) : '');
+        box.querySelector('.h-note').textContent = pct ? t('buy.off', { pct: pct }) : '';
         return;
       }
 
@@ -735,10 +759,50 @@
     $('#changeLine').innerHTML = t('buy.mayChange', { terms: terms });
   }
 
+  // ---------------------------------------------------------- package info
+  // One shared panel rather than one per card: the cards are narrow and a
+  // panel inside them would have nowhere to go.
+  var tip = null;
+  function closeTip() {
+    if (tip) { tip.remove(); tip = null; }
+    document.removeEventListener('keydown', onTipKey);
+  }
+  function onTipKey(ev) { if (ev.key === 'Escape') closeTip(); }
+  function openTip(icon) {
+    closeTip();
+    var code = icon.getAttribute('data-tip');
+    tip = el('div');
+    tip.id = 'tip';
+    tip.setAttribute('role', 'dialog');
+    tip.innerHTML = '<b>' + esc(t('pkg.' + code + '.title')) + '</b>' + esc(t('pkg.' + code + '.body'));
+    document.body.appendChild(tip);
+
+    var r = icon.getBoundingClientRect(), box = tip.getBoundingClientRect();
+    var left = Math.min(Math.max(12, r.left + r.width / 2 - box.width / 2),
+                        window.innerWidth - box.width - 12);
+    var top = r.bottom + 10;
+    if (top + box.height > window.innerHeight - 12) top = Math.max(12, r.top - box.height - 10);
+    tip.style.left = left + 'px';
+    tip.style.top = top + 'px';
+    document.addEventListener('keydown', onTipKey);
+  }
+  document.addEventListener('click', function (ev) {
+    var icon = ev.target.closest && ev.target.closest('.info');
+    if (icon) { ev.preventDefault(); ev.stopPropagation(); openTip(icon); return; }
+    if (tip && !ev.target.closest('#tip')) closeTip();
+  });
+  document.addEventListener('keydown', function (ev) {
+    var icon = ev.target.closest && ev.target.closest('.info');
+    if (icon && (ev.key === 'Enter' || ev.key === ' ')) { ev.preventDefault(); openTip(icon); }
+  });
+  window.addEventListener('resize', closeTip);
+  window.addEventListener('scroll', closeTip, true);
+
   i18n.apply();
   i18n.mountSwitch(document.getElementById('langpick'));
   paintProse();
   i18n.onChange(function () {
+    closeTip();
     paintProse();
     renderDelivery();
     if (cat) draw();
