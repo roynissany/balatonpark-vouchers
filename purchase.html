@@ -442,15 +442,33 @@
 
     var sessions = sessionsInBasket();
     var gross = 0, total = 0, count = 0;
+    // A percent off a whole-euro price rarely lands on a whole euro: 5% off
+    // three sessions is 185.25. The basket is floored to the euro and the
+    // odd cents come off the biggest line, so no price is ever shown with
+    // stray cents. The server does the same sum and is the one that charges.
+    var trimFrom = null, trimBy = 0;
 
-    chosen.forEach(function (p) {
+    var rows = chosen.map(function (p) {
       var n = qty[p.code];
       var list = p.list_price_cents || p.price_cents;
       var unit = unitFor(p, sessions);
-      var pct = list > unit ? Math.round((1 - unit / list) * 100) : 0;
       var was = list * n;
       var line = unit * n;
       gross += was; total += line; count += n;
+      return { p: p, n: n, list: list, unit: unit, was: was, line: line };
+    });
+
+    if (total % 100) {
+      trimBy = total % 100;
+      trimFrom = rows.reduce(function (a, b) { return b.line > a.line ? b : a; }, rows[0]);
+      trimFrom.line -= trimBy;
+      trimFrom.unit = Math.round(trimFrom.line / trimFrom.n);
+      total -= trimBy;
+    }
+
+    rows.forEach(function (r) {
+      var p = r.p, n = r.n, list = r.list, unit = r.unit, was = r.was, line = r.line;
+      var pct = list > unit ? Math.round((1 - unit / list) * 100) : 0;
 
       var row = el('div', 'line');
       row.innerHTML =
