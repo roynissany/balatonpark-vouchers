@@ -55,6 +55,14 @@
   .eyebrow{display:flex;align-items:center;gap:14px;margin:0 0 16px;font-size:12px;
     font-weight:600;letter-spacing:.24em;text-transform:uppercase;color:rgba(245,247,251,.85)}
   .eyebrow i{display:inline-block;width:40px;height:2px;background:var(--blue)}
+  /* The Hungarian step line is far longer than the English one. On a phone it
+     wrapped to two lines and ran up under the language buttons, so it gets
+     tighter tracking and the header row gets a gap that cannot be absorbed. */
+  @media (max-width:760px){
+    .headrow{margin-bottom:26px}
+    .eyebrow{font-size:11px;letter-spacing:.12em;gap:10px}
+    .eyebrow i{width:24px}
+  }
 
   .cols{display:flex;flex-wrap:wrap;gap:clamp(28px,4vw,52px);align-items:flex-start}
   .main{flex:999 1 560px;min-width:0}
