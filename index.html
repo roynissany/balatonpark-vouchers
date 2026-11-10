@@ -45,7 +45,7 @@
   .cue{animation:cueBounce 2.4s ease-in-out infinite}
   .mq{animation:marquee 38s linear infinite}
   .rule{transform-origin:left;animation:rule .9s cubic-bezier(.22,.61,.36,1) both;animation-delay:.1s}
-  .lift{transition:transform .4s cubic-bezier(.22,.61,.36,1),background .3s,border-color .3s,box-shadow .4s}
+  .lift{transition:transform .4s cubic-bezier(.22,.61,.36,1),background .3s,border-color .3s,box-shadow .4s,opacity .3s}
   .lift:hover{transform:translateY(-5px);box-shadow:0 18px 40px rgba(0,0,0,.45)}
   .zw{overflow:hidden} .zw img{transition:transform .9s cubic-bezier(.22,.61,.36,1);display:block}
   .zw:hover img{transform:scale(1.07)}
@@ -85,6 +85,7 @@
          text-decoration:none; font-family:var(--cond); font-weight:800;
          font-size:clamp(22px,4.4vw,34px); letter-spacing:.04em; text-transform:uppercase }
   .cta.primary{background:var(--blue);color:#fff}
+  .cta.primary:hover{opacity:.5}
   .cta.ghost{background:rgba(10,20,34,.55);color:var(--text);border:1px solid rgba(255,255,255,.5)}
 
   .ticker { overflow:hidden; border-top:1px solid rgba(255,255,255,.10);
