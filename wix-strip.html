@@ -51,7 +51,10 @@
      the paragraph goes, because a strip is not the place to make someone
      read on a phone. */
   @media (max-width:620px){
-    .strip{flex-direction:column;align-items:flex-start;gap:12px}
+    /* nowrap matters: wrap in a column container wraps into a second
+       COLUMN, which put the button beside the words and off the edge. */
+    .strip{flex-direction:column;flex-wrap:nowrap;align-items:stretch;
+           justify-content:center;gap:12px}
     p{display:none}
     .go{width:100%}
   }
