@@ -319,10 +319,13 @@
       return n + (p.splittable ? (p.session_count || 0) * (qty[p.code] || 0) : 0);
     }, 0);
   }
+  // The tier states the price of a session outright. percent is only the
+  // figure on the badge, so 58 a session can be shown as 10% without the
+  // arithmetic and the rounding having to agree.
   function tierFor(sessions) {
-    var pct = 0;
-    (cat.tiers || []).forEach(function (t) { if (sessions >= t.min_sessions) pct = t.percent; });
-    return pct;
+    var hit = null;
+    (cat.tiers || []).forEach(function (t) { if (sessions >= t.min_sessions) hit = t; });
+    return hit;
   }
   function nextTier(sessions) {
     var up = (cat.tiers || []).filter(function (t) { return t.min_sessions > sessions; })
@@ -340,15 +343,16 @@
 
   // What one voucher of this package costs right now.
   function unitFor(p, sessions) {
-    var list = p.list_price_cents || p.price_cents;
-    var pct = p.splittable ? tierFor(sessions) : 0;
-    if (!pct) return p.price_cents;
-    // Rounded per session, not per package, and to a whole euro. Rounding the
-    // package price instead would make three singles and the three-pack
-    // differ by a euro, and anything but whole euros puts cents on the page.
-    var per = Math.round(list / (p.session_count || 1));
-    var cut = Math.round(per * (1 - pct / 100) / 100) * 100;
-    return cut * (p.session_count || 1);
+    var tier = p.splittable ? tierFor(sessions) : null;
+    if (!tier || !tier.unit_cents) return p.price_cents;
+    return tier.unit_cents * (p.session_count || 1);
+  }
+  // What the badge says, which is the tier's stated figure rather than one
+  // worked back out of the price.
+  function pctFor(p, sessions, list, now) {
+    var tier = p.splittable ? tierFor(sessions) : null;
+    if (tier && tier.unit_cents) return tier.percent;
+    return list > now ? Math.round((1 - now / list) * 100) : 0;
   }
 
   // ------------------------------------------------------------ render
@@ -421,7 +425,7 @@
       // when adding it would actually have cost 348 at 11%.
       var reach = sessions + (n || !p.splittable ? 0 : (p.session_count || 0));
       var now = unitFor(p, reach);
-      var pct = list > now ? Math.round((1 - now / list) * 100) : 0;
+      var pct = pctFor(p, reach, list, now);
 
       if (p.includes_room) {
         var box = $('#hotelCard');
@@ -488,7 +492,7 @@
 
     rows.forEach(function (r) {
       var p = r.p, n = r.n, list = r.list, unit = r.unit, was = r.was, line = r.line;
-      var pct = list > unit ? Math.round((1 - unit / list) * 100) : 0;
+      var pct = pctFor(p, sessions, list, unit);
 
       var row = el('div', 'line');
       row.innerHTML =
