@@ -73,6 +73,12 @@
   .wrap{background:var(--ink2);border:1px solid var(--line);border-radius:11px;overflow:auto}
   .mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px}
 
+  /* An order whose receipt or invoice never issued. Deliberately loud: it
+     means somebody has to raise the document by hand. */
+  .bang{display:inline-flex;align-items:center;justify-content:center;
+    width:20px;height:20px;margin-left:7px;border-radius:999px;
+    background:#C0392B;color:#fff;font-size:13px;font-weight:800;line-height:1;
+    vertical-align:middle;cursor:help}
   .pill{display:inline-block;padding:2px 9px;border-radius:999px;font-size:11px;font-weight:600;
         letter-spacing:.03em;text-transform:uppercase}
   .s-unredeemed{background:rgba(66,122,183,.22);color:var(--pale)}
@@ -403,6 +409,7 @@ async function loadOverview() {
       `${money(R.net_of_vat_cents)} after VAT` +
       (R.refunded_cents ? ` · ${money(R.refunded_cents)} refunded` : '')],
     ['Paid orders', d.paid_orders, ''],
+    ['Need a document', d.orders_without_document ?? 0, 'no nyugta or számla yet'],
     ['Unredeemed', L.vouchers_unredeemed ?? 0, 'vouchers not yet started'],
     ['Partly redeemed', L.vouchers_partial ?? 0, 'sessions still owed'],
     ['Outstanding', money(L.outstanding_face_cents), 'track time still to honour'],
@@ -433,6 +440,20 @@ async function loadOverview() {
 
 // ---------------------------------------------------------------- vouchers
 
+// A paid order with no receipt or invoice number against it still owes the
+// customer a document. The title carries whatever Szamlazz said, so the
+// reason is one hover away rather than buried in a log.
+function needsDoc(o) {
+  return !!o && o.status === 'paid' && !o.invoice_number;
+}
+function docFlag(o) {
+  if (!needsDoc(o)) return '';
+  const why = o.invoice_error
+    ? String(o.invoice_error).replace(/<!\[CDATA\[|\]\]>/g, '').replace(/<[^>]*>/g, '').slice(0, 220)
+    : 'No receipt or invoice has been issued for this order yet.';
+  return `<span class="bang" title="${esc(why)}">!</span>`;
+}
+
 let page = 0;
 const PER = 50;
 
@@ -453,7 +474,7 @@ async function loadVouchers() {
        <td class="mono">${v.sessions_remaining} / ${v.sessions_total}</td>
        <td>${esc(o.recipient_name || '-')}<div class="tiny muted">${esc(o.recipient_email || '')}</div></td>
        <td>${esc(o.buyer_name || '-')}<div class="tiny muted">${esc(o.buyer_email || '')}</div></td>
-       <td class="mono">${money(v.paid_value_cents)}</td>
+       <td class="mono">${money(v.paid_value_cents)}${docFlag(o)}</td>
        <td>${pill(v.status)}</td>`);
     tr.style.cursor = 'pointer';
     tr.addEventListener('click', () => openVoucher(v.id));
@@ -521,8 +542,56 @@ async function openVoucher(id) {
        <dt>Paid</dt><dd class="mono">${money(o.total_cents)}${
           o.discount_cents ? ` <span class="muted tiny">(${money(o.discount_cents)} off)</span>` : ''}</dd>
        <dt>Order</dt><dd>${pill(o.status)} <span class="muted tiny">${when(o.paid_at)}</span></dd>
+       <dt>${o.invoice_kind === 'szamla' ? 'Invoice' : 'Receipt'}</dt>
+       <dd>${o.invoice_number
+            ? `<span class="mono">${esc(o.invoice_number)}</span>` +
+              (o.invoiced_at ? ` <span class="muted tiny">${when(o.invoiced_at)}</span>` : '')
+            : `<span style="color:#E8705F">Not issued</span>${docFlag(o)}`}</dd>
        ${o.gift_message ? `<dt>Message</dt><dd class="muted">${esc(o.gift_message)}</dd>` : ''}
      </dl>`);
+
+  // Two ways out of a failed document: ask Szamlazz again once whatever
+  // blocked it is fixed, or record the number of one raised by hand.
+  if (needsDoc(o)) {
+    const box = el('div', 'alert');
+    box.style.cssText = 'margin:14px 0 0';
+    box.innerHTML =
+      `<h3 style="margin:0 0 6px">No ${o.invoice_kind === 'szamla' ? 'invoice' : 'receipt'} yet</h3>` +
+      `<div class="tiny muted" style="margin-bottom:10px">${
+         esc(o.invoice_error
+           ? String(o.invoice_error).replace(/<!\[CDATA\[|\]\]>/g, '').replace(/<[^>]*>/g, '').slice(0, 300)
+           : 'Nothing has been issued for this order.')}</div>`;
+    const row = el('div');
+    row.style.cssText = 'display:flex;gap:8px;flex-wrap:wrap';
+
+    const again = el('button', 'ghost', 'Try again');
+    again.addEventListener('click', async () => {
+      again.disabled = true; again.textContent = 'Asking Számlázz…';
+      try {
+        await api('retry_invoice', { order_id: o.id });
+        openVoucher(v.id);
+      } catch (e) {
+        again.disabled = false; again.textContent = 'Try again';
+        alert('Still refused: ' + (e && e.message ? e.message : 'unknown error'));
+      }
+    });
+
+    const byHand = el('button', 'ghost', 'Issued by hand');
+    byHand.addEventListener('click', async () => {
+      const num = prompt('Document number from Számlázz:');
+      if (!num) return;
+      try {
+        await api('mark_invoiced', { order_id: o.id, invoice_number: num.trim() });
+        openVoucher(v.id);
+      } catch (e) {
+        alert('Could not record it: ' + (e && e.message ? e.message : 'unknown error'));
+      }
+    });
+
+    row.append(again, byHand);
+    box.append(row);
+    head.append(box);
+  }
 
   const parts = el('div', null, '<hr><h3 style="font-size:17px;margin-bottom:11px">Redeemed parts</h3>');
   if (!d.parts.length) {
