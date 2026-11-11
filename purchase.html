@@ -185,6 +185,22 @@
     border:1px solid rgba(217,96,79,.3);color:#F0A99D;font-size:13px;line-height:1.5}
   .err[hidden]{display:none}
 
+  /* Two chips rather than a select: the choice is between exactly two
+     things and should read at a glance on a phone. */
+  .langchoice{display:flex;gap:10px;flex-wrap:wrap}
+  .langchoice .lng{min-height:48px;padding:0 20px;cursor:pointer;
+    background:rgba(255,255,255,.04);color:rgba(245,247,251,.72);
+    border:1px solid rgba(255,255,255,.22);border-radius:0;
+    font-family:Inter,sans-serif;font-size:15px;font-weight:500;
+    transition:background .2s,color .2s,border-color .2s}
+  .langchoice .lng:hover{color:var(--text);border-color:rgba(255,255,255,.45)}
+  .langchoice .lng[aria-pressed=true]{background:var(--blue);color:#fff;border-color:var(--blue)}
+
+  .wantinv{display:flex;align-items:center;gap:12px;margin:24px 0 0;cursor:pointer;
+    font-size:15px;font-weight:300;color:rgba(245,247,251,.86)}
+  .wantinv input{width:20px;height:20px;flex:0 0 auto;accent-color:var(--blue);cursor:pointer}
+  #invfields{margin-top:18px}
+
   .langpick{display:flex;gap:6px;flex:0 0 auto}
   .langpick button{min-height:44px;min-width:52px;padding:0 14px;cursor:pointer;
     background:rgba(10,20,34,.55);color:rgba(245,247,251,.72);
@@ -195,7 +211,7 @@
   .langpick button[aria-pressed=true]{background:var(--blue);color:#fff;border-color:var(--blue)}
   .headrow{display:flex;align-items:center;justify-content:space-between;gap:16px}
 </style>
-<script src="i18n.js?v=20261111k"></script>
+<script src="i18n.js?v=20261111m"></script>
 </head>
 <body>
 
@@ -234,6 +250,45 @@
             <label class="f" for="bemail" data-i18n="buy.bemail">Your email</label>
             <input id="bemail" class="fld" type="email" required autocomplete="email">
           </div>
+        </div>
+
+        <!-- Most people buying a gift want no paperwork, and Hungarian law
+             lets a consumer sale close on a receipt that needs no personal
+             details at all. Only someone who ticks this is asked for an
+             address, and only then is one stored. -->
+        <label class="wantinv">
+          <input type="checkbox" id="wantinv">
+          <span data-i18n="buy.wantInvoice">I need a company invoice</span>
+        </label>
+        <div id="invfields" class="grid2" hidden>
+          <div style="grid-column:1/-1">
+            <label class="f" for="invname" data-i18n="buy.invName">Company name</label>
+            <input id="invname" class="fld" type="text" autocomplete="organization">
+          </div>
+          <div>
+            <label class="f" for="invtax" data-i18n="buy.invTax">Tax number</label>
+            <input id="invtax" class="fld" type="text" placeholder="12345678-2-41">
+          </div>
+          <div>
+            <label class="f" for="invcountry" data-i18n="buy.invCountry">Country</label>
+            <input id="invcountry" class="fld" type="text" autocomplete="country-name">
+          </div>
+          <div>
+            <label class="f" for="invpost" data-i18n="buy.invPost">Postcode</label>
+            <input id="invpost" class="fld" type="text" autocomplete="postal-code">
+          </div>
+          <div>
+            <label class="f" for="invcity" data-i18n="buy.invCity">City</label>
+            <input id="invcity" class="fld" type="text" autocomplete="address-level2">
+          </div>
+          <div style="grid-column:1/-1">
+            <label class="f" for="invaddr" data-i18n="buy.invAddr">Street and number</label>
+            <input id="invaddr" class="fld" type="text" autocomplete="street-address">
+          </div>
+          <p style="grid-column:1/-1;margin:0;font-size:13px;font-weight:300;line-height:1.6;
+                    color:rgba(245,247,251,.62)" data-i18n="buy.invNote">
+            Without this you get a receipt, which is all a private buyer needs.
+          </p>
         </div>
 
         <button type="button" id="addGift" class="addgift">
@@ -307,8 +362,28 @@
   var gifts = [];
   var seq = 0;
 
+  // Only read when the box is ticked: an untouched form stores nothing.
+  function invoiceDetails() {
+    var want = document.getElementById('wantinv');
+    if (!want || !want.checked) return null;
+    var v = function (id) {
+      var e = document.getElementById(id);
+      return e ? e.value.trim() : '';
+    };
+    return {
+      kind: 'szamla',
+      name: v('invname'),
+      tax_number: v('invtax'),
+      country: v('invcountry'),
+      postcode: v('invpost'),
+      city: v('invcity'),
+      address: v('invaddr')
+    };
+  }
+
   function newGift() {
-    return { id: ++seq, qty: {}, delivery: 'now', cardFor: {}, el: null };
+    return { id: ++seq, qty: {}, delivery: 'now', cardFor: {}, el: null,
+             lang: i18n.lang, langTouched: false, paintLang: null };
   }
 
   // The ladder counts sessions in the basket, not vouchers. The 3- and
@@ -413,11 +488,35 @@
         '<input class="fld r-name" type="text" autocomplete="off" placeholder="Kovács Péter"></div>' +
       '<div><label class="f" data-i18n="buy.remail">' + esc(t('buy.remail')) + '</label>' +
         '<input class="fld r-email" type="email" required placeholder="peter@example.com"></div>' +
+      // Whoever receives this may not read the language the buyer is
+      // browsing in, so the choice sits with each receiver rather than with
+      // the order. It starts on the buyer's own language.
+      '<div style="grid-column:1/-1">' +
+        '<label class="f" data-i18n="buy.rlang">' + esc(t('buy.rlang')) + '</label>' +
+        '<div class="langchoice" role="group">' +
+          '<button type="button" class="lng" data-lang="hu">Magyar</button>' +
+          '<button type="button" class="lng" data-lang="en">English</button>' +
+        '</div></div>' +
       '<div style="grid-column:1/-1"><label class="f" data-i18n="buy.msg">' + esc(t('buy.msg')) + '</label>' +
         '<textarea class="fld r-msg" rows="3" maxlength="2000" data-i18n-ph="buy.msgPlaceholder" placeholder="' +
         esc(t('buy.msgPlaceholder')) + '"></textarea></div>';
     wrap.append(who);
     who.querySelector('.r-name').addEventListener('input', paintHeads);
+
+    function paintLang() {
+      who.querySelectorAll('.lng').forEach(function (b) {
+        b.setAttribute('aria-pressed', b.dataset.lang === g.lang ? 'true' : 'false');
+      });
+    }
+    who.querySelectorAll('.lng').forEach(function (b) {
+      b.addEventListener('click', function () {
+        g.lang = b.dataset.lang;
+        g.langTouched = true;
+        paintLang();
+      });
+    });
+    paintLang();
+    g.paintLang = paintLang;
 
     var h3 = el('h2', 'sec', '<i></i><span data-i18n="buy.secDelivery">' + esc(t('buy.secDelivery')) + '</span>');
     wrap.append(h3);
@@ -708,7 +807,8 @@
         recipient_email: remail.value,
         gift_message: g.el.querySelector('.r-msg').value,
         delivery_method: g.delivery === 'date' ? 'scheduled' : g.delivery,
-        deliver_at: deliverAt
+        deliver_at: deliverAt,
+        lang: g.lang
       });
     }
 
@@ -737,7 +837,9 @@
       body: JSON.stringify({
         gifts: payload,
         buyer_name: $('#bname').value.trim(),
-        buyer_email: $('#bemail').value.trim()
+        buyer_email: $('#bemail').value.trim(),
+        lang: i18n.lang,
+        invoice: invoiceDetails()
       })
     }).then(function (res) {
       return res.json().then(function (body) { return { ok: res.ok, body: body }; });
@@ -970,12 +1072,25 @@
     closeTip();
     paintProse();
     gifts.forEach(function (g) {
+      // Switching the site language moves the gift languages with it, but
+      // only the ones nobody has deliberately set.
+      if (!g.langTouched) {
+        g.lang = i18n.lang;
+        if (g.paintLang) g.paintLang();
+      }
       renderDelivery(g);
       paintSendNote(g);
     });
     resetPaymentForm();
     if (cat) draw();
   });
+
+  (function () {
+    var want = document.getElementById('wantinv');
+    var box = document.getElementById('invfields');
+    if (!want || !box) return;
+    want.addEventListener('change', function () { box.hidden = !want.checked; });
+  })();
 
   $('#addGift').addEventListener('click', function () { addGift(true); });
 
