@@ -65,44 +65,52 @@
 
   /* The print sheet is its own document: the page's dark theme and every
      control are taken out of the flow, and what is left is laid out for an
-     A4 page in ink on white. */
+     A4 page in ink on white.
+
+     These rules sit OUTSIDE @media print on purpose. The PDF button renders
+     the very same sheet off-screen, and rules inside @media print would not
+     apply to it. .printroot keeps the sheet hidden until one of the two asks
+     for it. The height is a hair under A4 with overflow hidden, because at
+     exactly 297mm sub-pixel rounding tips the sheet onto a second, blank
+     page. */
   .printroot{display:none}
   @page{size:A4 portrait;margin:0}
   @media print{
-    html,body{background:#fff!important}
+    html,body{background:#fff!important;margin:0!important;padding:0!important}
     body > *{display:none!important}
     body > .printroot{display:block!important}
-    .sheet{position:relative;width:210mm;min-height:297mm;padding:13mm;
-      background:#fff;color:#1a1d24;box-sizing:border-box;
-      font-family:Inter,Arial,sans-serif;-webkit-print-color-adjust:exact;print-color-adjust:exact}
-    .sheetin{position:relative;height:100%;border:1.6pt solid #B8902C;padding:13mm 12mm;
-      box-sizing:border-box}
-    .sheetin::before{content:'';position:absolute;inset:3.2mm;border:0.5pt solid #D9BE70}
-    .orn{position:absolute;width:17mm;height:17mm;border:0 solid #B8902C}
-    .orn.tl{top:9mm;left:9mm;border-top-width:3pt;border-left-width:3pt}
-    .orn.tr{top:9mm;right:9mm;border-top-width:3pt;border-right-width:3pt}
-    .orn.bl{bottom:9mm;left:9mm;border-bottom-width:3pt;border-left-width:3pt}
-    .orn.br{bottom:9mm;right:9mm;border-bottom-width:3pt;border-right-width:3pt}
-
-    .kick{margin:0 0 3mm;text-align:center;font-family:'Barlow Condensed',Arial,sans-serif;
-      font-weight:700;font-size:10pt;letter-spacing:4pt;text-transform:uppercase;color:#9A7A22}
-    .forwho{margin:0 0 7mm;text-align:center;font-family:'Barlow Condensed',Arial,sans-serif;
-      font-weight:800;font-size:27pt;line-height:1.05;text-transform:uppercase;color:#12161d}
-    .tkbox{margin:0 0 7mm}
-    .tkbox .ticket{display:block;width:100%;height:auto}
-    .msg{margin:0 0 4mm;padding:0 10mm;text-align:center;font-family:Georgia,serif;
-      font-style:italic;font-size:13pt;line-height:1.6;color:#2b3039}
-    .from{margin:0 0 7mm;text-align:center;font-family:'Barlow Condensed',Arial,sans-serif;
-      font-weight:700;font-size:11pt;letter-spacing:2.5pt;text-transform:uppercase;color:#6b5a2a}
-    .rule2{height:0.5pt;background:#D9BE70;margin:0 0 6mm}
-    .cols2{display:flex;gap:9mm;margin:0 0 6mm}
-    .cols2 > div{flex:1}
-    .sheetin h2{margin:0 0 2mm;font-family:'Barlow Condensed',Arial,sans-serif;font-weight:800;
-      font-size:11pt;letter-spacing:2pt;text-transform:uppercase;color:#9A7A22}
-    .sheetin p{margin:0;font-size:9.5pt;line-height:1.6;color:#3a414c}
-    .steps ol{margin:0;padding-left:5mm;font-size:9.5pt;line-height:1.75;color:#3a414c}
-    .foot{margin:6mm 0 0;text-align:center;font-size:8.5pt;color:#7b828d}
   }
+  .printroot .sheet{position:relative;width:210mm;height:296mm;overflow:hidden;
+    break-inside:avoid;page-break-inside:avoid;padding:13mm;
+    background:#fff;color:#1a1d24;box-sizing:border-box;
+    font-family:Inter,Arial,sans-serif;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .printroot .sheetin{position:relative;height:100%;border:1.6pt solid #B8902C;padding:13mm 12mm;
+    box-sizing:border-box}
+  .printroot .sheetin::before{content:'';position:absolute;inset:3.2mm;border:0.5pt solid #D9BE70}
+  .printroot .orn{position:absolute;width:17mm;height:17mm;border:0 solid #B8902C}
+  .printroot .orn.tl{top:9mm;left:9mm;border-top-width:3pt;border-left-width:3pt}
+  .printroot .orn.tr{top:9mm;right:9mm;border-top-width:3pt;border-right-width:3pt}
+  .printroot .orn.bl{bottom:9mm;left:9mm;border-bottom-width:3pt;border-left-width:3pt}
+  .printroot .orn.br{bottom:9mm;right:9mm;border-bottom-width:3pt;border-right-width:3pt}
+
+  .printroot .kick{margin:0 0 3mm;text-align:center;font-family:'Barlow Condensed',Arial,sans-serif;
+    font-weight:700;font-size:10pt;letter-spacing:4pt;text-transform:uppercase;color:#9A7A22}
+  .printroot .forwho{margin:0 0 7mm;text-align:center;font-family:'Barlow Condensed',Arial,sans-serif;
+    font-weight:800;font-size:27pt;line-height:1.05;text-transform:uppercase;color:#12161d}
+  .printroot .tkbox{margin:0 0 7mm}
+  .printroot .tkbox .ticket{display:block;width:100%;height:auto}
+  .printroot .msg{margin:0 0 4mm;padding:0 10mm;text-align:center;font-family:Georgia,serif;
+    font-style:italic;font-size:13pt;line-height:1.6;color:#2b3039}
+  .printroot .from{margin:0 0 7mm;text-align:center;font-family:'Barlow Condensed',Arial,sans-serif;
+    font-weight:700;font-size:11pt;letter-spacing:2.5pt;text-transform:uppercase;color:#6b5a2a}
+  .printroot .rule2{height:0.5pt;background:#D9BE70;margin:0 0 6mm}
+  .printroot .cols2{display:flex;gap:9mm;margin:0 0 6mm}
+  .printroot .cols2 > div{flex:1}
+  .printroot .sheetin h2{margin:0 0 2mm;font-family:'Barlow Condensed',Arial,sans-serif;font-weight:800;
+    font-size:11pt;letter-spacing:2pt;text-transform:uppercase;color:#9A7A22}
+  .printroot .sheetin p{margin:0;font-size:9.5pt;line-height:1.6;color:#3a414c}
+  .printroot .steps ol{margin:0;padding-left:5mm;font-size:9.5pt;line-height:1.75;color:#3a414c}
+  .printroot .foot{margin:6mm 0 0;text-align:center;font-size:8.5pt;color:#7b828d}
   .panel{padding:clamp(24px,4vw,36px);background:rgba(255,255,255,.04);
     border:1px solid rgba(255,255,255,.10)}
   .codebox{display:flex;flex-wrap:wrap;gap:14px;align-items:stretch}
@@ -144,7 +152,7 @@
   .langpick button[aria-pressed=true]{background:var(--blue);color:#fff;border-color:var(--blue)}
   .headrow{display:flex;align-items:center;justify-content:space-between;gap:16px}
 </style>
-<script src="i18n.js?v=20261111h"></script>
+<script src="i18n.js?v=20261111i"></script>
 <script src="ticket.js?v=20261111f"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
 </head>
@@ -258,12 +266,12 @@
   // Printing produces a gift sheet, not a bare ticket: a frame, who it is
   // from, the message that came with the order, and a few lines saying what
   // this is for someone who has never heard of the place.
-  function printTicket(code) {
+  function buildSheet(code) {
     var hit = null;
     giftPairs().forEach(function (pair) {
       if (pair.v.code === code) hit = pair;
     });
-    if (!hit) return;
+    if (!hit) return null;
 
     var d = last && last.d ? last.d : {};
     var from = (d.buyer_name || '').trim();
@@ -303,12 +311,79 @@
         '</div>' +
       '</div>';
 
+    return root;
+  }
+
+  function printTicket(code) {
+    var root = buildSheet(code);
+    if (!root) return;
     var done = function () {
       root.innerHTML = '';
       window.removeEventListener('afterprint', done);
     };
     window.addEventListener('afterprint', done);
     window.print();
+  }
+
+  // The same sheet, turned into a real A4 PDF the person can keep or send
+  // on. Rendering happens off-screen rather than in a print dialog, so the
+  // two libraries below only load when someone actually asks for a PDF.
+  var LIBS = {
+    h2c: 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js',
+    pdf: 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js'
+  };
+  var loaded = {};
+  function loadScript(src) {
+    if (loaded[src]) return loaded[src];
+    loaded[src] = new Promise(function (ok, fail) {
+      var el = document.createElement('script');
+      el.src = src;
+      el.onload = function () { ok(); };
+      el.onerror = function () { loaded[src] = null; fail(new Error('load ' + src)); };
+      document.head.appendChild(el);
+    });
+    return loaded[src];
+  }
+
+  function downloadSheet(code, btn) {
+    var label = btn ? btn.textContent : '';
+    if (btn) { btn.disabled = true; btn.textContent = t('ty.pdfWorking'); }
+
+    var root = buildSheet(code);
+    if (!root) { if (btn) { btn.disabled = false; btn.textContent = label; } return; }
+
+    // Visible to the renderer, out of the person's way. display:none would
+    // give html2canvas nothing to measure.
+    root.style.cssText = 'display:block;position:fixed;left:-10000px;top:0;z-index:-1';
+
+    var cleanup = function () {
+      root.style.cssText = '';
+      root.innerHTML = '';
+      if (btn) { btn.disabled = false; btn.textContent = label; }
+    };
+
+    Promise.all([loadScript(LIBS.h2c), loadScript(LIBS.pdf)])
+      .then(function () {
+        return document.fonts && document.fonts.ready ? document.fonts.ready : null;
+      })
+      .then(function () {
+        return window.html2canvas(root.querySelector('.sheet'), {
+          scale: 2, backgroundColor: '#ffffff', useCORS: true, logging: false
+        });
+      })
+      .then(function (canvas) {
+        var JsPDF = (window.jspdf && window.jspdf.jsPDF) || window.jsPDF;
+        var doc = new JsPDF({ unit: 'mm', format: 'a4', orientation: 'portrait' });
+        doc.addImage(canvas.toDataURL('image/jpeg', 0.94), 'JPEG', 0, 0, 210, 297);
+        doc.save('balaton-park-gift-' + code + '.pdf');
+        cleanup();
+      })
+      .catch(function (e) {
+        console.error('pdf failed', e);
+        cleanup();
+        // Printing still works, and a browser can print to PDF itself.
+        printTicket(code);
+      });
   }
 
   // Each voucher together with the gift it belongs to.
@@ -410,6 +485,8 @@
           '<div class="acts">' +
             '<button type="button" class="cta primary lift print" data-code="' + esc(v.code) + '">' +
               t('ty.print') + '</button>' +
+            '<button type="button" class="cta ghost lift pdf" data-code="' + esc(v.code) + '">' +
+              t('ty.pdf') + '</button>' +
             '<button type="button" class="cta ghost lift copy" data-code="' + esc(v.code) + '">' +
               t('common.copy') + '</button>' +
             '<a class="cta ghost lift" href="redeem.html?code=' + encodeURIComponent(v.code) + '">' +
@@ -438,6 +515,11 @@
       var pr = ev.target.closest('.print');
       if (pr) {
         printTicket(pr.getAttribute('data-code'));
+        return;
+      }
+      var dl = ev.target.closest('.pdf');
+      if (dl) {
+        downloadSheet(dl.getAttribute('data-code'), dl);
         return;
       }
       var btn = ev.target.closest('.copy');
