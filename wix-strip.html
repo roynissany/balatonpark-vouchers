@@ -62,6 +62,20 @@
   /* Below this the button sits under the words rather than beside them, and
      the paragraph goes, because a strip is not the place to make someone
      read on a phone. */
+  /* Wix decides the height, not us, so the content has to give way rather
+     than spill: the paragraph goes first, then the eyebrow, then the
+     headline comes down a size. Nothing is ever allowed to be cut off. */
+  @media (max-height:235px){ p{display:none} }
+  @media (max-height:165px){
+    .kick{display:none}
+    h1{font-size:clamp(24px,4vw,42px)}
+    .go{padding:12px 24px;font-size:clamp(16px,1.9vw,22px)}
+  }
+  @media (max-height:110px){
+    h1{font-size:clamp(19px,3.2vw,30px)}
+    .strip{padding:10px clamp(16px,3vw,40px)}
+  }
+
   @media (max-width:620px){
     /* nowrap matters: wrap in a column container wraps into a second
        COLUMN, which put the button beside the words and off the edge. */
