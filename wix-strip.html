@@ -81,6 +81,10 @@
        COLUMN, which put the button beside the words and off the edge. */
     .inner{flex-direction:column;flex-wrap:nowrap;align-items:stretch;
            justify-content:center;gap:14px}
+    /* flex-basis follows the main axis, so the 340px that was a minimum
+       WIDTH in a row becomes a 340px HEIGHT in a column and shoves the
+       button off the bottom. */
+    .words{flex:0 0 auto}
     p{display:none}
     .go{width:100%}
     .strip img.bg{object-position:50% 38%}
