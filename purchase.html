@@ -415,7 +415,12 @@
     cat.packages.forEach(function (p) {
       var n = qty[p.code] || 0;
       var list = p.list_price_cents || p.price_cents;
-      var now = unitFor(p, sessions);
+      // A card shows what it costs to add, so an unselected one is priced at
+      // the tier its own sessions would reach. Pricing it at the basket's
+      // current tier made the six-pack read 372 at 5% next to a three-pack,
+      // when adding it would actually have cost 348 at 11%.
+      var reach = sessions + (n || !p.splittable ? 0 : (p.session_count || 0));
+      var now = unitFor(p, reach);
       var pct = list > now ? Math.round((1 - now / list) * 100) : 0;
 
       if (p.includes_room) {
