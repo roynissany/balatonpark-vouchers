@@ -177,7 +177,7 @@
   .langpick button[aria-pressed=true]{background:var(--blue);color:#fff;border-color:var(--blue)}
   .headrow{display:flex;align-items:center;justify-content:space-between;gap:16px}
 </style>
-<script src="i18n.js?v=20261111b"></script>
+<script src="i18n.js?v=20261111c"></script>
 </head>
 <body>
 
@@ -235,7 +235,7 @@
             <label class="f" for="sendtime" data-i18n="buy.sendAt">At</label>
             <input id="sendtime" class="fld" type="time" value="08:00" style="border-color:rgba(255,255,255,.22)">
           </div>
-          <p data-i18n="buy.sendNote" style="flex:1 1 100%;margin:0;font-size:13px;font-weight:300;line-height:1.6;color:rgba(245,247,251,.70)">Budapest time.</p>
+          <p id="sendNote" style="flex:1 1 100%;margin:0;font-size:13px;font-weight:300;line-height:1.6;color:rgba(245,247,251,.70)">Budapest time.</p>
         </div>
 
         <h2 class="sec up"><i></i><span data-i18n="buy.sec4">4 · Your details</span></h2>
@@ -596,6 +596,10 @@
   $('#buy').addEventListener('submit', function (ev) {
     ev.preventDefault();
     $('#err').hidden = true;
+    ['senddate', 'sendtime'].forEach(function (id) {
+      var f = $('#' + id);
+      if (f && !f.dataset.noted) { f.dataset.noted = '1'; f.addEventListener('change', paintSendNote); }
+    });
     ['remail', 'bemail', 'senddate'].forEach(function (id) {
       $('#' + id).removeAttribute('aria-invalid');
     });
@@ -618,13 +622,16 @@
       // whole handler and leaves the translator undefined from its first line.
       var d = $('#senddate').value, clock = $('#sendtime').value || '08:00';
       if (!d) return fail(t('buy.errDate'), $('#senddate'));
-      // The field is Budapest time; send an explicit offset so the server is
-      // not left guessing which clock the buyer meant.
-      var when = new Date(d + 'T' + clock + ':00');
+      // The field is Budapest time, so the instant has to be built with
+      // Budapest's offset before it is compared with now. Parsed without one
+      // the browser reads it in its own zone, and from Tel Aviv a perfectly
+      // valid Budapest time came back as "in the past".
+      var stamp = d + 'T' + clock + ':00' + budapestOffset(new Date(d + 'T12:00:00Z'));
+      var when = new Date(stamp);
       if (isNaN(when.getTime()) || when.getTime() < Date.now()) {
         return fail(t('buy.errPast'), $('#senddate'));
       }
-      deliverAt = d + 'T' + clock + ':00' + budapestOffset(when);
+      deliverAt = stamp;
     }
 
     var btn = $('#pay');
@@ -782,6 +789,25 @@
   }
 
   // Hungary is UTC+1, UTC+2 between the last Sundays of March and October.
+  // Says what the chosen Budapest time is on the buyer's own clock, so
+  // nobody has to work out the difference themselves.
+  function paintSendNote() {
+    var n = $('#sendNote');
+    if (!n) return;
+    var d = $('#senddate') && $('#senddate').value;
+    var clock = $('#sendtime') && $('#sendtime').value;
+    n.textContent = t('buy.sendNote');
+    if (!d || !clock) return;
+    var when = new Date(d + 'T' + clock + ':00' + budapestOffset(new Date(d + 'T12:00:00Z')));
+    if (isNaN(when.getTime())) return;
+    var here = when.toLocaleTimeString(i18n.lang === 'hu' ? 'hu-HU' : 'en-GB',
+      { hour: '2-digit', minute: '2-digit' });
+    var mine = when.toLocaleDateString(undefined, { day: 'numeric', month: 'short' });
+    // Only worth saying when the buyer is not already on Budapest time.
+    if (here === clock && when.toISOString().slice(0, 10) === d) return;
+    n.textContent = t('buy.sendNote') + ' ' + t('buy.sendLocal', { time: here, date: mine });
+  }
+
   function budapestOffset(when) {
     var y = when.getFullYear();
     var lastSunday = function (month) {   // month: 0-based
