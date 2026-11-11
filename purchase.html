@@ -177,7 +177,7 @@
   .langpick button[aria-pressed=true]{background:var(--blue);color:#fff;border-color:var(--blue)}
   .headrow{display:flex;align-items:center;justify-content:space-between;gap:16px}
 </style>
-<script src="i18n.js?v=20261111a"></script>
+<script src="i18n.js?v=20261111b"></script>
 </head>
 <body>
 
@@ -342,7 +342,13 @@
   function unitFor(p, sessions) {
     var list = p.list_price_cents || p.price_cents;
     var pct = p.splittable ? tierFor(sessions) : 0;
-    return pct ? Math.round(list * (1 - pct / 100)) : p.price_cents;
+    if (!pct) return p.price_cents;
+    // Rounded per session, not per package, and to a whole euro. Rounding the
+    // package price instead would make three singles and the three-pack
+    // differ by a euro, and anything but whole euros puts cents on the page.
+    var per = Math.round(list / (p.session_count || 1));
+    var cut = Math.round(per * (1 - pct / 100) / 100) * 100;
+    return cut * (p.session_count || 1);
   }
 
   // ------------------------------------------------------------ render
@@ -783,9 +789,7 @@
   // Lines with links inside them are built from the dictionary.
   function paintProse() {
     var terms = link('https://www.balatonparkcircuit.com/tc', t('common.terms'), true);
-    $('#smallprint').innerHTML = t('buy.smallprint', {
-      hotel: link('https://balatonparkhotel.com', 'balatonparkhotel.com', true)
-    });
+    $('#smallprint').innerHTML = t('buy.smallprint');
     $('#refundLine').innerHTML = t('buy.refund', {
       email: link('mailto:info@balatonparkcircuit.com?subject=Gift%20Voucher%20Refund%20Request',
                   t('common.emailUs'))

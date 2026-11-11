@@ -106,6 +106,30 @@
               color:rgba(245,247,251,.72) }
   .days { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:14px }
   .day { padding:26px 28px; background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.10) }
+  button.day { width:100%; text-align:left; color:inherit; font:inherit; cursor:pointer }
+  button.day:hover,button.day:focus-visible { border-color:var(--blue); outline:none }
+
+  /* The tiles name real dates, which reads as "pick one now". The panel is
+     there to say the voucher is not tied to any of them. */
+  .scrim { position:fixed; inset:0; z-index:70; display:grid; place-items:center;
+           padding:20px; background:rgba(4,9,16,.76) }
+  .sheet { width:100%; max-width:440px; padding:clamp(26px,5vw,38px);
+           background:#16293F; border:1px solid var(--blue) }
+  .sheet h2 { margin:0; font-family:var(--cond); font-weight:800; text-transform:uppercase;
+              font-size:clamp(26px,5vw,36px); line-height:1 }
+  .sheet p { margin:16px 0 0; font-size:15px; font-weight:300; line-height:1.7;
+             color:rgba(245,247,251,.82) }
+  .sheet .row { display:flex; flex-wrap:wrap; gap:12px; margin-top:26px }
+  .sheet .go { flex:1 1 160px; display:inline-flex; align-items:center; justify-content:center;
+    min-height:56px; padding:0 26px; background:var(--blue); color:#fff; text-decoration:none;
+    font-family:var(--cond); font-weight:800; font-size:21px; letter-spacing:.04em;
+    text-transform:uppercase; transition:background .3s }
+  .sheet .go:hover { background:rgba(66,122,183,.5) }
+  .sheet .shut { flex:0 0 auto; min-height:56px; padding:0 20px; cursor:pointer;
+    background:none; color:rgba(245,247,251,.70); border:1px solid rgba(255,255,255,.28);
+    font-family:var(--cond); font-weight:800; font-size:17px; letter-spacing:.06em;
+    text-transform:uppercase }
+  .sheet .shut:hover { color:var(--text); border-color:rgba(255,255,255,.55) }
   .day p.big { margin:0; font-family:var(--cond); font-weight:800;
                font-size:clamp(28px,4vw,34px); text-transform:uppercase; line-height:1 }
   .day p.sub { margin:8px 0 0; font-size:13px; color:rgba(245,247,251,.72) }
@@ -152,7 +176,7 @@
   .langpick button[aria-pressed=true]{background:var(--blue);color:#fff;border-color:var(--blue)}
   .headrow{display:flex;align-items:center;justify-content:space-between;gap:16px}
 </style>
-<script src="i18n.js?v=20261111a"></script>
+<script src="i18n.js?v=20261111b"></script>
 </head>
 <body>
 
@@ -226,9 +250,9 @@
     <section style="margin:clamp(56px,9vw,88px) 0 0">
       <h2 class="up" style="margin:0 0 28px"><span data-i18n="home.daysA">Track days</span> <span style="color:var(--blue)" data-i18n="home.daysB">2027.</span></h2>
       <div class="days">
-        <div class="day lift up d1"><p class="big">17 April</p><p class="sub">Saturday · 2027</p></div>
-        <div class="day lift up d2"><p class="big">22 May</p><p class="sub">Saturday · 2027</p></div>
-        <div class="day lift up d3"><p class="big">26 June</p><p class="sub">Saturday · 2027</p></div>
+        <button type="button" class="day lift up d1"><p class="big" data-i18n="home.d1big">17 April</p><p class="sub" data-i18n="home.daySub">Saturday · 2027</p></button>
+        <button type="button" class="day lift up d2"><p class="big" data-i18n="home.d2big">22 May</p><p class="sub" data-i18n="home.daySub">Saturday · 2027</p></button>
+        <button type="button" class="day lift up d3"><p class="big" data-i18n="home.d3big">26 June</p><p class="sub" data-i18n="home.daySub">Saturday · 2027</p></button>
         <div class="day soon up d4"><p data-i18n="home.soon">More to come soon!</p></div>
       </div>
     </section>
@@ -281,10 +305,53 @@
              i18n.t('common.emailUs') + '</a>'
     });
   }
+  // The marquee repeats its dates, so it is built from the dictionary too.
+  function paintTicker() {
+    var parts = [i18n.t('home.d1long'), i18n.t('home.d2long'), i18n.t('home.d3long'),
+                 i18n.t('home.soon')];
+    var run = parts.concat(parts).map(function (p) { return p + '<b>/</b>'; }).join('');
+    document.querySelectorAll('.ticker span').forEach(function (s) { s.innerHTML = run; });
+  }
+
+  // Clicking a date says, in one panel, that the voucher is not tied to it.
+  var sheet = null;
+  function closeSheet() {
+    if (!sheet) return;
+    sheet.remove();
+    sheet = null;
+    document.removeEventListener('keydown', onSheetKey);
+  }
+  function onSheetKey(ev) { if (ev.key === 'Escape') closeSheet(); }
+  function openSheet() {
+    closeSheet();
+    sheet = document.createElement('div');
+    sheet.className = 'scrim';
+    sheet.innerHTML =
+      '<div class="sheet" role="dialog" aria-modal="true">' +
+        '<h2>' + i18n.t('home.dayPickH') + '</h2>' +
+        '<p>' + i18n.t('home.dayPickP') + '</p>' +
+        '<div class="row">' +
+          '<a class="go" href="purchase.html">' + i18n.t('home.dayPickCta') + '</a>' +
+          '<button type="button" class="shut">' + i18n.t('home.dayPickClose') + '</button>' +
+        '</div>' +
+      '</div>';
+    sheet.addEventListener('click', function (ev) {
+      if (ev.target === sheet || ev.target.closest('.shut')) closeSheet();
+    });
+    document.body.appendChild(sheet);
+    document.addEventListener('keydown', onSheetKey);
+    var go = sheet.querySelector('.go');
+    if (go) go.focus();
+  }
+  document.querySelectorAll('button.day').forEach(function (b) {
+    b.addEventListener('click', openSheet);
+  });
+
   i18n.apply();
   i18n.mountSwitch(document.getElementById('langpick'));
   paintNote();
-  i18n.onChange(paintNote);
+  paintTicker();
+  i18n.onChange(function () { paintNote(); paintTicker(); closeSheet(); });
 
   var KEY = 'bpc-cookie-choice';
   var box = document.getElementById('cookies');
