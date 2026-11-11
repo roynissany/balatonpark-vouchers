@@ -63,7 +63,7 @@
       : '';
 
     return '' +
-'<svg class="ticket" viewBox="0 0 ' + W + ' ' + H + '" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="' + esc(o.alt || o.code) + '">' +
+'<svg class="ticket" viewBox="0 0 ' + W + ' ' + H + '" width="' + W + '" height="' + H + '" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="' + esc(o.alt || o.code) + '">' +
   '<defs>' +
     '<linearGradient id="g-' + id + '" x1="0" y1="0" x2="0.35" y2="1">' +
       '<stop offset="0%" stop-color="#8A6A18"/><stop offset="12%" stop-color="#D8B441"/>' +
