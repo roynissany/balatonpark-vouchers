@@ -58,7 +58,10 @@
   .giftwho{margin:0 0 14px;font-family:var(--cond);font-weight:800;font-size:17px;
     letter-spacing:.16em;text-transform:uppercase;color:var(--pale)}
   .giftnote{margin:0 0 20px;font-size:15px;font-weight:300;line-height:1.7;color:rgba(245,247,251,.82)}
-  .acts{display:flex;flex-wrap:wrap;gap:12px;margin-top:4px}
+  /* The buttons belong to the ticket above them, so the gap below has to be
+     bigger than the gap above or the next ticket reads as part of this one. */
+  .acts{display:flex;flex-wrap:wrap;gap:12px;margin:4px 0 44px}
+  .giftblk > .acts:last-child{margin-bottom:0}
 
   /* Printing one ticket: everything else is taken out of the flow, and the
      ticket is laid on white so the gold is not fighting a dark page. */
