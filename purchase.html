@@ -506,7 +506,7 @@
     host.replaceChildren();
 
     var sessions = sessionsInBasket();
-    var gross = 0, total = 0, count = 0;
+    var gross = 0, total = 0;
     var rows = [];
 
     gifts.forEach(function (g, gi) {
@@ -515,7 +515,7 @@
         if (!n) return;
         var list = p.list_price_cents || p.price_cents;
         var unit = unitFor(p, sessions);
-        gross += list * n; total += unit * n; count += n;
+        gross += list * n; total += unit * n;
         rows.push({ g: g, gi: gi, p: p, n: n, list: list, unit: unit,
                     was: list * n, line: unit * n });
       });
@@ -597,10 +597,12 @@
       host.append(nudge);
     }
 
-    $('#saving').hidden = gross <= total;
-    $('#savingAmt').textContent = '-' + money(gross - total);
-    $('#total').textContent = money(total);
-    $('#count').textContent = count;
+    // Written defensively: a summary field that is not on the page should
+    // not be able to stop the basket from drawing.
+    var set = function (sel, text) { var n = $(sel); if (n) n.textContent = text; };
+    if ($('#saving')) $('#saving').hidden = gross <= total;
+    set('#savingAmt', '-' + money(gross - total));
+    set('#total', money(total));
     syncPaymentForm(total);
   }
 
