@@ -177,7 +177,7 @@
   .langpick button[aria-pressed=true]{background:var(--blue);color:#fff;border-color:var(--blue)}
   .headrow{display:flex;align-items:center;justify-content:space-between;gap:16px}
 </style>
-<script src="i18n.js?v=20261110a"></script>
+<script src="i18n.js?v=20261111a"></script>
 </head>
 <body>
 
@@ -329,6 +329,15 @@
       .sort(function (a, b) { return a.min_sessions - b.min_sessions; });
     return up.length ? up[0] : null;
   }
+  // Package names live in the database in English, so the basket showed
+  // "1 session" and "VIP Day" on the Hungarian site. The catalogue's name is
+  // the fallback for anything added to the database later.
+  function pkgName(p) {
+    var k = 'pkg.' + p.code + '.name';
+    var s = t(k);
+    return s === k ? p.name : s;
+  }
+
   // What one voucher of this package costs right now.
   function unitFor(p, sessions) {
     var list = p.list_price_cents || p.price_cents;
@@ -474,11 +483,11 @@
       row.innerHTML =
         '<div class="top">' +
           '<span style="display:flex;flex-direction:column;gap:9px;min-width:0">' +
-            '<span style="font-size:15px;font-weight:500">' + esc(p.name) + '</span>' +
+            '<span style="font-size:15px;font-weight:500">' + esc(pkgName(p)) + '</span>' +
             '<span style="display:flex;align-items:center;gap:8px">' +
-              '<button type="button" class="step" data-act="dec" aria-label="Remove one ' + esc(p.name) + '">-</button>' +
+              '<button type="button" class="step" data-act="dec" aria-label="' + esc(t('buy.removeOne', { name: pkgName(p) })) + '">-</button>' +
               '<span style="min-width:22px;text-align:center;font-size:14px;font-weight:600">' + n + '</span>' +
-              '<button type="button" class="step" data-act="inc" aria-label="Add one more ' + esc(p.name) + '">+</button>' +
+              '<button type="button" class="step" data-act="inc" aria-label="' + esc(t('buy.addOne', { name: pkgName(p) })) + '">+</button>' +
               '<span style="font-size:12px;color:rgba(245,247,251,.50)">' +
                 t('buy.each', { amount: money(unit) }) + '</span>' +
             '</span>' +
@@ -742,6 +751,10 @@
         mode: 'payment',
         amount: totalCents,
         currency: (cat.currency || 'eur').toLowerCase(),
+        // Without this Stripe labels its own fields from the browser's
+        // language, so a Hungarian browser read "Kártyaszám" on the English
+        // site. It follows the switcher instead.
+        locale: i18n.lang,
         appearance: APPEARANCE
       });
       pay.element = pay.elements.create('payment', { layout: 'tabs' });
@@ -825,10 +838,21 @@
   i18n.apply();
   i18n.mountSwitch(document.getElementById('langpick'));
   paintProse();
+  // Stripe fixes its locale when the element is created, so switching
+  // language has to build a new one; draw() mounts it again straight after.
+  function resetPaymentForm() {
+    if (pay.element) {
+      try { pay.element.unmount(); } catch (e) {}
+      try { pay.element.destroy(); } catch (e) {}
+    }
+    pay.stripe = null; pay.elements = null; pay.element = null; pay.ready = false;
+  }
+
   i18n.onChange(function () {
     closeTip();
     paintProse();
     renderDelivery();
+    resetPaymentForm();
     if (cat) draw();
   });
 
