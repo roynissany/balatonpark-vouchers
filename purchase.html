@@ -220,6 +220,8 @@
     <form id="buy" class="cols" novalidate>
 
       <div class="main">
+        <p class="up" id="smallprint" style="margin:0 0 34px;font-size:13px;font-weight:300;line-height:1.75;color:rgba(245,247,251,.62)"></p>
+
         <div id="gifts"></div>
 
         <h2 class="sec up"><i></i><span data-i18n="buy.sec4">4 · Your details</span></h2>
@@ -898,15 +900,16 @@
   // Lines with links inside them are built from the dictionary.
   function paintProse() {
     var terms = link('https://www.balatonparkcircuit.com/tc', t('common.terms'), true);
-    $('#smallprint').innerHTML = t('buy.smallprint');
-    $('#refundLine').innerHTML = t('buy.refund', {
+    var put = function (sel, html) { var n = $(sel); if (n) n.innerHTML = html; };
+    put('#smallprint', t('buy.smallprint'));
+    put('#refundLine', t('buy.refund', {
       email: link('mailto:info@balatonparkcircuit.com?subject=Gift%20Voucher%20Refund%20Request',
                   t('common.emailUs'))
-    });
-    $('#haveLine').innerHTML = t('buy.haveVoucher', {
+    }));
+    put('#haveLine', t('buy.haveVoucher', {
       link: '<a href="redeem.html" style="font-weight:500">' + t('buy.redeemHere') + '</a>'
-    });
-    $('#changeLine').innerHTML = t('buy.mayChange', { terms: terms });
+    }));
+    put('#changeLine', t('buy.mayChange', { terms: terms }));
   }
 
   // ---------------------------------------------------------- package info
