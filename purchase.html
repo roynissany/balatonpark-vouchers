@@ -11,6 +11,13 @@
 <meta property="og:image" content="https://gifts.balatonpark.com/og-share.jpg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://hbosxvmprhzrheilwwfv.supabase.co" crossorigin>
+<script>
+  // The page cannot draw a single package without this, so it goes out now
+  // rather than after the stylesheet, the fonts and 1,100 lines of script.
+  window.__catalogue = fetch('https://hbosxvmprhzrheilwwfv.supabase.co/functions/v1/catalogue')
+    .then(function (r) { return r.json(); });
+</script>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap">
 <style>
   :root { --ink:#0A1422; --blue:#427AB7; --pale:#A8CEF0; --text:#F5F7FB;
@@ -211,8 +218,8 @@
   .langpick button[aria-pressed=true]{background:var(--blue);color:#fff;border-color:var(--blue)}
   .headrow{display:flex;align-items:center;justify-content:space-between;gap:16px}
 </style>
-<script src="i18n.js?v=20261111q"></script>
-<script src="analytics.js?v=20261111q" defer></script>
+<script src="i18n.js?v=20261111r"></script>
+<script src="analytics.js?v=20261111r" defer></script>
 </head>
 <body>
 
@@ -1111,19 +1118,56 @@
     window.bpcTrack('ViewContent', { content_category: 'gift voucher', currency: 'EUR' });
   }
 
-  fetch(API + '/catalogue')
-    .then(function (r) { return r.json(); })
-    .then(function (data) {
-      cat = data;
+  // Last visit's catalogue, so the shop is on screen immediately instead of
+  // after a round trip. A price here is only ever what gets shown: checkout
+  // recalculates every figure from the database, so a stale copy cannot
+  // change what anyone is charged, and the live answer redraws over it a
+  // moment later. Dropped after a day so it can never go properly stale.
+  var CACHE_KEY = 'bpc-catalogue';
+  var CACHE_MAX_AGE = 24 * 60 * 60 * 1000;
+
+  function cachedCatalogue() {
+    try {
+      var raw = localStorage.getItem(CACHE_KEY);
+      if (!raw) return null;
+      var box = JSON.parse(raw);
+      if (!box || !box.at || (Date.now() - box.at) > CACHE_MAX_AGE) return null;
+      return box.data && box.data.packages && box.data.packages.length ? box.data : null;
+    } catch (e) { return null; }
+  }
+
+  function rememberCatalogue(data) {
+    try { localStorage.setItem(CACHE_KEY, JSON.stringify({ at: Date.now(), data: data })); }
+    catch (e) { /* blocked storage */ }
+  }
+
+  function boot(data) {
+    cat = data;
+    if (!gifts.length) {
       var g = addGift(false);
-      // Open on the middle package, the way the mockup did.
-      if (cat.packages.some(function (p) { return p.code === 's3'; })) g.qty.s3 = 1;
-      draw();
+      // Open on a single session: the cheapest way in, and the ladder does
+      // the selling from there.
+      if (cat.packages.some(function (p) { return p.code === 's1'; })) g.qty.s1 = 1;
+    }
+    draw();
+  }
+
+  var warm = cachedCatalogue();
+  if (warm) {
+    try { boot(warm); } catch (e) { console.error('warm boot failed', e); }
+  }
+
+  (window.__catalogue || fetch(API + '/catalogue').then(function (r) { return r.json(); }))
+    .then(function (data) {
+      if (!data || !data.packages) throw new Error('catalogue empty');
+      rememberCatalogue(data);
+      boot(data);
     })
     .catch(function (e) {
       // Worth saying out loud: this catch also swallows a fault in the code
       // that builds the page, not just a failed request.
       console.error('catalogue/boot failed', e && (e.stack || e.message || e));
+      if (cat) return;   // already drawn from the stored copy; leave it be
       $('#gifts').innerHTML =
         '<p style="color:rgba(245,247,251,.6);font-size:14px">' +
         t('buy.errLoad', { email: link('mailto:info@balatonparkcircuit.com', t('common.emailUs')) }) + '</p>';
