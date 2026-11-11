@@ -52,6 +52,25 @@
     font-weight:600;letter-spacing:.24em;text-transform:uppercase;color:rgba(245,247,251,.9)}
   .eyebrow i{display:inline-block;width:40px;height:2px;background:var(--blue)}
 
+  .tk{width:100%;max-width:640px;margin:0 auto;display:block}
+  .tkwrap{margin:0 0 18px}
+  .giftblk + .giftblk{margin-top:46px;padding-top:40px;border-top:1px solid rgba(255,255,255,.12)}
+  .giftwho{margin:0 0 14px;font-family:var(--cond);font-weight:800;font-size:17px;
+    letter-spacing:.16em;text-transform:uppercase;color:var(--pale)}
+  .giftnote{margin:0 0 20px;font-size:15px;font-weight:300;line-height:1.7;color:rgba(245,247,251,.82)}
+  .acts{display:flex;flex-wrap:wrap;gap:12px;margin-top:4px}
+
+  /* Printing one ticket: everything else is taken out of the flow, and the
+     ticket is laid on white so the gold is not fighting a dark page. */
+  @media print{
+    body{background:#fff}
+    body > *{display:none!important}
+    body > .printroot{display:block!important}
+    .printroot .tk{max-width:none;width:100%}
+    .printroot .pcode{margin-top:14px;font-family:'JetBrains Mono',monospace;
+      font-size:13px;color:#333;text-align:center}
+  }
+  .printroot{display:none}
   .panel{padding:clamp(24px,4vw,36px);background:rgba(255,255,255,.04);
     border:1px solid rgba(255,255,255,.10)}
   .codebox{display:flex;flex-wrap:wrap;gap:14px;align-items:stretch}
@@ -93,7 +112,9 @@
   .langpick button[aria-pressed=true]{background:var(--blue);color:#fff;border-color:var(--blue)}
   .headrow{display:flex;align-items:center;justify-content:space-between;gap:16px}
 </style>
-<script src="i18n.js?v=20261111d"></script>
+<script src="i18n.js?v=20261111e"></script>
+<script src="ticket.js?v=20261111e"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
 </head>
 <body>
 
@@ -202,6 +223,95 @@
       t('ty.contactFix', { contact: contactLink() }) + '</div>';
   }
 
+  // Printing copies the chosen ticket into a root of its own and prints that,
+  // so the page's dark background and everything around it stay out of the
+  // way without having to maintain a second layout.
+  function printTicket(code) {
+    var found = null;
+    (last && last.d ? collectVouchers(last.d) : []).forEach(function (v) {
+      if (v.code === code) found = v;
+    });
+    if (!found) return;
+
+    var root = document.querySelector('.printroot');
+    if (!root) {
+      root = document.createElement('div');
+      root.className = 'printroot';
+      document.body.appendChild(root);
+    }
+    root.innerHTML = ticketFor(found) +
+      '<p class="pcode">' + esc(found.code) + '</p>';
+
+    var done = function () {
+      root.innerHTML = '';
+      window.removeEventListener('afterprint', done);
+    };
+    window.addEventListener('afterprint', done);
+    window.print();
+  }
+
+  function collectVouchers(d) {
+    if (d.gifts && d.gifts.length) {
+      return d.gifts.reduce(function (acc, g) { return acc.concat(g.vouchers || []); }, []);
+    }
+    return d.vouchers || [];
+  }
+
+  // The QR carries the redeem link with the code already in it, so scanning
+  // the printed ticket lands on the right page with nothing to type.
+  function qrFor(code) {
+    if (typeof qrcode !== 'function') return null;
+    try {
+      var q = qrcode(0, 'M');
+      q.addData('https://gifts.balatonpark.com/redeem.html?code=' + code);
+      q.make();
+      var n = q.getModuleCount(), out = [];
+      for (var r = 0; r < n; r++) {
+        for (var c = 0; c < n; c++) {
+          if (q.isDark(r, c)) {
+            out.push('<rect x="' + c + '" y="' + r + '" width="1.06" height="1.06" rx="0.2"/>');
+          }
+        }
+      }
+      return { rects: out.join(''), modules: n };
+    } catch (e) {
+      return null;                 // a ticket without its QR still works
+    }
+  }
+
+  function ticketFor(v) {
+    var n = v.sessions_total || 1;
+    var qr = qrFor(v.code);
+    return bpcTicket({
+      code: v.code,
+      shortCode: String(v.code).replace(/^BPC-/, ''),
+      sessions: v.package_code === 'vip' ? 'VIP' : n,
+      headline: t('tk.headline' + (n > 1 ? 'Many' : 'One'), { n: n }),
+      sub: t('tk.sub'),
+      eyebrow: t('tk.eyebrow'),
+      codeLabel: t('tk.codeLabel'),
+      footnote: t('tk.footnote'),
+      admit: t('tk.admit'),
+      unit: t(n > 1 ? 'common.sessionMany' : 'common.sessionOne').toUpperCase(),
+      each: t('tk.each'),
+      scanLabel: t('tk.scan'),
+      alt: v.package + ' ' + v.code,
+      qr: qr && qr.rects,
+      qrModules: qr && qr.modules
+    });
+  }
+
+  // What happens next, in the words that match what this receiver chose.
+  function noteFor(g) {
+    var who = esc(g.recipient_name || g.recipient_email || '');
+    if (g.delivery_method === 'print') return t('ty.nextPrint2', { name: who });
+    if (g.delivery_method === 'scheduled' && g.deliver_at) {
+      return t('ty.nextSched2', { email: esc(g.recipient_email), date: esc(day(g.deliver_at)) });
+    }
+    if (g.emailed) return t('ty.nextSent2', { recipient: esc(g.recipient_email) });
+    return t('ty.nextPending2', { recipient: esc(g.recipient_email) });
+  }
+
   function show(d) {
     last = { kind: 'order', d: d };
     document.getElementById('eyebrow').textContent = t('ty.eyebrow');
@@ -214,59 +324,56 @@
       return;
     }
 
-    var many = d.vouchers.length > 1;
-    var codes = many ? t('ty.codeMany') : t('ty.codeOne');
-    document.getElementById('headline').textContent = many ? t('ty.h1many') : t('ty.h1one');
+    var gifts = (d.gifts && d.gifts.length) ? d.gifts : [{
+      recipient_name: d.recipient_name, recipient_email: d.recipient_email,
+      delivery_method: d.delivery_method, deliver_at: d.deliver_at,
+      emailed: d.emailed, vouchers: d.vouchers || []
+    }];
+    var all = gifts.reduce(function (n, g) { return n + g.vouchers.length; }, 0);
+    var many = gifts.length > 1;
+    document.getElementById('headline').textContent = all > 1 ? t('ty.h1many') : t('ty.h1one');
 
-    // Only claim an email was sent if one actually was. Saying "we've emailed
-    // it" when nothing left the building sends people hunting through spam
-    // folders for a message that does not exist.
-    var next;
-    if (d.delivery_method === 'print') {
-      next = t('ty.nextPrint', { name: esc(d.recipient_name || d.recipient_email), codes: codes });
-    } else if (d.delivery_method === 'scheduled' && d.deliver_at) {
-      next = t('ty.nextSched', { email: esc(d.recipient_email),
-                                 date: esc(day(d.deliver_at)), codes: codes });
-    } else if (d.emailed) {
-      next = t('ty.nextSent', { recipient: esc(d.recipient_email), buyer: esc(d.buyer_email) });
-    } else {
-      next = t('ty.nextPending', { recipient: esc(d.recipient_email) });
-    }
-
-    var cards = d.vouchers.map(function (v, i) {
-      return '<div class="panel up d' + Math.min(i + 1, 3) + '" style="margin-top:' + (i ? '16px' : '0') + '">' +
-        '<p style="margin:0 0 14px;font-size:12px;font-weight:600;letter-spacing:.18em;' +
-          'text-transform:uppercase;color:rgba(245,247,251,.72)">' +
-          (many ? t('ty.voucherOf', { name: esc(v.package), i: i + 1, n: d.vouchers.length })
-                : esc(v.package)) + '</p>' +
-        '<div class="codebox">' +
-          '<span class="code glow">' + esc(v.code) + '</span>' +
-          '<button type="button" class="copy lift" data-code="' + esc(v.code) + '">' +
-            t('common.copy') + '</button>' +
-        '</div>' +
-        '<dl class="meta">' +
-          '<div><dt>' + t('ty.covers') + '</dt><dd>' + v.sessions_total + ' ' +
-            t(v.sessions_total > 1 ? 'common.sessionMany' : 'common.sessionOne') + '</dd></div>' +
-          '<div><dt>' + t('ty.validUntil') + '</dt><dd>' + esc(day(v.expires_on)) + '</dd></div>' +
-          '<div><dt>' + t('ty.redeemAt') + '</dt><dd><a href="redeem.html?code=' +
-            encodeURIComponent(v.code) + '">gifts.balatonpark.com</a></dd></div>' +
-        '</dl></div>';
+    var blocks = gifts.map(function (g, gi) {
+      var head = many
+        ? '<p class="giftwho">' + esc(g.recipient_name
+            ? t('buy.receiverNamed', { n: gi + 1, name: g.recipient_name })
+            : t('buy.receiverN', { n: gi + 1 })) + '</p>'
+        : '';
+      var tickets = g.vouchers.map(function (v) {
+        return '<div class="tkwrap">' + ticketFor(v) + '</div>' +
+          '<div class="acts">' +
+            '<button type="button" class="cta primary lift print" data-code="' + esc(v.code) + '">' +
+              t('ty.print') + '</button>' +
+            '<button type="button" class="cta ghost lift copy" data-code="' + esc(v.code) + '">' +
+              t('common.copy') + '</button>' +
+            '<a class="cta ghost lift" href="redeem.html?code=' + encodeURIComponent(v.code) + '">' +
+              t('ty.redeemNow') + '</a>' +
+          '</div>';
+      }).join('');
+      return '<div class="giftblk up d' + Math.min(gi + 1, 3) + '">' + head +
+             '<p class="giftnote">' + noteFor(g) + '</p>' + tickets + '</div>';
     }).join('');
 
     body.innerHTML =
-      '<p class="up" style="margin:0 0 28px;font-size:17px;font-weight:300;line-height:1.7;' +
-        'color:rgba(245,247,251,.82)">' + next + '</p>' +
-      cards +
-      '<div class="up d3" style="display:flex;flex-wrap:wrap;gap:14px;margin:34px 0 0">' +
-        '<a class="cta primary lift" href="redeem.html">' + t('ty.redeemNow') + '</a>' +
+      blocks +
+      '<div class="up d3" style="display:flex;flex-wrap:wrap;gap:14px;margin:40px 0 0">' +
         '<a class="cta ghost lift" href="index.html">' + t('ty.buyAnother') + '</a>' +
       '</div>' +
       '<p class="up d3" style="margin:26px 0 0;font-size:13px;font-weight:300;line-height:1.7;' +
         'color:rgba(245,247,251,.62)">' +
         t('ty.paidOn', { amount: money(d.total_cents), date: esc(day(d.paid_at)),
-                         codes: codes, contact: contactLink() }) + '</p>';
+                         codes: all > 1 ? t('ty.codeMany') : t('ty.codeOne'),
+                         contact: contactLink() }) + '</p>';
+  }
 
-    body.addEventListener('click', function (ev) {
+  // Bound once on the container rather than per button, so it keeps working
+  // across every redraw: a language switch rebuilds all of this.
+  body.addEventListener('click', function (ev) {
+      var pr = ev.target.closest('.print');
+      if (pr) {
+        printTicket(pr.getAttribute('data-code'));
+        return;
+      }
       var btn = ev.target.closest('.copy');
       if (!btn) return;
       var done = function () {
@@ -279,8 +386,7 @@
       } else {
         btn.textContent = t('common.copyManual');
       }
-    });
-  }
+  });
 })();
 </script>
 </body>
