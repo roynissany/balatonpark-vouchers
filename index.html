@@ -176,7 +176,8 @@
   .langpick button[aria-pressed=true]{background:var(--blue);color:#fff;border-color:var(--blue)}
   .headrow{display:flex;align-items:center;justify-content:space-between;gap:16px}
 </style>
-<script src="i18n.js?v=20261111p"></script>
+<script src="i18n.js?v=20261111q"></script>
+<script src="analytics.js?v=20261111q" defer></script>
 </head>
 <body>
 
@@ -263,14 +264,6 @@
 
   </main>
 
-  <div id="cookies" hidden>
-    <p><span data-i18n="cookie.text">Essential cookies keep the voucher system working! Other ones are important to us.</span>
-      <a href="https://www.balatonparkcircuit.com/privacy-policy" target="_blank" rel="noopener" style="white-space:nowrap" data-i18n="cookie.more">More</a></p>
-    <span style="flex:0 0 auto;display:flex;gap:8px">
-      <button type="button" class="ess" data-choice="essential" data-i18n="cookie.essentials">Essentials</button>
-      <button type="button" class="acc" data-choice="all" data-i18n="cookie.accept">Accept</button>
-    </span>
-  </div>
 
   <footer>
     <div class="inner wrap pad">
@@ -353,26 +346,8 @@
   paintTicker();
   i18n.onChange(function () { paintNote(); paintTicker(); closeSheet(); });
 
-  var KEY = 'bpc-cookie-choice';
-  var box = document.getElementById('cookies');
-  var saved = null;
-  try { saved = localStorage.getItem(KEY); } catch (e) { /* blocked storage */ }
-
-  if (!saved) box.hidden = false;
-
-  box.addEventListener('click', function (ev) {
-    var btn = ev.target.closest('button[data-choice]');
-    if (!btn) return;
-    try { localStorage.setItem(KEY, btn.dataset.choice); } catch (e) {}
-    box.hidden = true;
-    if (btn.dataset.choice === 'all') loadOptional();
-  });
-
-  if (saved === 'all') loadOptional();
-
-  // Where the Meta pixel and anything else non-essential will go. Called only
-  // with consent, so adding a tag here cannot leak before the choice is made.
-  function loadOptional() { /* analytics go here */ }
+  // The consent bar and the pixel behind it live in analytics.js now, so
+  // every page asks rather than only this one.
 })();
 </script>
 </body>

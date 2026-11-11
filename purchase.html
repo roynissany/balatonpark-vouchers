@@ -211,7 +211,8 @@
   .langpick button[aria-pressed=true]{background:var(--blue);color:#fff;border-color:var(--blue)}
   .headrow{display:flex;align-items:center;justify-content:space-between;gap:16px}
 </style>
-<script src="i18n.js?v=20261111p"></script>
+<script src="i18n.js?v=20261111q"></script>
+<script src="analytics.js?v=20261111q" defer></script>
 </head>
 <body>
 
@@ -361,6 +362,9 @@
   // block together, which is the point of buying for several people at once.
   var gifts = [];
   var seq = 0;
+
+  // The basket total as last drawn, in cents. Only used for reporting.
+  var lastTotal = 0;
 
   // Only read when the box is ticked: an untouched form stores nothing.
   function invoiceDetails() {
@@ -702,6 +706,7 @@
     if ($('#saving')) $('#saving').hidden = gross <= total;
     set('#savingAmt', '-' + money(gross - total));
     set('#total', money(total));
+    lastTotal = total;
     syncPaymentForm(total);
   }
 
@@ -824,6 +829,14 @@
     // disabled with no message - a Pay press that hangs for good.
     Promise.resolve().then(function () {
       btn.textContent = t('buy.paying');
+      // Reported before the card is confirmed: this is the step, not the sale.
+      if (window.bpcTrack) {
+        window.bpcTrack('InitiateCheckout', {
+          value: Number((lastTotal / 100).toFixed(2)),
+          currency: 'EUR',
+          num_items: payload.length
+        });
+      }
       // Validate the card fields before creating anything server-side, so a
       // mistyped card never leaves a stray order behind.
       if (!pay.elements) return;
@@ -1093,6 +1106,10 @@
   })();
 
   $('#addGift').addEventListener('click', function () { addGift(true); });
+
+  if (window.bpcTrack) {
+    window.bpcTrack('ViewContent', { content_category: 'gift voucher', currency: 'EUR' });
+  }
 
   fetch(API + '/catalogue')
     .then(function (r) { return r.json(); })
