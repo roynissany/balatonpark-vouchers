@@ -986,7 +986,10 @@
       if (cat.packages.some(function (p) { return p.code === 's3'; })) g.qty.s3 = 1;
       draw();
     })
-    .catch(function () {
+    .catch(function (e) {
+      // Worth saying out loud: this catch also swallows a fault in the code
+      // that builds the page, not just a failed request.
+      console.error('catalogue/boot failed', e && (e.stack || e.message || e));
       $('#gifts').innerHTML =
         '<p style="color:rgba(245,247,251,.6);font-size:14px">' +
         t('buy.errLoad', { email: link('mailto:info@balatonparkcircuit.com', t('common.emailUs')) }) + '</p>';
