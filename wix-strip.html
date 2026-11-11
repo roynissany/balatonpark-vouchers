@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gift vouchers strip</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800&family=Inter:wght@300;400&display=swap">
+<style>
+  /* Nothing here may scroll. A Wix HTML embed is an iframe of a height Wix
+     decides, and an inner scrollbar on a phone is miserable, so the layout
+     only ever shrinks to fit: no fixed heights, no min-widths, wrapping
+     allowed everywhere, and overflow hidden as a last resort. */
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%;overflow:hidden}
+  body{font-family:Inter,-apple-system,system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+
+  .strip{position:relative;display:flex;align-items:center;justify-content:space-between;
+    flex-wrap:wrap;gap:clamp(14px,2.5vw,32px);height:100%;min-height:0;
+    padding:clamp(16px,3.2vw,34px) clamp(18px,4vw,48px);
+    background:#0A1422;color:#F5F7FB;overflow:hidden}
+  .strip::before{content:'';position:absolute;inset:0;
+    background:
+      radial-gradient(120% 180% at 88% 50%, rgba(66,122,183,.38), transparent 62%),
+      linear-gradient(90deg, rgba(10,20,34,.0) 55%, rgba(66,122,183,.10) 100%);
+    pointer-events:none}
+
+  .words{position:relative;min-width:0;flex:1 1 320px}
+  .kick{display:flex;align-items:center;gap:12px;margin-bottom:8px;
+    font-size:clamp(10px,1.3vw,12px);font-weight:600;letter-spacing:.2em;
+    text-transform:uppercase;color:#A8CEF0}
+  .kick i{display:block;width:clamp(20px,3vw,38px);height:2px;background:#427AB7;flex:0 0 auto}
+  h1{font-family:'Barlow Condensed',sans-serif;font-weight:800;text-transform:uppercase;
+     font-size:clamp(23px,4.4vw,46px);line-height:1;letter-spacing:-.01em}
+  h1 span{color:#A8CEF0}
+  p{margin-top:clamp(6px,1vw,12px);font-size:clamp(12px,1.5vw,16px);font-weight:300;
+    line-height:1.55;color:rgba(245,247,251,.78);max-width:52ch}
+
+  .go{position:relative;flex:0 0 auto;display:inline-flex;align-items:center;
+    justify-content:center;gap:10px;text-decoration:none;
+    padding:clamp(12px,1.8vw,19px) clamp(20px,3vw,38px);
+    background:#427AB7;color:#fff;
+    font-family:'Barlow Condensed',sans-serif;font-weight:800;
+    font-size:clamp(15px,2.1vw,23px);letter-spacing:.05em;text-transform:uppercase;
+    transition:background .3s,transform .3s}
+  .go:hover{background:rgba(66,122,183,.5);transform:translateY(-2px)}
+  .go svg{flex:0 0 auto}
+
+  /* Below this the button sits under the words rather than beside them, and
+     the paragraph goes, because a strip is not the place to make someone
+     read on a phone. */
+  @media (max-width:620px){
+    .strip{flex-direction:column;align-items:flex-start;gap:12px}
+    p{display:none}
+    .go{width:100%}
+  }
+  @media (prefers-reduced-motion:reduce){ .go{transition:none} }
+</style>
+</head>
+<body>
+  <a class="strip" href="https://gifts.balatonpark.com" target="_blank" rel="noopener"
+     style="text-decoration:none;color:inherit">
+    <span class="words">
+      <span class="kick"><i></i>Gift vouchers</span>
+      <h1>Gift a session. <span>Or more.</span></h1>
+      <p>Track time at Balaton Park Circuit, wrapped. They pick their own track day.</p>
+    </span>
+    <span class="go">
+      Buy a voucher
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor"
+           stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M5 12h13M12 5l7 7-7 7"></path>
+      </svg>
+    </span>
+  </a>
+</body>
+</html>
