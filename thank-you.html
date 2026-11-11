@@ -63,17 +63,46 @@
   .acts{display:flex;flex-wrap:wrap;gap:12px;margin:4px 0 44px}
   .giftblk > .acts:last-child{margin-bottom:0}
 
-  /* Printing one ticket: everything else is taken out of the flow, and the
-     ticket is laid on white so the gold is not fighting a dark page. */
+  /* The print sheet is its own document: the page's dark theme and every
+     control are taken out of the flow, and what is left is laid out for an
+     A4 page in ink on white. */
+  .printroot{display:none}
+  @page{size:A4 portrait;margin:0}
   @media print{
-    body{background:#fff}
+    html,body{background:#fff!important}
     body > *{display:none!important}
     body > .printroot{display:block!important}
-    .printroot .tk{max-width:none;width:100%}
-    .printroot .pcode{margin-top:14px;font-family:'JetBrains Mono',monospace;
-      font-size:13px;color:#333;text-align:center}
+    .sheet{position:relative;width:210mm;min-height:297mm;padding:13mm;
+      background:#fff;color:#1a1d24;box-sizing:border-box;
+      font-family:Inter,Arial,sans-serif;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+    .sheetin{position:relative;height:100%;border:1.6pt solid #B8902C;padding:13mm 12mm;
+      box-sizing:border-box}
+    .sheetin::before{content:'';position:absolute;inset:3.2mm;border:0.5pt solid #D9BE70}
+    .orn{position:absolute;width:17mm;height:17mm;border:0 solid #B8902C}
+    .orn.tl{top:9mm;left:9mm;border-top-width:3pt;border-left-width:3pt}
+    .orn.tr{top:9mm;right:9mm;border-top-width:3pt;border-right-width:3pt}
+    .orn.bl{bottom:9mm;left:9mm;border-bottom-width:3pt;border-left-width:3pt}
+    .orn.br{bottom:9mm;right:9mm;border-bottom-width:3pt;border-right-width:3pt}
+
+    .kick{margin:0 0 3mm;text-align:center;font-family:'Barlow Condensed',Arial,sans-serif;
+      font-weight:700;font-size:10pt;letter-spacing:4pt;text-transform:uppercase;color:#9A7A22}
+    .forwho{margin:0 0 7mm;text-align:center;font-family:'Barlow Condensed',Arial,sans-serif;
+      font-weight:800;font-size:27pt;line-height:1.05;text-transform:uppercase;color:#12161d}
+    .tkbox{margin:0 0 7mm}
+    .tkbox .ticket{display:block;width:100%;height:auto}
+    .msg{margin:0 0 4mm;padding:0 10mm;text-align:center;font-family:Georgia,serif;
+      font-style:italic;font-size:13pt;line-height:1.6;color:#2b3039}
+    .from{margin:0 0 7mm;text-align:center;font-family:'Barlow Condensed',Arial,sans-serif;
+      font-weight:700;font-size:11pt;letter-spacing:2.5pt;text-transform:uppercase;color:#6b5a2a}
+    .rule2{height:0.5pt;background:#D9BE70;margin:0 0 6mm}
+    .cols2{display:flex;gap:9mm;margin:0 0 6mm}
+    .cols2 > div{flex:1}
+    .sheetin h2{margin:0 0 2mm;font-family:'Barlow Condensed',Arial,sans-serif;font-weight:800;
+      font-size:11pt;letter-spacing:2pt;text-transform:uppercase;color:#9A7A22}
+    .sheetin p{margin:0;font-size:9.5pt;line-height:1.6;color:#3a414c}
+    .steps ol{margin:0;padding-left:5mm;font-size:9.5pt;line-height:1.75;color:#3a414c}
+    .foot{margin:6mm 0 0;text-align:center;font-size:8.5pt;color:#7b828d}
   }
-  .printroot{display:none}
   .panel{padding:clamp(24px,4vw,36px);background:rgba(255,255,255,.04);
     border:1px solid rgba(255,255,255,.10)}
   .codebox{display:flex;flex-wrap:wrap;gap:14px;align-items:stretch}
@@ -115,8 +144,8 @@
   .langpick button[aria-pressed=true]{background:var(--blue);color:#fff;border-color:var(--blue)}
   .headrow{display:flex;align-items:center;justify-content:space-between;gap:16px}
 </style>
-<script src="i18n.js?v=20261111e"></script>
-<script src="ticket.js?v=20261111e"></script>
+<script src="i18n.js?v=20261111f"></script>
+<script src="ticket.js?v=20261111f"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
 </head>
 <body>
@@ -226,15 +255,20 @@
       t('ty.contactFix', { contact: contactLink() }) + '</div>';
   }
 
-  // Printing copies the chosen ticket into a root of its own and prints that,
-  // so the page's dark background and everything around it stay out of the
-  // way without having to maintain a second layout.
+  // Printing produces a gift sheet, not a bare ticket: a frame, who it is
+  // from, the message that came with the order, and a few lines saying what
+  // this is for someone who has never heard of the place.
   function printTicket(code) {
-    var found = null;
-    (last && last.d ? collectVouchers(last.d) : []).forEach(function (v) {
-      if (v.code === code) found = v;
+    var hit = null;
+    giftPairs().forEach(function (pair) {
+      if (pair.v.code === code) hit = pair;
     });
-    if (!found) return;
+    if (!hit) return;
+
+    var d = last && last.d ? last.d : {};
+    var from = (d.buyer_name || '').trim();
+    var to = (hit.g.recipient_name || '').trim();
+    var msg = (hit.g.gift_message || '').trim();
 
     var root = document.querySelector('.printroot');
     if (!root) {
@@ -242,8 +276,32 @@
       root.className = 'printroot';
       document.body.appendChild(root);
     }
-    root.innerHTML = ticketFor(found) +
-      '<p class="pcode">' + esc(found.code) + '</p>';
+
+    root.innerHTML =
+      '<div class="sheet">' +
+        '<div class="orn tl"></div><div class="orn tr"></div>' +
+        '<div class="orn bl"></div><div class="orn br"></div>' +
+        '<div class="sheetin">' +
+          '<p class="kick">' + esc(t('pr.kicker')) + '</p>' +
+          (to ? '<h1 class="forwho">' + esc(t('pr.for', { name: to })) + '</h1>'
+              : '<h1 class="forwho">' + esc(t('pr.forAnon')) + '</h1>') +
+          '<div class="tkbox">' + ticketFor(hit.v) + '</div>' +
+          (msg ? '<blockquote class="msg">' + esc(msg) + '</blockquote>' : '') +
+          (from ? '<p class="from">' + esc(t('pr.from', { name: from })) + '</p>' : '') +
+          '<div class="rule2"></div>' +
+          '<div class="cols2">' +
+            '<div><h2>' + esc(t('pr.whatH')) + '</h2><p>' + esc(t('pr.whatP')) + '</p></div>' +
+            '<div><h2>' + esc(t('pr.whereH')) + '</h2><p>' + esc(t('pr.whereP')) + '</p></div>' +
+          '</div>' +
+          '<div class="steps">' +
+            '<h2>' + esc(t('pr.howH')) + '</h2>' +
+            '<ol><li>' + esc(t('pr.how1')) + '</li>' +
+                '<li>' + esc(t('pr.how2')) + '</li>' +
+                '<li>' + esc(t('pr.how3')) + '</li></ol>' +
+          '</div>' +
+          '<p class="foot">' + esc(t('pr.foot')) + '</p>' +
+        '</div>' +
+      '</div>';
 
     var done = function () {
       root.innerHTML = '';
@@ -253,11 +311,16 @@
     window.print();
   }
 
-  function collectVouchers(d) {
-    if (d.gifts && d.gifts.length) {
-      return d.gifts.reduce(function (acc, g) { return acc.concat(g.vouchers || []); }, []);
-    }
-    return d.vouchers || [];
+  // Each voucher together with the gift it belongs to.
+  function giftPairs() {
+    var d = last && last.d ? last.d : {};
+    var gs = (d.gifts && d.gifts.length) ? d.gifts : [{
+      recipient_name: d.recipient_name, recipient_email: d.recipient_email,
+      gift_message: d.gift_message, vouchers: d.vouchers || []
+    }];
+    return gs.reduce(function (acc, g) {
+      return acc.concat((g.vouchers || []).map(function (v) { return { g: g, v: v }; }));
+    }, []);
   }
 
   // The QR carries the redeem link with the code already in it, so scanning
