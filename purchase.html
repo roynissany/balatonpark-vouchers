@@ -71,6 +71,24 @@
   h2.sec i{display:inline-block;width:28px;height:2px;background:var(--blue)}
 
   .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px}
+  /* Each receiver is a block of its own: packages, who it is for, delivery. */
+  .gift{position:relative;padding-top:4px}
+  .gift + .gift{margin-top:46px;padding-top:40px;border-top:1px solid rgba(255,255,255,.12)}
+  .gifthead{display:flex;align-items:center;justify-content:space-between;gap:16px;margin:0 0 6px}
+  .gifthead .who{font-family:var(--cond);font-weight:800;font-size:19px;letter-spacing:.14em;
+    text-transform:uppercase;color:var(--pale)}
+  .drop{min-height:38px;padding:0 14px;cursor:pointer;background:none;
+    color:rgba(245,247,251,.58);border:1px solid rgba(255,255,255,.22);
+    font-family:var(--cond);font-weight:700;font-size:14px;letter-spacing:.1em;text-transform:uppercase}
+  .drop:hover{color:var(--text);border-color:rgba(255,255,255,.5)}
+  .addgift{display:inline-flex;align-items:center;gap:10px;margin-top:34px;min-height:56px;
+    padding:0 26px;cursor:pointer;background:none;color:var(--pale);
+    border:1px dashed rgba(168,206,240,.55);
+    font-family:var(--cond);font-weight:800;font-size:19px;letter-spacing:.08em;text-transform:uppercase;
+    transition:background .25s,border-color .25s,color .25s}
+  .addgift:hover{background:rgba(66,122,183,.14);border-color:var(--blue);color:var(--text)}
+  .sumgift{margin:18px 0 6px;font-family:var(--cond);font-weight:800;font-size:15px;
+    letter-spacing:.16em;text-transform:uppercase;color:var(--pale)}
   .card{position:relative;display:flex;flex-direction:column;align-items:flex-start;min-height:172px;
     padding:22px;cursor:pointer;text-align:left;color:var(--text);
     background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.10)}
@@ -177,7 +195,7 @@
   .langpick button[aria-pressed=true]{background:var(--blue);color:#fff;border-color:var(--blue)}
   .headrow{display:flex;align-items:center;justify-content:space-between;gap:16px}
 </style>
-<script src="i18n.js?v=20261111c"></script>
+<script src="i18n.js?v=20261111d"></script>
 </head>
 <body>
 
@@ -202,41 +220,7 @@
     <form id="buy" class="cols" novalidate>
 
       <div class="main">
-        <h2 class="sec up" style="margin-top:0"><i class="rule"></i><span data-i18n="buy.sec1">1 · Packages</span></h2>
-        <div class="cards" id="cards"></div>
-        <button type="button" class="hotel lift zw up d2" id="hotelCard" aria-pressed="false"></button>
-
-        <p class="up" id="smallprint" style="margin:18px 0 0;font-size:13px;font-weight:300;line-height:1.75;color:rgba(245,247,251,.62)"></p>
-
-        <h2 class="sec up"><i></i><span data-i18n="buy.sec2">2 · Who is it for</span></h2>
-        <div class="grid2">
-          <div>
-            <label class="f" for="rname" data-i18n="buy.rname">Recipient name</label>
-            <input id="rname" class="fld" type="text" autocomplete="off" placeholder="Kovács Péter">
-          </div>
-          <div>
-            <label class="f" for="remail" data-i18n="buy.remail">Recipient email</label>
-            <input id="remail" class="fld" type="email" required placeholder="peter@example.com">
-          </div>
-          <div style="grid-column:1/-1">
-            <label class="f" for="msg" data-i18n="buy.msg">Message on the gift card</label>
-            <textarea id="msg" class="fld" rows="3" maxlength="2000" data-i18n-ph="buy.msgPlaceholder" placeholder="Happy birthday! See you on track."></textarea>
-          </div>
-        </div>
-
-        <h2 class="sec up"><i></i><span data-i18n="buy.sec3">3 · Delivery</span></h2>
-        <div style="display:flex;flex-direction:column;gap:12px" id="delivery"></div>
-        <div id="schedule" hidden style="margin-top:12px">
-          <div class="half">
-            <label class="f" for="senddate" data-i18n="buy.sendOn">Send on</label>
-            <input id="senddate" class="fld" type="date" style="border-color:rgba(255,255,255,.22)">
-          </div>
-          <div class="half">
-            <label class="f" for="sendtime" data-i18n="buy.sendAt">At</label>
-            <input id="sendtime" class="fld" type="time" value="08:00" style="border-color:rgba(255,255,255,.22)">
-          </div>
-          <p id="sendNote" style="flex:1 1 100%;margin:0;font-size:13px;font-weight:300;line-height:1.6;color:rgba(245,247,251,.70)">Budapest time.</p>
-        </div>
+        <div id="gifts"></div>
 
         <h2 class="sec up"><i></i><span data-i18n="buy.sec4">4 · Your details</span></h2>
         <div class="grid2">
@@ -249,6 +233,11 @@
             <input id="bemail" class="fld" type="email" required autocomplete="email">
           </div>
         </div>
+
+        <button type="button" id="addGift" class="addgift">
+          <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>
+          <span data-i18n="buy.addReceiver">Add another receiver</span>
+        </button>
       </div>
 
       <aside class="up d2">
@@ -308,16 +297,30 @@
   };
 
   var cat = null;            // catalogue from the server
-  var qty = {};              // package code -> how many
-  var deliveryMode = 'now';
+
+  // One entry per receiver. Each carries its own packages, its own recipient
+  // fields and its own delivery setting; the buyer's details are asked once
+  // and apply to the lot. The discount tier is still counted across every
+  // block together, which is the point of buying for several people at once.
+  var gifts = [];
+  var seq = 0;
+
+  function newGift() {
+    return { id: ++seq, qty: {}, delivery: 'now', cardFor: {}, el: null };
+  }
 
   // The ladder counts sessions in the basket, not vouchers. The 3- and
   // 6-session prices already carry their own discount; this is the deeper
   // tier you can only reach by combining. Shown here, enforced server-side.
   function sessionsInBasket() {
-    return cat.packages.reduce(function (n, p) {
-      return n + (p.splittable ? (p.session_count || 0) * (qty[p.code] || 0) : 0);
+    return gifts.reduce(function (sum, g) {
+      return sum + cat.packages.reduce(function (n, p) {
+        return n + (p.splittable ? (p.session_count || 0) * (g.qty[p.code] || 0) : 0);
+      }, 0);
     }, 0);
+  }
+  function countIn(g) {
+    return cat.packages.reduce(function (n, p) { return n + (g.qty[p.code] || 0); }, 0);
   }
   // The tier states the price of a session outright. percent is only the
   // figure on the badge, so 58 a session can be shown as 10% without the
@@ -357,16 +360,33 @@
 
   // ------------------------------------------------------------ render
 
-  // The cards are built once and then patched. Rebuilding them on every click
-  // restarted the entrance animation on all of them, which read as a flash.
-  var built = false;
-  var cardFor = {};
+  // ------------------------------------------------------------ render
 
-  function buildCards() {
-    var shop = cat.packages.filter(function (p) { return !p.includes_room; });
-    $('#cards').replaceChildren.apply($('#cards'), shop.map(function (p) {
+  // A receiver block: its packages, who it is for, how it is delivered.
+  // Built once per block and then patched, because rebuilding restarts the
+  // entrance animation on every card, which reads as a flash.
+  function buildGiftBlock(g) {
+    var wrap = el('div', 'gift');
+    g.el = wrap;
+
+    var head = el('div', 'gifthead');
+    head.innerHTML = '<span class="who"></span>';
+    var drop = el('button', 'drop', t('buy.removeReceiver'));
+    drop.type = 'button';
+    drop.addEventListener('click', function () { removeGift(g); });
+    head.append(drop);
+    wrap.append(head);
+
+    var h1 = el('h2', 'sec', '<i class="rule"></i><span data-i18n="buy.secPackages">' +
+      esc(t('buy.secPackages')) + '</span>');
+    h1.style.marginTop = '14px';
+    wrap.append(h1);
+
+    var cards = el('div', 'cards');
+    wrap.append(cards);
+    cat.packages.filter(function (p) { return !p.includes_room; }).forEach(function (p) {
       var face = FACE[p.code] || { big: String(p.session_count || ''), kind: 'buy.kindSessions' };
-      var b = el('button', 'card lift up');
+      var b = el('button', 'card lift');
       b.type = 'button';
       b.innerHTML =
         '<span class="info" role="button" tabindex="0" data-tip="' + esc(p.code) + '"' +
@@ -377,123 +397,158 @@
         '<span class="off" hidden></span>';
       b.addEventListener('click', function (ev) {
         if (ev.target.closest('.info')) return;   // the "i" is not a buy click
-        toggle(p.code);
+        toggle(g, p.code);
       });
-      cardFor[p.code] = b;
-      return b;
-    }));
-
-    var stay = cat.packages.filter(function (p) { return p.includes_room; })[0];
-    var box = $('#hotelCard');
-    if (!stay) { box.hidden = true; built = true; return; }
-
-    box.innerHTML =
-      '<span class="shot"><img src="hotel-room.jpg" alt="" aria-hidden="true" loading="lazy"></span>' +
-      '<span class="veil"></span>' +
-      '<span class="body">' +
-        '<span style="display:flex;align-items:center;gap:12px;font-size:11px;font-weight:600;letter-spacing:.22em;text-transform:uppercase;color:var(--pale)">' +
-          '<span style="display:inline-block;width:28px;height:2px;background:var(--blue)"></span>' +
-          // These carry data-i18n so a language switch can redraw them in
-          // place: buildCards runs once, so plain t() output would stay frozen
-          // in whichever language the page first loaded in.
-          '<span data-i18n="buy.stayNight">' + t('buy.stayNight') + '</span></span>' +
-        '<span data-i18n="buy.hotelName" style="font-family:var(--cond);font-weight:800;font-size:clamp(28px,5vw,44px);line-height:.96;text-transform:uppercase">' +
-          t('buy.hotelName') + '</span>' +
-        '<span data-i18n="buy.hotelBlurb" style="font-size:14px;font-weight:300;line-height:1.7;color:rgba(245,247,251,.82);max-width:480px">' +
-          t('buy.hotelBlurb') + '</span>' +
-        '<span style="display:flex;flex-wrap:wrap;align-items:baseline;gap:14px;margin-top:10px">' +
-          '<span class="h-now" style="font-family:var(--cond);font-weight:800;font-size:clamp(38px,7vw,54px);line-height:1;color:var(--pale)"></span>' +
-          '<span class="h-was" hidden style="font-family:var(--cond);font-weight:700;font-size:26px;color:rgba(245,247,251,.45);text-decoration:line-through"></span>' +
-          '<span class="h-note" style="font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:rgba(245,247,251,.65)"></span>' +
-        '</span>' +
-      '</span>';
-    box.addEventListener('click', function (ev) {
-      if (ev.target.closest('.info')) return;     // the "i" is not a buy click
-      toggle(stay.code);
+      g.cardFor[p.code] = b;
+      cards.append(b);
     });
-    built = true;
+
+    var h2 = el('h2', 'sec', '<i></i><span data-i18n="buy.secWho">' + esc(t('buy.secWho')) + '</span>');
+    wrap.append(h2);
+    var who = el('div', 'grid2');
+    who.innerHTML =
+      '<div><label class="f" data-i18n="buy.rname">' + esc(t('buy.rname')) + '</label>' +
+        '<input class="fld r-name" type="text" autocomplete="off" placeholder="Kovács Péter"></div>' +
+      '<div><label class="f" data-i18n="buy.remail">' + esc(t('buy.remail')) + '</label>' +
+        '<input class="fld r-email" type="email" required placeholder="peter@example.com"></div>' +
+      '<div style="grid-column:1/-1"><label class="f" data-i18n="buy.msg">' + esc(t('buy.msg')) + '</label>' +
+        '<textarea class="fld r-msg" rows="3" maxlength="2000" data-i18n-ph="buy.msgPlaceholder" placeholder="' +
+        esc(t('buy.msgPlaceholder')) + '"></textarea></div>';
+    wrap.append(who);
+    who.querySelector('.r-name').addEventListener('input', paintHeads);
+
+    var h3 = el('h2', 'sec', '<i></i><span data-i18n="buy.secDelivery">' + esc(t('buy.secDelivery')) + '</span>');
+    wrap.append(h3);
+    var del = el('div', 'delivery');
+    del.style.cssText = 'display:flex;flex-direction:column;gap:12px';
+    wrap.append(del);
+
+    var sched = el('div', 'schedule');
+    sched.hidden = true;
+    sched.style.marginTop = '12px';
+    sched.innerHTML =
+      '<div class="half"><label class="f" data-i18n="buy.sendOn">' + esc(t('buy.sendOn')) + '</label>' +
+        '<input class="fld s-date" type="date" style="border-color:rgba(255,255,255,.22)"></div>' +
+      '<div class="half"><label class="f" data-i18n="buy.sendAt">' + esc(t('buy.sendAt')) + '</label>' +
+        '<input class="fld s-time" type="time" value="08:00" style="border-color:rgba(255,255,255,.22)"></div>' +
+      '<p class="s-note" style="flex:1 1 100%;margin:0;font-size:13px;font-weight:300;line-height:1.6;color:rgba(245,247,251,.70)"></p>';
+    wrap.append(sched);
+    sched.querySelector('.s-date').min = new Date().toISOString().slice(0, 10);
+    sched.querySelector('.s-date').addEventListener('change', function () { paintSendNote(g); });
+    sched.querySelector('.s-time').addEventListener('change', function () { paintSendNote(g); });
+
+    renderDelivery(g);
+    return wrap;
+  }
+
+  // The heading only earns its place once there is more than one receiver.
+  function paintHeads() {
+    gifts.forEach(function (g, i) {
+      var head = g.el.querySelector('.gifthead');
+      var name = (g.el.querySelector('.r-name').value || '').trim();
+      head.hidden = gifts.length < 2;
+      head.querySelector('.who').textContent = gifts.length < 2 ? '' :
+        (name ? t('buy.receiverNamed', { n: i + 1, name: name }) : t('buy.receiverN', { n: i + 1 }));
+    });
+  }
+
+  function renderDelivery(g) {
+    var defs = [
+      { id: 'now',   label: t('buy.delNow'),   sub: t('buy.delNowSub') },
+      { id: 'date',  label: t('buy.delDate'),  sub: t('buy.delDateSub') },
+      { id: 'print', label: t('buy.delPrint'), sub: t('buy.delPrintSub') }
+    ];
+    var host = g.el.querySelector('.delivery');
+    host.replaceChildren.apply(host, defs.map(function (o) {
+      var lab = el('label', 'delrow lift' + (g.delivery === o.id ? ' on' : ''),
+        '<input type="radio" name="delivery-' + g.id + '"' + (g.delivery === o.id ? ' checked' : '') + '>' +
+        '<span><span class="t">' + esc(o.label) + '</span><span class="s">' + esc(o.sub) + '</span></span>');
+      lab.querySelector('input').addEventListener('change', function () {
+        g.delivery = o.id;
+        renderDelivery(g);
+        g.el.querySelector('.schedule').hidden = g.delivery !== 'date';
+        paintSendNote(g);
+      });
+      return lab;
+    }));
   }
 
   function paintCards() {
     var sessions = sessionsInBasket();
-    cat.packages.forEach(function (p) {
-      var n = qty[p.code] || 0;
-      var list = p.list_price_cents || p.price_cents;
-      // A card shows what it costs to add, so an unselected one is priced at
-      // the tier its own sessions would reach. Pricing it at the basket's
-      // current tier made the six-pack read 372 at 5% next to a three-pack,
-      // when adding it would actually have cost 348 at 11%.
-      var reach = sessions + (n || !p.splittable ? 0 : (p.session_count || 0));
-      var now = unitFor(p, reach);
-      var pct = pctFor(p, reach, list, now);
+    gifts.forEach(function (g) {
+      cat.packages.forEach(function (p) {
+        var card = g.cardFor[p.code];
+        if (!card) return;
+        var n = g.qty[p.code] || 0;
+        var list = p.list_price_cents || p.price_cents;
+        // A card shows what it costs to add, so an unselected one is priced
+        // at the tier its own sessions would reach.
+        var reach = sessions + (n || !p.splittable ? 0 : (p.session_count || 0));
+        var now = unitFor(p, reach);
+        var pct = pctFor(p, reach, list, now);
 
-      if (p.includes_room) {
-        var box = $('#hotelCard');
-        if (box.hidden) return;
-        box.setAttribute('aria-pressed', n > 0 ? 'true' : 'false');
-        box.querySelector('.h-now').textContent = money(now);
-        var was = box.querySelector('.h-was');
-        was.hidden = !pct;
-        was.textContent = money(list);
-        box.querySelector('.h-note').textContent = pct ? t('buy.off', { pct: pct }) : '';
-        return;
-      }
-
-      var card = cardFor[p.code];
-      if (!card) return;
-      card.setAttribute('aria-pressed', n > 0 ? 'true' : 'false');
-      card.querySelector('.now').textContent = money(now);
-      var w = card.querySelector('.was');
-      w.hidden = !pct;
-      w.textContent = money(list);
-      var off = card.querySelector('.off');
-      off.hidden = !pct;
-      off.textContent = pct ? t('buy.off', { pct: pct }) : '';
+        card.setAttribute('aria-pressed', n > 0 ? 'true' : 'false');
+        card.querySelector('.now').textContent = money(now);
+        var w = card.querySelector('.was');
+        w.hidden = !pct;
+        w.textContent = money(list);
+        var off = card.querySelector('.off');
+        off.hidden = !pct;
+        off.textContent = pct ? t('buy.off', { pct: pct }) : '';
+      });
     });
   }
 
   function renderSummary() {
-    var chosen = cat.packages.filter(function (p) { return (qty[p.code] || 0) > 0; });
     var host = $('#lines');
     host.replaceChildren();
 
-    if (!chosen.length) {
+    var sessions = sessionsInBasket();
+    var gross = 0, total = 0, count = 0;
+    var rows = [];
+
+    gifts.forEach(function (g, gi) {
+      cat.packages.forEach(function (p) {
+        var n = g.qty[p.code] || 0;
+        if (!n) return;
+        var list = p.list_price_cents || p.price_cents;
+        var unit = unitFor(p, sessions);
+        gross += list * n; total += unit * n; count += n;
+        rows.push({ g: g, gi: gi, p: p, n: n, list: list, unit: unit,
+                    was: list * n, line: unit * n });
+      });
+    });
+
+    if (!rows.length) {
       host.append(el('p', null, t('buy.empty')));
       host.firstChild.style.cssText = 'margin:0 0 22px;padding:20px 0;font-size:14px;' +
         'font-weight:300;line-height:1.7;color:rgba(245,247,251,.60);' +
         'border-top:1px solid rgba(255,255,255,.10);border-bottom:1px solid rgba(255,255,255,.10)';
     }
 
-    var sessions = sessionsInBasket();
-    var gross = 0, total = 0, count = 0;
-    // A percent off a whole-euro price rarely lands on a whole euro: 5% off
-    // three sessions is 185.25. The basket is floored to the euro and the
-    // odd cents come off the biggest line, so no price is ever shown with
-    // stray cents. The server does the same sum and is the one that charges.
-    var trimFrom = null, trimBy = 0;
-
-    var rows = chosen.map(function (p) {
-      var n = qty[p.code];
-      var list = p.list_price_cents || p.price_cents;
-      var unit = unitFor(p, sessions);
-      var was = list * n;
-      var line = unit * n;
-      gross += was; total += line; count += n;
-      return { p: p, n: n, list: list, unit: unit, was: was, line: line };
-    });
-
+    // Every unit is a whole number of euros, so this should never fire. It
+    // stays as a floor in case a package is ever priced in cents.
     if (total % 100) {
-      trimBy = total % 100;
-      trimFrom = rows.reduce(function (a, b) { return b.line > a.line ? b : a; }, rows[0]);
-      trimFrom.line -= trimBy;
-      trimFrom.unit = Math.round(trimFrom.line / trimFrom.n);
-      total -= trimBy;
+      var trim = total % 100;
+      var big = rows.reduce(function (a, b) { return b.line > a.line ? b : a; }, rows[0]);
+      big.line -= trim;
+      big.unit = Math.round(big.line / big.n);
+      total -= trim;
     }
 
+    var lastGift = -1;
     rows.forEach(function (r) {
-      var p = r.p, n = r.n, list = r.list, unit = r.unit, was = r.was, line = r.line;
-      var pct = pctFor(p, sessions, list, unit);
+      if (gifts.length > 1 && r.gi !== lastGift) {
+        lastGift = r.gi;
+        var name = (r.g.el.querySelector('.r-name').value || '').trim();
+        var head = el('p', 'sumgift', esc(name
+          ? t('buy.receiverNamed', { n: r.gi + 1, name: name })
+          : t('buy.receiverN', { n: r.gi + 1 })));
+        host.append(head);
+      }
 
+      var p = r.p, n = r.n, list = r.list, unit = r.unit;
+      var pct = pctFor(p, sessions, list, unit);
       var row = el('div', 'line');
       row.innerHTML =
         '<div class="top">' +
@@ -508,21 +563,21 @@
             '</span>' +
           '</span>' +
           '<span style="display:flex;flex-direction:column;align-items:flex-end;gap:3px;white-space:nowrap">' +
-            '<span style="font-family:var(--cond);font-weight:800;font-size:22px;line-height:1">' + money(line) + '</span>' +
-            (pct ? '<span style="font-size:12px;color:rgba(245,247,251,.45);text-decoration:line-through">' + money(was) + '</span>' : '') +
+            '<span style="font-family:var(--cond);font-weight:800;font-size:22px;line-height:1">' + money(r.line) + '</span>' +
+            (pct ? '<span style="font-size:12px;color:rgba(245,247,251,.45);text-decoration:line-through">' + money(r.was) + '</span>' : '') +
           '</span>' +
         '</div>' +
         (pct ? '<p style="margin:11px 0 0;font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--pale)">' +
                t('buy.off', { pct: pct }) + '</p>' : '');
 
-      row.querySelector('[data-act=dec]').addEventListener('click', function () { bump(p.code, -1); });
-      row.querySelector('[data-act=inc]').addEventListener('click', function () { bump(p.code, 1); });
+      row.querySelector('[data-act=dec]').addEventListener('click', function () { bump(r.g, p.code, -1); });
+      row.querySelector('[data-act=inc]').addEventListener('click', function () { bump(r.g, p.code, 1); });
       host.append(row);
     });
 
-    // One nudge for the whole basket, not one per line: the tier is about
-    // total sessions, so a per-line prompt would be telling the buyer to do
-    // something that does not apply to that line.
+    // One nudge for the whole basket: the tier is about total sessions, so a
+    // per-line prompt would be telling the buyer to do something that does
+    // not apply to that line.
     var next = sessions > 0 ? nextTier(sessions) : null;
     if (next) {
       var add = next.min_sessions - sessions;
@@ -535,49 +590,51 @@
         }) + '</span>');
       nudge.type = 'button';
       nudge.style.marginTop = '16px';
-      nudge.addEventListener('click', function () { bump('s1', add); });
+      // Added to the first block, since that is the one the buyer started.
+      nudge.addEventListener('click', function () { bump(gifts[0], 's1', add); });
       host.append(nudge);
     }
 
     $('#saving').hidden = gross <= total;
     $('#savingAmt').textContent = '-' + money(gross - total);
     $('#total').textContent = money(total);
-    $('#pay').disabled = !chosen.length;
-    $('#pay').textContent = total ? t('buy.payAmount', { amount: money(total) }) : t('buy.pay');
+    $('#count').textContent = count;
     syncPaymentForm(total);
-    $('#codeNote').textContent = count > 1
-      ? t('buy.codeMany', { n: count }) : t('buy.codeOne');
-  }
-
-  function renderDelivery() {
-    var defs = [
-      { id: 'now',   label: t('buy.delNow'),   sub: t('buy.delNowSub') },
-      { id: 'date',  label: t('buy.delDate'),  sub: t('buy.delDateSub') },
-      { id: 'print', label: t('buy.delPrint'), sub: t('buy.delPrintSub') }
-    ];
-    var host = $('#delivery');
-    host.replaceChildren.apply(host, defs.map(function (o) {
-      var lab = el('label', 'delrow lift' + (deliveryMode === o.id ? ' on' : ''),
-        '<input type="radio" name="delivery"' + (deliveryMode === o.id ? ' checked' : '') + '>' +
-        '<span><span class="t">' + esc(o.label) + '</span><span class="s">' + esc(o.sub) + '</span></span>');
-      lab.querySelector('input').addEventListener('change', function () {
-        deliveryMode = o.id;
-        renderDelivery();
-        $('#schedule').hidden = deliveryMode !== 'date';
-      });
-      return lab;
-    }));
   }
 
   function draw() {
-    if (!built) buildCards();
+    paintHeads();
     paintCards();
     renderSummary();
   }
 
-  function toggle(code) { qty[code] = (qty[code] || 0) > 0 ? 0 : 1; draw(); }
-  function bump(code, by) {
-    qty[code] = Math.max(0, Math.min(20, (qty[code] || 0) + by));
+  function addGift(focus) {
+    var g = newGift();
+    gifts.push(g);
+    $('#gifts').append(buildGiftBlock(g));
+    i18n.apply(g.el);
+    draw();
+    if (focus) {
+      g.el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      var f = g.el.querySelector('.r-name');
+      if (f) setTimeout(function () { f.focus(); }, 300);
+    }
+    return g;
+  }
+
+  function removeGift(g) {
+    if (gifts.length < 2) return;        // the first block is the order itself
+    gifts = gifts.filter(function (x) { return x !== g; });
+    g.el.remove();
+    draw();
+  }
+
+  function toggle(g, code) {
+    g.qty[code] = (g.qty[code] || 0) > 0 ? 0 : 1;
+    draw();
+  }
+  function bump(g, code, by) {
+    g.qty[code] = Math.max(0, Math.min(20, (g.qty[code] || 0) + by));
     draw();
   }
 
@@ -596,42 +653,63 @@
   $('#buy').addEventListener('submit', function (ev) {
     ev.preventDefault();
     $('#err').hidden = true;
-    ['senddate', 'sendtime'].forEach(function (id) {
-      var f = $('#' + id);
-      if (f && !f.dataset.noted) { f.dataset.noted = '1'; f.addEventListener('change', paintSendNote); }
-    });
-    ['remail', 'bemail', 'senddate'].forEach(function (id) {
-      $('#' + id).removeAttribute('aria-invalid');
+    $('#bemail').removeAttribute('aria-invalid');
+    gifts.forEach(function (g) {
+      ['.r-email', '.s-date'].forEach(function (sel) {
+        var f = g.el.querySelector(sel);
+        if (f) f.removeAttribute('aria-invalid');
+      });
     });
 
-    var items = Object.keys(qty)
-      .filter(function (c) { return qty[c] > 0; })
-      .map(function (c) { return { package_code: c, qty: qty[c] }; });
-    if (!items.length) return fail(t('buy.errPackage'));
+    // Every block is checked before anything is sent, so the buyer fixes all
+    // of it in one go rather than discovering the next fault after each try.
+    var payload = [];
+    for (var i = 0; i < gifts.length; i++) {
+      var g = gifts[i];
+      var who = gifts.length > 1 ? ' (' + t('buy.receiverN', { n: i + 1 }) + ')' : '';
 
-    if (!validEmail($('#remail').value)) {
-      return fail(t('buy.errRecipient'), $('#remail'));
+      var items = Object.keys(g.qty)
+        .filter(function (c) { return g.qty[c] > 0; })
+        .map(function (c) { return { package_code: c, qty: g.qty[c] }; });
+      if (!items.length) {
+        g.el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        return fail(t('buy.errPackage') + who);
+      }
+
+      var remail = g.el.querySelector('.r-email');
+      if (!validEmail(remail.value)) return fail(t('buy.errRecipient') + who, remail);
+
+      var deliverAt = null;
+      if (g.delivery === 'date') {
+        // Named clock, not t: a variable called t here is hoisted over the
+        // whole handler and leaves the translator undefined from line one.
+        var dateF = g.el.querySelector('.s-date');
+        var d = dateF.value, clock = g.el.querySelector('.s-time').value || '08:00';
+        if (!d) return fail(t('buy.errDate') + who, dateF);
+        // The field is Budapest time, so the instant has to be built with
+        // Budapest's offset before it is compared with now. Parsed without
+        // one the browser reads it in its own zone, and from Tel Aviv a
+        // perfectly valid Budapest time came back as "in the past".
+        var stamp = d + 'T' + clock + ':00' + budapestOffset(new Date(d + 'T12:00:00Z'));
+        var when = new Date(stamp);
+        if (isNaN(when.getTime()) || when.getTime() < Date.now()) {
+          return fail(t('buy.errPast') + who, dateF);
+        }
+        deliverAt = stamp;
+      }
+
+      payload.push({
+        items: items,
+        recipient_name: g.el.querySelector('.r-name').value,
+        recipient_email: remail.value,
+        gift_message: g.el.querySelector('.r-msg').value,
+        delivery_method: g.delivery === 'date' ? 'scheduled' : g.delivery,
+        deliver_at: deliverAt
+      });
     }
+
     if (!validEmail($('#bemail').value)) {
       return fail(t('buy.errBuyer'), $('#bemail'));
-    }
-
-    var deliverAt = null;
-    if (deliveryMode === 'date') {
-      // Named clock, not t: a variable called t here is hoisted over the
-      // whole handler and leaves the translator undefined from its first line.
-      var d = $('#senddate').value, clock = $('#sendtime').value || '08:00';
-      if (!d) return fail(t('buy.errDate'), $('#senddate'));
-      // The field is Budapest time, so the instant has to be built with
-      // Budapest's offset before it is compared with now. Parsed without one
-      // the browser reads it in its own zone, and from Tel Aviv a perfectly
-      // valid Budapest time came back as "in the past".
-      var stamp = d + 'T' + clock + ':00' + budapestOffset(new Date(d + 'T12:00:00Z'));
-      var when = new Date(stamp);
-      if (isNaN(when.getTime()) || when.getTime() < Date.now()) {
-        return fail(t('buy.errPast'), $('#senddate'));
-      }
-      deliverAt = stamp;
     }
 
     var btn = $('#pay');
@@ -653,14 +731,9 @@
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        items: items,
+        gifts: payload,
         buyer_name: $('#bname').value.trim(),
-        buyer_email: $('#bemail').value.trim(),
-        recipient_name: $('#rname').value.trim(),
-        recipient_email: $('#remail').value.trim(),
-        gift_message: $('#msg').value.trim(),
-        delivery_method: deliveryMode === 'date' ? 'scheduled' : deliveryMode,
-        deliver_at: deliverAt
+        buyer_email: $('#bemail').value.trim()
       })
     }).then(function (res) {
       return res.json().then(function (body) { return { ok: res.ok, body: body }; });
@@ -791,11 +864,12 @@
   // Hungary is UTC+1, UTC+2 between the last Sundays of March and October.
   // Says what the chosen Budapest time is on the buyer's own clock, so
   // nobody has to work out the difference themselves.
-  function paintSendNote() {
-    var n = $('#sendNote');
+  function paintSendNote(g) {
+    if (!g || !g.el) return;
+    var n = g.el.querySelector('.s-note');
     if (!n) return;
-    var d = $('#senddate') && $('#senddate').value;
-    var clock = $('#sendtime') && $('#sendtime').value;
+    var d = g.el.querySelector('.s-date').value;
+    var clock = g.el.querySelector('.s-time').value;
     n.textContent = t('buy.sendNote');
     if (!d || !clock) return;
     var when = new Date(d + 'T' + clock + ':00' + budapestOffset(new Date(d + 'T12:00:00Z')));
@@ -890,27 +964,31 @@
   i18n.onChange(function () {
     closeTip();
     paintProse();
-    renderDelivery();
+    gifts.forEach(function (g) {
+      renderDelivery(g);
+      paintSendNote(g);
+    });
     resetPaymentForm();
     if (cat) draw();
   });
 
-  renderDelivery();
-  $('#senddate').min = new Date().toISOString().slice(0, 10);
+  $('#addGift').addEventListener('click', function () { addGift(true); });
 
   fetch(API + '/catalogue')
     .then(function (r) { return r.json(); })
     .then(function (data) {
       cat = data;
+      var g = addGift(false);
       // Open on the middle package, the way the mockup did.
-      if (cat.packages.some(function (p) { return p.code === 's3'; })) qty.s3 = 1;
+      if (cat.packages.some(function (p) { return p.code === 's3'; })) g.qty.s3 = 1;
       draw();
     })
     .catch(function () {
-      $('#cards').innerHTML =
+      $('#gifts').innerHTML =
         '<p style="color:rgba(245,247,251,.6);font-size:14px">' +
         t('buy.errLoad', { email: link('mailto:info@balatonparkcircuit.com', t('common.emailUs')) }) + '</p>';
       $('#pay').disabled = true;
+      $('#addGift').hidden = true;
     });
 })();
 </script>
