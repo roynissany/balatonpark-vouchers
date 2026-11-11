@@ -81,7 +81,7 @@
   footer a{text-decoration:none;color:rgba(245,247,251,.55)}
   footer a:hover{color:var(--text)}
 </style>
-<script src="i18n.js?v=20261111f"></script>
+<script src="i18n.js?v=20261111g"></script>
 </head>
 <body>
 
@@ -129,15 +129,25 @@
   function paint() {
     var terms = '<a href="https://www.balatonparkcircuit.com/tc" target="_blank" rel="noopener">' +
                 t('foot.terms').toLowerCase() + '</a>';
-    var contact = '<a href="mailto:info@balatonparkcircuit.com?subject=Gift%20Vouchers">' +
-                  t('foot.contact').toLowerCase() + '</a>';
+    // Hungarian wants a different word inside the link depending on the
+    // sentence, so a question may name its own; t() hands back the key
+    // itself when there is none, which is the signal to use the default.
+    function contact(forKey) {
+      var k = forKey ? 'faq.' + forKey + '.link' : '';
+      var label = k ? t(k) : '';
+      if (!label || label === k) label = t('foot.contact').toLowerCase();
+      return '<a href="mailto:info@balatonparkcircuit.com?subject=Gift%20Vouchers">' +
+             label + '</a>';
+    }
     document.getElementById('qa').innerHTML = KEYS.map(function (k) {
       return '<details><summary>' + t('faq.' + k + '.q') +
              '<span class="mk" aria-hidden="true"></span></summary>' +
-             '<div class="ans">' + t('faq.' + k + '.a', { terms: terms, contact: contact }) +
+             '<div class="ans">' +
+             t('faq.' + k + '.a', { terms: terms, contact: contact(k) }) +
              '</div></details>';
     }).join('');
-    document.getElementById('askLine').innerHTML = t('faq.ask', { contact: contact });
+    document.getElementById('askLine').innerHTML =
+      t('faq.ask', { contact: contact('ask') });
   }
 
   i18n.apply();

@@ -182,6 +182,7 @@
       'buy.haveVoucher': 'Already have a voucher? {link}.',
       'buy.redeemHere': 'Redeem it here',
       'buy.mayChange': 'Dates may be moved or cancelled - see the {terms}.',
+      'red.mayChange': 'Dates may be moved or cancelled - see the {terms}.',
       'buy.errPackage': 'Choose at least one package.',
       'buy.errRecipient': 'We need a valid email for the person receiving the gift.',
       'buy.errBuyer': 'We need your email, so we can send you the receipt.',
@@ -201,7 +202,7 @@
       'red.codeLabel': 'Voucher code',
       'red.continue': 'Continue',
       'red.checking': 'Checking…',
-      'red.lost': 'Lost the code? {email} with the buyer’s name and we’ll find it.',
+      'red.lost': 'Lost the code? {email} the address we sent it to and we’ll find it.',
       'red.emailUs': 'Email us',
       'red.tooShort': 'That code looks too short. It’s twelve characters, like BPC-ABCD-1234.',
       'red.step2': 'Step 2 of 2 · {left} of {total} left',
@@ -344,6 +345,9 @@
       'faq.lede': 'Minden, amit vásárlás előtt tudni érdemes, és minden, amire a megajándékozott kíváncsi lesz.',
       'faq.cta': 'Utalvány vásárlása',
       'faq.ask': 'Valamire nem kaptál választ? {contact}, és segítünk.',
+      'faq.ask.link': 'Írj nekünk',
+      'faq.lost.link': 'írj nekünk',
+      'faq.refund.link': 'kapcsolatot',
 
       'faq.how.q': 'Hogyan működik az ajándékutalvány?',
       'faq.how.a': 'Megveszed az utalványt, és kiválasztod, hogyan kézbesítsük. A megajándékozott megnyitja, megadja a kódot, és kiválasztja a neki megfelelő pályanapot. Ezután megkapja az adott napra szóló foglalási kódot. Neked nem kell dátumot választanod helyette.',
@@ -366,7 +370,7 @@
       'faq.transfer.q': 'Továbbadható másnak?',
       'faq.transfer.a': 'A kód a beváltásig nincs névhez kötve, így az használhatja fel, akinél van. A beváltás után a belőle létrejövő foglalásra a pálya szokásos szabályai vonatkoznak - lásd az {terms}-et.',
       'faq.refund.q': 'Kérhető visszatérítés?',
-      'faq.refund.a': 'Vedd fel velünk a kapcsolatot, és megnézzük: {contact}. A még be nem váltott utalványok esetében egyszerű az ügyintézés. Ha az utalványt már beváltották egy konkrét pályanapra, a foglalásra az {terms} rendelkezései vonatkoznak.',
+      'faq.refund.a': 'Vedd fel velünk a {contact}, és megnézzük. A még be nem váltott utalványok esetében egyszerű az ügyintézés. Ha az utalványt már beváltották egy konkrét pályanapra, a foglalásra az {terms} rendelkezései vonatkoznak.',
       'faq.bring.q': 'Mire van szüksége a vezetőnek az adott napon?',
       'faq.bring.a': 'Ugyanarra, mint bármelyik nyilvános pályanapon: érvényes jogosítványra és az előírt védőfelszerelésre. A részletes követelményeket az {terms} tartalmazza.',
       'faq.vat.q': 'Az árak tartalmazzák az áfát?',
@@ -376,7 +380,7 @@
       'foot.privacy': 'Adatvédelem',
       'foot.contact': 'Kapcsolat',
       'common.emailUs': 'írj nekünk',
-      'common.terms': 'feltételeket',
+      'common.terms': 'ÁSZF',
       'common.sessionOne': 'menet',
       'common.sessionMany': 'menet',
       'common.saturday': 'Szombat',
@@ -433,7 +437,7 @@
       'buy.secPackages': 'Csomagok',
       'buy.secWho': 'Kinek szól',
       'buy.secDelivery': 'Kézbesítés',
-      'buy.addReceiver': 'További megajándékozott',
+      'buy.addReceiver': 'Ajándékoznál még valakinek?',
       'buy.removeReceiver': 'Törlés',
       'buy.receiverN': '{n}. megajándékozott',
       'buy.receiverNamed': '{n}. megajándékozott · {name}',
@@ -497,6 +501,7 @@
       'buy.haveVoucher': 'Már van utalványod? {link}.',
       'buy.redeemHere': 'Itt beválthatod',
       'buy.mayChange': 'Az időpontok változhatnak vagy törlésre kerülhetnek - lásd az {terms}-et.',
+      'red.mayChange': 'A pályanapok időpontja módosulhat, vagy a rendezvények elmaradhatnak. Részletek az {terms}-ben.',
       'buy.errPackage': 'Válassz legalább egy csomagot.',
       'buy.errRecipient': 'Szükségünk van a megajándékozott érvényes e-mail címére.',
       'buy.errBuyer': 'Add meg az e-mail címed, hogy el tudjuk küldeni a visszaigazolást.',
@@ -515,8 +520,8 @@
       'red.codeLabel': 'Utalványkód',
       'red.continue': 'Tovább',
       'red.checking': 'Ellenőrzés…',
-      'red.lost': 'Elveszett a kód? {email}, írd meg a vásárló nevét, és megkeressük.',
-      'red.emailUs': 'Írj nekünk',
+      'red.lost': 'Elveszett a kód? {email} az e-mail-címet, amire a kódot küldtük, és megkeressük.',
+      'red.emailUs': 'Írd meg nekünk',
       'red.tooShort': 'Ez a kód túl rövidnek tűnik. Tizenkét karakter, például BPC-ABCD-1234.',
       'red.step2': '2. lépés a 2-ből · {left} / {total} maradt',
       'red.h2fresh': 'Válassz napot és darabszámot.',
@@ -525,27 +530,27 @@
       'red.leftMany': 'még {n} menet',
       'red.different': 'Másik kódot adok meg',
       'red.already': 'Kódok, amiket már megkaptál',
-      'red.introFresh': 'A {n} meneted lefuthat egyetlen napon, vagy eloszthatod több nap között.',
+      'red.introFresh': 'A {n} menetet felhasználhatod egyetlen pályanapon, vagy eloszthatod több napra is.',
       'red.introMore': 'Költs el ezen a napon annyit, amennyit szeretnél - a többiért bármikor visszatérhetsz.',
-      'red.notice': 'A 2027-es pályanapokra a regisztráció 2027 januárjában nyílik meg a Cooltixon. Váltsd be most, a kódod megvár. A nyitásról a közösségi oldalainkon és a hírlevélben szólunk - {subscribe}. Egy menet 25 perc.',
+      'red.notice': 'A 2027-es pályanapokra januártól lehet regisztrálni a Cooltixon. Az utalványodat azonban már most beválthatod, a kódodat pedig megőrizzük. A regisztráció indulását közösségi oldalainkon és hírlevelünkben jelentjük be - {subscribe}! Egy menet 25 perc.',
       'red.subscribe': 'iratkozz fel itt',
       'red.whichDay': '1 · Melyik nap',
       'red.howMany': '2 · Hány menet',
       'red.howManyOn': '2 · Hány menet - {day}',
-      'red.hint': 'Még {n} maradt. Minden kiválasztott csoportból külön Cooltix kód lesz arra a napra.',
+      'red.hint': 'Még {n} maradt. Minden kiválasztott pályanaphoz külön Cooltix-kódot kapsz az arra a napra szánt menetekhez.',
       'red.hintPickDay': 'Előbb válassz napot.',
       'red.alreadyHere': 'már {n} ide',
       'red.all': 'Mind a {n}',
       'red.getCode': 'Kérem a kódom',
-      'red.getCodeFor': 'Kérem a kódom {n} {sessions}ra',
+      'red.getCodeFor': 'Kérem a kódomat {n} {sessions}re',
       'red.issuing': 'Kód kiállítása…',
-      'red.footAll': 'A dátum kiválasztása még nem foglalás - kedvezménykódot kapsz, amit a Cooltixon használsz fel.',
-      'red.footSome': 'Még {n} {sessions} marad, bármikor a 2027-es szezonban.',
+      'red.footAll': 'A dátum kiválasztása még nem jelent foglalást - kedvezménykódot kapsz, amit a Cooltixon használhatsz fel.',
+      'red.footSome': 'Még {n} {sessions} marad, amelyeket a 2027-es szezonban használhatsz fel.',
       'red.soon': 'És lesz folytatás!',
       'red.issued': 'Utalvány beváltva',
       'red.issuedH': 'Kód kiállítva.',
       'red.doneH': 'Minden megvan.',
-      'red.issuedLede': 'Az <strong>{day}</strong> napra szóló Cooltix kedvezménykódod alább található. A regisztráció 2027 januárjában nyílik - a kód addig megvár.',
+      'red.issuedLede': 'A <strong>{dayi}</strong> pályanaphoz tartozó Cooltix-kedvezménykódodat alább találod. A regisztráció 2027 januárjában indul, a kódodat addig megőrizzük.',
       'red.yourCode': 'A Cooltix kedvezménykódod',
       'red.validFor': 'Érvényes',
       'red.validForV': 'csak {day}',
@@ -554,10 +559,10 @@
       'red.usesV': 'Egyszeri',
       'red.stepsA': 'Mi történik',
       'red.stepsB': 'a Cooltixon.',
-      'red.cstep1': 'Illeszd be a kódot a kedvezmény mezőbe, <strong>mielőtt bármit kosárba teszel</strong>.',
-      'red.cstep2': 'Tedd kosárba a {n} {sessions}t erre a napra: {day}.',
-      'red.cstep3': 'A menetek ingyenesként jelennek meg. Fejezd be a fizetést, és megkapod a jegyed.',
-      'red.warn': 'A kód csak erre a napra érvényes: {day}, és lejár, amikor az adott nap értékesítése lezárul. Ha másik dátum kell, ne használd fel - {email}, és kicseréljük.',
+      'red.cstep1': 'Illeszd be a kódot a kedvezménykód mezőbe, <strong>mielőtt bármit a kosárba teszel</strong>.',
+      'red.cstep2': 'Tedd kosárba a kiválasztott {n} {sessions}et erre a napra: {day}',
+      'red.cstep3': 'A menetek ingyenesként jelennek meg. Fejezd be a rendelést, és megkapod a jegyedet.',
+      'red.warn': 'A kód kizárólag a következő pályanapra érvényes: {day}, és lejár, amikor az adott nap értékesítése lezárul. Ha másik időpontot választanál, ne használd fel - {email}, és kicseréljük egy másik időpontra érvényes kódra.',
       'red.more': 'Még {n} {sessions} beváltása',
       'red.back': 'Vissza az ajándékutalványokhoz',
       'red.spent': 'Utalvány teljesen beváltva',
@@ -675,6 +680,15 @@
       opts || { year: 'numeric', month: 'long', day: 'numeric' });
   }
 
+  // The same date used as an adjective. Hungarian turns "2027. április 17."
+  // into "2027. április 17-i" when it modifies a noun, which is what a phrase
+  // like "the 17 April track day" needs. English needs no such change.
+  function formatDateAdj(value) {
+    var s = formatDate(value);
+    if (!s || lang !== 'hu') return s;
+    return s.replace(/\.$/, '') + '-i';
+  }
+
   function money(cents) {
     var n = Math.round(Number(cents) || 0) / 100;
     return '€' + n.toLocaleString(lang === 'hu' ? 'hu-HU' : 'en-IE',
@@ -736,6 +750,7 @@
     onChange: onChange,
     mountSwitch: mountSwitch,
     formatDate: formatDate,
+    formatDateAdj: formatDateAdj,
     money: money
   };
 })(window);

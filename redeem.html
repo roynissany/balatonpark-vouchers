@@ -144,7 +144,7 @@
   .langpick button[aria-pressed=true]{background:var(--blue);color:#fff;border-color:var(--blue)}
   .headrow{display:flex;align-items:center;justify-content:space-between;gap:16px}
 </style>
-<script src="i18n.js?v=20261111f"></script>
+<script src="i18n.js?v=20261111g"></script>
 </head>
 <body>
 
@@ -191,6 +191,8 @@
   var el = function (t, c, h) { var n = document.createElement(t);
     if (c) n.className = c; if (h !== undefined) n.innerHTML = h; return n; };
   var day = function (s) { return i18n.formatDate(s); };
+  // same date, inflected for use in front of a noun (Hungarian)
+  var dayAdj = function (s) { return i18n.formatDateAdj(s); };
   var t = function (k, v) { return i18n.t(k, v); };
   var sessionWord = function (n) {
     return t(n === 1 ? 'common.sessionOne' : 'common.sessionMany');
@@ -444,7 +446,7 @@
       (state.pickedCount === left
         ? t('red.footAll')
         : t('red.footSome', { n: rest, sessions: sessionWord(rest) })) + ' ' +
-      t('buy.mayChange', {
+      t('red.mayChange', {
         terms: '<a href="https://www.balatonparkcircuit.com/tc" target="_blank" rel="noopener">' +
                t('common.terms') + '</a>'
       }));
@@ -500,7 +502,8 @@
     view.replaceChildren();
 
     view.append(el('p', 'up', t('red.issuedLede', {
-      day: esc(day(r.track_day && r.track_day.date))
+      day: esc(day(r.track_day && r.track_day.date)),
+      dayi: esc(dayAdj(r.track_day && r.track_day.date))
     })));
     view.firstChild.style.cssText = 'margin:0 0 30px;font-size:17px;font-weight:300;line-height:1.7;color:rgba(245,247,251,.82)';
 
