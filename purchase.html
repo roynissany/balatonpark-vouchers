@@ -837,11 +837,19 @@
     Promise.resolve().then(function () {
       btn.textContent = t('buy.paying');
       // Reported before the card is confirmed: this is the step, not the sale.
+      // Count the vouchers the order would mint, not the recipients: payload
+      // is one entry per receiver, so a single buyer taking two packages
+      // reported 1 and never matched the num_items Purchase sends from the
+      // thank-you page, which counts vouchers.
+      var itemCount = 0;
+      payload.forEach(function (g) {
+        g.items.forEach(function (it) { itemCount += it.qty; });
+      });
       if (window.bpcTrack) {
         window.bpcTrack('InitiateCheckout', {
           value: Number((lastTotal / 100).toFixed(2)),
           currency: 'EUR',
-          num_items: payload.length
+          num_items: itemCount || 1
         });
       }
       // Validate the card fields before creating anything server-side, so a
