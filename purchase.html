@@ -1114,9 +1114,19 @@
 
   $('#addGift').addEventListener('click', function () { addGift(true); });
 
-  if (window.bpcTrack) {
-    window.bpcTrack('ViewContent', { content_category: 'gift voucher', currency: 'EUR' });
-  }
+  // analytics.js is deferred, so it has not run yet while this inline script
+  // is parsing and window.bpcTrack does not exist. Deferred scripts always
+  // finish before DOMContentLoaded, so waiting for that is enough; checking
+  // first keeps it working if the ordering ever changes.
+  (function () {
+    function fire() {
+      if (window.bpcTrack) {
+        window.bpcTrack('ViewContent', { content_category: 'gift voucher', currency: 'EUR' });
+      }
+    }
+    if (window.bpcTrack) fire();
+    else document.addEventListener('DOMContentLoaded', fire);
+  })();
 
   // Last visit's catalogue, so the shop is on screen immediately instead of
   // after a round trip. A price here is only ever what gets shown: checkout

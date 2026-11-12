@@ -565,7 +565,13 @@
   // Reported once per order. The key is kept in browser storage so a
   // refresh of the confirmation page does not count the sale twice.
   function reportSale(d) {
-    if (!window.bpcTrack || !d || d.status !== 'paid') return;
+    if (!d || d.status !== 'paid') return;
+    // analytics.js is deferred. If the order came back before it ran, wait
+    // for it rather than dropping the one event that actually matters.
+    if (!window.bpcTrack) {
+      document.addEventListener('DOMContentLoaded', function () { reportSale(d); });
+      return;
+    }
     var key = 'bpc-reported-' + orderId;
     try { if (localStorage.getItem(key)) return; localStorage.setItem(key, '1'); } catch (e) {}
     var items = 0;
