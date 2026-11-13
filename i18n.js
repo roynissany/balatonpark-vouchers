@@ -32,6 +32,8 @@
 
       'faq.how.q': 'How does a gift voucher work?',
       'faq.how.a': 'You buy the voucher and choose how it is delivered. The person you give it to opens it, enters the code and picks the track day they want. We then hand them the booking code for that day. You never have to pick a date for them.',
+      'faq.cars.q': 'Is this for cars or motorcycles?',
+      'faq.cars.a': 'Cars only. The track days these vouchers are valid for are car track days - motorcycles are not included. The driver comes in their own car.',
       'faq.dates.q': 'Which days can it be used on?',
       'faq.dates.a': 'Any published Balaton Park Circuit track day in the 2027 season, while places last. The first three are 17 April, 22 May and 26 June 2027, all Saturdays, and more will be announced.',
       'faq.book.q': 'When can the recipient actually book?',
@@ -76,6 +78,7 @@
       'home.h1a': 'Gift your loved ones a day on track.',
       'home.h1b': 'Or a whole VIP day.',
       'home.lede': 'Buy a voucher for track sessions at Balaton Park Circuit. The person you give it to picks their own date - no need to decide for them.',
+      'home.carsOnly': 'Cars only - these track days are not open to motorcycles.',
       'home.buy': 'Buy a voucher',
       'home.redeem': 'Redeem a voucher',
       'home.scroll': 'Scroll',
@@ -364,6 +367,8 @@
 
       'faq.how.q': 'Hogyan működik az ajándékutalvány?',
       'faq.how.a': 'Megveszed az utalványt, és kiválasztod, hogyan kézbesítsük. A megajándékozott megnyitja, megadja a kódot, és kiválasztja a neki megfelelő pályanapot. Ezután megkapja az adott napra szóló foglalási kódot. Neked nem kell dátumot választanod helyette.',
+      'faq.cars.q': 'Autókra vagy motorokra vonatkozik?',
+      'faq.cars.a': 'Csak autókra. Az utalvány kizárólag autós pályanapokra érvényes - motorral nem lehet részt venni. A vezető a saját autójával érkezik.',
       'faq.dates.q': 'Mely napokra váltható be?',
       'faq.dates.a': 'A Balaton Parkban a 2027-es szezonra meghirdetett bármely pályanapra, a szabad helyek függvényében. Az első három időpont: április 17., május 22. és június 26. (mindhárom szombat). További időpontokat is meghirdetünk.',
       'faq.book.q': 'Mikortól tud ténylegesen foglalni?',
@@ -407,6 +412,7 @@
       'home.h1a': 'Lepd meg őt egy pályanappal.',
       'home.h1b': 'Vagy akár egy teljes VIP nappal.',
       'home.lede': 'Vásárolj utalványt a Balaton Park pályanapjaira! Az ajándékozott később maga választhatja ki a számára megfelelő dátumot.',
+      'home.carsOnly': 'Csak autóknak - ezeken a pályanapokon motorral nem lehet részt venni.',
       'home.buy': 'Utalvány vásárlása',
       'home.redeem': 'Utalvány beváltása',
       'home.scroll': 'Görgess lejjebb',
