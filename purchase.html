@@ -1144,6 +1144,53 @@
   var CACHE_KEY = 'bpc-catalogue';
   var CACHE_MAX_AGE = 24 * 60 * 60 * 1000;
 
+  // Same idea as the stored copy above, but for a first-time visitor, who has
+  // nothing stored and is exactly who an ad sends here. Without this they wait
+  // out the whole round trip looking at a form with no shop above it, and the
+  // catalogue function is cold often enough that the wait reached six seconds.
+  //
+  // Deliberately carries no Stripe key: the card form is gated on
+  // cat.stripe_publishable_key, so it simply waits for the live answer rather
+  // than risking a rotated key being read from a stale copy. Packages paint at
+  // once, payment arrives a moment later.
+  //
+  // RE-BAKE THIS WHENEVER PRICES, PACKAGES OR TRACK DAYS CHANGE. It is only
+  // ever what gets drawn for the first second - checkout recalculates every
+  // figure from the database - but a wrong price on screen still costs trust.
+  // It is ignored once clearly old, which puts the page back to waiting for
+  // the network rather than quietly showing last season's prices forever.
+  var SEED_ON = '2026-11-16';
+  var SEED_MAX_AGE_DAYS = 120;
+  var SEED_CATALOGUE = {
+    "packages": [
+      { "code": "s1",  "name": "1 session",  "price_cents": 6500,  "list_price_cents": 6500,  "session_count": 1, "includes_room": false, "splittable": true },
+      { "code": "s3",  "name": "3 sessions", "price_cents": 18600, "list_price_cents": 19500, "session_count": 3, "includes_room": false, "splittable": true },
+      { "code": "s6",  "name": "6 sessions", "price_cents": 34800, "list_price_cents": 39000, "session_count": 6, "includes_room": false, "splittable": true },
+      { "code": "vip", "name": "VIP Day",    "price_cents": 45000, "list_price_cents": 45000, "session_count": 6, "includes_room": false, "splittable": false }
+    ],
+    "tiers": [
+      { "min_sessions": 3,  "percent": 5,  "unit_cents": 6200 },
+      { "min_sessions": 6,  "percent": 10, "unit_cents": 5800 },
+      { "min_sessions": 10, "percent": 20, "unit_cents": 5200 }
+    ],
+    "session_price_cents": 6500,
+    "track_days": [
+      { "id": "72278664-8526-4320-9b1d-a3aae0388fa0", "event_date": "2027-04-17", "public_label": "Mid April" },
+      { "id": "0a487861-57a4-4f78-a3cd-423e8b4c1f71", "event_date": "2027-05-22", "public_label": "Mid May" },
+      { "id": "91b8af1c-44db-4056-85c6-e77280126c15", "event_date": "2027-06-26", "public_label": "Late June" }
+    ],
+    "currency": "eur",
+    "vat_rate": 0.27
+  };
+
+  function seedCatalogue() {
+    try {
+      var age = (Date.now() - Date.parse(SEED_ON)) / 86400000;
+      if (!(age < SEED_MAX_AGE_DAYS)) return null;
+      return SEED_CATALOGUE;
+    } catch (e) { return null; }
+  }
+
   function cachedCatalogue() {
     try {
       var raw = localStorage.getItem(CACHE_KEY);
@@ -1170,7 +1217,7 @@
     draw();
   }
 
-  var warm = cachedCatalogue();
+  var warm = cachedCatalogue() || seedCatalogue();
   if (warm) {
     try { boot(warm); } catch (e) { console.error('warm boot failed', e); }
   }
@@ -1185,7 +1232,11 @@
       // Worth saying out loud: this catch also swallows a fault in the code
       // that builds the page, not just a failed request.
       console.error('catalogue/boot failed', e && (e.stack || e.message || e));
-      if (cat) return;   // already drawn from the stored copy; leave it be
+      // Leave the page alone only if what is already drawn can actually take
+      // money. The stored copy carries a Stripe key and can; the baked seed
+      // deliberately does not, so falling through to here on the seed would
+      // otherwise leave a shop with no card form and nothing explaining why.
+      if (cat && cat.stripe_publishable_key) return;
       $('#gifts').innerHTML =
         '<p style="color:rgba(245,247,251,.6);font-size:14px">' +
         t('buy.errLoad', { email: link('mailto:info@balatonparkcircuit.com', t('common.emailUs')) }) + '</p>';
