@@ -185,6 +185,9 @@
       'buy.total': 'Total',
       'buy.pay': 'Pay with card',
       'buy.payAmount': 'Pay {amount}',
+      /* Spoken label for the Apple Pay button, whose visible word is part of
+         the mark and stays in English. */
+      'buy.payApple': 'Pay with Apple Pay',
       'buy.paying': 'Paying…',
       'buy.nudge': 'Add {n} more {sessions} for <strong>{pct}%</strong> off everything',
       'buy.noCard': 'We never see your card details.',
@@ -518,6 +521,7 @@
       'buy.total': 'Összesen',
       'buy.pay': 'Fizetés kártyával',
       'buy.payAmount': 'Fizetés - {amount}',
+      'buy.payApple': 'Fizetés Apple Pay-jel',
       'buy.paying': 'Fizetés…',
       /* Hungarian wants the accusative here, so the noun is written into the
          sentence rather than slotted in as a bare word. */
