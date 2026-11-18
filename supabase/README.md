@@ -11,9 +11,26 @@ This folder is that missing copy.
 
 | Path | What it is |
 |---|---|
-| `functions/<name>/index.ts` | The 11 edge functions that matter, as deployed |
+| `functions/<name>/index.ts` | All 12 edge functions that matter, as deployed |
 | `schema/functions.sql` | Every database function, including the ones that move money |
 | `schema/tables.sql` | Tables, columns, views and the scheduled jobs |
+
+The twelve, and what each one is for:
+
+| Function | What it does |
+|---|---|
+| `catalogue` | Packages, prices and the discount ladder the shop reads |
+| `checkout` | Prices the basket server side and raises the Stripe intent |
+| `stripe-webhook` | The only place vouchers are minted, on Stripe's say-so |
+| `order-status` | What the thank-you page is allowed to see about one order |
+| `redeem` | Turns a voucher code into a Cooltix code for a chosen day |
+| `invoice` | Számlázz.hu: issues the nyugta or számla and files the PDF |
+| `send-voucher` | Renders the ticket and emails one gift to its receiver |
+| `notify-sale` | The buyer's receipt, and the circuit's own sale notice |
+| `admin` | The backoffice: refunds, code minting, exports, audit trail |
+| `insights` | Read-only reporting: attribution, traffic, how an order was paid |
+| `attribution` | Records the "where did you hear about us" answer |
+| `hit` | Counts a page view, cookielessly, into `traffic_hits` |
 
 ## What is NOT here, by design
 
