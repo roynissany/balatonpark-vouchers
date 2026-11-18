@@ -106,6 +106,28 @@
     if (queue.length < 20) queue.push({ name: name, params: params });
   }
 
+  // ------------------------------------------------------- our own counting
+
+  // Separate from everything above, and deliberately outside the consent
+  // bar. The bar guards third-party trackers that follow people between
+  // sites; this sets no cookie, reads no storage and sends no identifier -
+  // the server turns the address into a salted daily hash and keeps only
+  // that. It runs on every page, which is the point: the landing page and
+  // the FAQ call no server of ours, so until now they were invisible.
+  var HIT = 'https://hbosxvmprhzrheilwwfv.supabase.co/functions/v1/hit';
+
+  function countVisit() {
+    var page = (document.body && document.body.getAttribute('data-page')) || 'other';
+    try {
+      fetch(HIT, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ page: page, ref: document.referrer || '' }),
+        keepalive: true
+      }).catch(function () {});
+    } catch (e) { /* counting a visit must never break the visit */ }
+  }
+
   // ---------------------------------------------------------------- the bar
 
   var CSS =
@@ -155,6 +177,8 @@
   }
 
   function start() {
+    countVisit();
+
     var box = build();
     var saved = stored();
 

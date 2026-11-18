@@ -1,6 +1,5 @@
 {
   "_note": "Copy for the emails the system sends. The edge functions fetch this file at cold start, so wording changes here reach the inbox on the next push with no redeploy. Placeholders in braces are filled in by the sender; leave them spelled exactly as they are.",
-
   "en": {
     "g.preheader": "You have been given track time at Balaton Park Circuit.",
     "g.subject": "{buyer} has given you track time at Balaton Park Circuit",
@@ -16,14 +15,13 @@
     "g.whatH": "What this is",
     "g.whatP": "A voucher for track time, not a booking. You pick which published track day to use it on, then it turns into the booking code for that day.",
     "g.whereH": "Balaton Park Circuit",
-    "g.whereP": "A 4.115 km circuit beside Lake Balaton in Hungary, licensed FIA Grade 2 and FIM Grade A. Sixteen corners, six right and ten left, for cars and motorcycles alike.",
+    "g.whereP": "A 4.115 km circuit beside Lake Balaton in Hungary, licensed FIA Grade 2 and FIM Grade A. Sixteen corners, six right and ten left. Our track days are for cars only.",
     "g.howH": "How to use it",
     "g.how1": "Open the voucher and enter the code, or scan the ticket.",
     "g.how2": "Choose a track day and how many sessions to use on it.",
     "g.how3": "You get the booking code for that day. Registration for the 2027 season opens in January 2027.",
     "g.footReply": "Questions? Just reply to this email.",
     "g.footFaq": "Read the FAQ",
-
     "r.subject": "Your Balaton Park Circuit order {ref}",
     "r.eyebrow": "Order confirmed",
     "r.title": "Thank you, {name}.",
@@ -52,7 +50,6 @@
     "r.footReply": "Questions? Just reply to this email.",
     "r.footFaq": "Read the FAQ"
   },
-
   "hu": {
     "g.preheader": "Pályaidőt kaptál ajándékba a Balaton Park Circuitre.",
     "g.subject": "{buyer} pályaidőt ajándékozott neked a Balaton Park Circuiten",
@@ -68,14 +65,13 @@
     "g.whatH": "Mi ez pontosan",
     "g.whatP": "Pályaidőre szóló utalvány, nem foglalás. Te választod ki, melyik meghirdetett pályanapra használod fel, és akkor válik az adott napra szóló foglalási kóddá.",
     "g.whereH": "Balaton Park Circuit",
-    "g.whereP": "4,115 km-es pálya a Balaton mellett, FIA Grade 2 és FIM Grade A minősítéssel. Tizenhat kanyar, hat jobbos és tíz balos, autóknak és motoroknak egyaránt.",
+    "g.whereP": "4,115 km-es pálya a Balaton mellett, FIA Grade 2 és FIM Grade A minősítéssel. Tizenhat kanyar, hat jobbos és tíz balos. Pályanapjaink kizárólag autóknak szólnak.",
     "g.howH": "Így használod fel",
     "g.how1": "Nyisd meg az utalványt és írd be a kódot, vagy olvasd be a jegyet.",
     "g.how2": "Válassz pályanapot, és hogy hány menetet használsz fel rá.",
     "g.how3": "Megkapod az adott napra szóló foglalási kódot. A 2027-es szezon regisztrációja 2027 januárjában nyílik meg.",
     "g.footReply": "Kérdésed van? Válaszolj erre az e-mailre.",
     "g.footFaq": "Gyakori kérdések",
-
     "r.subject": "A Balaton Park Circuit rendelésed: {ref}",
     "r.eyebrow": "Rendelés visszaigazolva",
     "r.title": "Köszönjük, {name}.",

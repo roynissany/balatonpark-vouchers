@@ -606,7 +606,8 @@ async function loadTraffic() {
   const hits = d.countries.reduce((n, c) => n + c.hits, 0) || 1;
   $('#tCountries').replaceChildren(...(d.countries.length ? d.countries.map((c) =>
     el('tr', null,
-      `<td class="mono">${esc(c.country)}</td>
+      `<td class="mono">${c.country === '??'
+         ? '<span class="muted">Unknown</span>' : esc(c.country)}</td>
        <td class="mono">${c.hits}</td>
        <td class="mono">${c.visitors}</td>
        <td style="width:190px"><div class="bar"><i style="width:${
