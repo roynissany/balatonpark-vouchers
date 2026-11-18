@@ -23,6 +23,7 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap">
 <style>
   :root { --ink:#0A1422; --blue:#427AB7; --pale:#A8CEF0; --text:#F5F7FB;
+          --gold:#C9A45C; --goldlo:rgba(201,164,92,.55);
           --cond:'Barlow Condensed',sans-serif; }
   *{box-sizing:border-box}
   /* An inline display: beats the hidden attribute otherwise. */
@@ -126,6 +127,49 @@
     color:rgba(245,247,251,.45);text-decoration:line-through}
   .card .off{margin-top:7px;font-size:10px;font-weight:600;letter-spacing:.14em;
     text-transform:uppercase;color:var(--pale)}
+
+  /* The VIP day is the one package sold as a day rather than as a count of
+     sessions, so it runs across the row on its own instead of sitting as a
+     fourth tile with a hole beside it. Gold, because that is what it is. */
+  .vip{position:relative;display:block;width:100%;margin-top:14px;padding:0;
+    overflow:hidden;cursor:pointer;text-align:left;color:var(--text);
+    background:#0D1A2B;border:1px solid var(--goldlo);
+    transition:border-color .25s,box-shadow .25s}
+  .vip:hover{border-color:var(--gold)}
+  .vip[aria-pressed=true]{border:2px solid var(--gold);
+    box-shadow:inset 0 0 0 1px rgba(201,164,92,.22)}
+  .vip .shot{position:absolute;inset:0;overflow:hidden}
+  .vip .shot img{width:100%;height:100%;object-fit:cover;object-position:50% 50%}
+  /* Dark enough on the left for the wording to sit on it at any width, and
+     left open on the right so the box garage is still recognisable. */
+  .vip .veil{position:absolute;inset:0;background:
+    linear-gradient(90deg,rgba(8,14,24,.95) 0%,rgba(8,14,24,.86) 48%,rgba(8,14,24,.46) 100%)}
+  .vip .body{position:relative;display:flex;flex-wrap:wrap;align-items:center;
+    gap:clamp(14px,2.6vw,30px);min-height:clamp(148px,19vw,176px);
+    padding:clamp(20px,3.2vw,28px)}
+  .vip .face{flex:0 0 auto}
+  .vip .big{display:block;font-family:var(--cond);font-weight:800;
+    font-size:clamp(38px,6.4vw,50px);line-height:.86;letter-spacing:.02em;
+    text-transform:uppercase;color:var(--gold)}
+  .vip .kind{display:block;margin-top:7px;font-size:11px;font-weight:600;
+    letter-spacing:.18em;text-transform:uppercase;color:rgba(201,164,92,.78)}
+  .vip .what{flex:1 1 230px;min-width:0;margin:0;font-size:13.5px;font-weight:300;
+    line-height:1.65;color:rgba(245,247,251,.80)}
+  .vip .prices{flex:0 0 auto;display:flex;flex-wrap:wrap;align-items:baseline;gap:9px}
+  .vip .now{font-family:var(--cond);font-weight:800;font-size:30px;color:var(--gold)}
+  .vip .was{font-family:var(--cond);font-weight:700;font-size:20px;
+    color:rgba(245,247,251,.45);text-decoration:line-through}
+  .vip .off{flex:0 0 auto;font-size:10px;font-weight:600;letter-spacing:.14em;
+    text-transform:uppercase;color:var(--gold)}
+  .vip .info{border-color:rgba(201,164,92,.50)}
+  .vip .info:hover,.vip .info:focus-visible{background:var(--gold);border-color:var(--gold);
+    color:#0A1422}
+  /* On a phone the wording wraps across the whole banner rather than keeping
+     to the dark left end, so the wash goes flat and heavier instead. */
+  @media (max-width:640px){
+    .vip .veil{background:linear-gradient(180deg,rgba(8,14,24,.92) 0%,
+      rgba(8,14,24,.88) 58%,rgba(8,14,24,.82) 100%)}
+  }
 
   .hotel{position:relative;display:flex;width:100%;margin-top:14px;padding:0;
     overflow:hidden;cursor:pointer;color:var(--text);background:#0D1A2B;
@@ -505,7 +549,9 @@
 
     var cards = el('div', 'cards');
     wrap.append(cards);
-    cat.packages.filter(function (p) { return !p.includes_room; }).forEach(function (p) {
+    cat.packages.filter(function (p) {
+      return !p.includes_room && p.code !== 'vip';
+    }).forEach(function (p) {
       var face = FACE[p.code] || { big: String(p.session_count || ''), kind: 'buy.kindSessions' };
       var b = el('button', 'card lift');
       b.type = 'button';
@@ -523,6 +569,34 @@
       g.cardFor[p.code] = b;
       cards.append(b);
     });
+
+    // The VIP day, across the row under the session tiles. Same classes for
+    // the price parts, so paintCards drives it without knowing it is here.
+    var vipPkg = cat.packages.filter(function (p) { return p.code === 'vip'; })[0];
+    if (vipPkg) {
+      var v = el('button', 'vip lift');
+      v.type = 'button';
+      v.innerHTML =
+        '<span class="shot"><img src="vip-box.jpg" alt="" loading="lazy"></span>' +
+        '<span class="veil"></span>' +
+        '<span class="info" role="button" tabindex="0" data-tip="vip"' +
+          ' aria-label="' + esc(t('buy.whatsThis')) + '">i</span>' +
+        '<span class="body">' +
+          '<span class="face">' +
+            '<span class="big">VIP</span>' +
+            '<span class="kind" data-i18n="buy.kindDay">' + esc(t('buy.kindDay')) + '</span>' +
+          '</span>' +
+          '<span class="what" data-i18n="pkg.vip.body">' + esc(t('pkg.vip.body')) + '</span>' +
+          '<span class="prices"><span class="now"></span><span class="was" hidden></span></span>' +
+          '<span class="off" hidden></span>' +
+        '</span>';
+      v.addEventListener('click', function (ev) {
+        if (ev.target.closest('.info')) return;
+        toggle(g, vipPkg.code);
+      });
+      g.cardFor[vipPkg.code] = v;
+      wrap.append(v);
+    }
 
     var h2 = el('h2', 'sec', '<i></i><span data-i18n="buy.secWho">' + esc(t('buy.secWho')) + '</span>');
     wrap.append(h2);
