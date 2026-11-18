@@ -16,11 +16,23 @@
   'use strict';
 
   var PIXEL_ID = '987233217783582';
+  // Google Analytics 4. Blank until the property exists, and nothing about
+  // GA loads or runs while it is blank, so this file is safe either way.
+  var GA_ID = '';
   var KEY = 'bpc-cookie-choice';
   var PRIVACY = 'https://www.balatonparkcircuit.com/privacy-policy';
 
+  // The pages report in Meta's event names. GA4 wants its own, so they are
+  // translated on the way out; anything unlisted goes across unchanged.
+  var GA_NAMES = {
+    ViewContent: 'view_item',
+    InitiateCheckout: 'begin_checkout',
+    Purchase: 'purchase'
+  };
+
   var queue = [];
-  var loaded = false;
+  var metaOn = false;
+  var gaOn = false;
 
   function stored() {
     try { return localStorage.getItem(KEY); } catch (e) { return null; }
@@ -30,8 +42,8 @@
   }
 
   function loadPixel() {
-    if (loaded || !PIXEL_ID) return;
-    loaded = true;
+    if (metaOn || !PIXEL_ID) return;
+    metaOn = true;
 
     /* Meta's own snippet, unchanged apart from being called on consent. */
     !function (f, b, e, v, n, t, s) {
@@ -46,19 +58,51 @@
 
     window.fbq('init', PIXEL_ID);
     window.fbq('track', 'PageView');
+  }
 
-    // Anything the page reported while it was waiting.
-    queue.splice(0).forEach(function (item) {
-      window.fbq('track', item.name, item.params || {});
+  function loadGA() {
+    if (gaOn || !GA_ID) return;
+    gaOn = true;
+
+    var s = document.createElement('script');
+    s.async = true;
+    s.src = 'https://www.googletagmanager.com/gtag/js?id=' + encodeURIComponent(GA_ID);
+    document.head.appendChild(s);
+
+    window.dataLayer = window.dataLayer || [];
+    window.gtag = function () { window.dataLayer.push(arguments); };
+    window.gtag('js', new Date());
+    // Only ever reached once the visitor has accepted, but GA is told in so
+    // many words rather than left to its own defaults.
+    window.gtag('consent', 'default', {
+      ad_storage: 'granted',
+      analytics_storage: 'granted',
+      ad_user_data: 'granted',
+      ad_personalization: 'granted'
     });
+    // config sends its own page_view, which is why no page reports one.
+    window.gtag('config', GA_ID, { anonymize_ip: true });
+  }
+
+  function loadTrackers() {
+    loadPixel();
+    loadGA();
+    // Anything the pages reported while the choice was still open.
+    queue.splice(0).forEach(function (item) { send(item.name, item.params); });
+  }
+
+  // One call out to whichever trackers actually loaded.
+  function send(name, params) {
+    if (metaOn && window.fbq) window.fbq('track', name, params || {});
+    if (gaOn && window.gtag) window.gtag('event', GA_NAMES[name] || name, params || {});
   }
 
   // What the pages call. Safe to call at any time: before consent it is
   // remembered, after a refusal it is dropped.
   function track(name, params) {
     if (!name) return;
-    if (loaded && window.fbq) { window.fbq('track', name, params || {}); return; }
-    if (stored() === 'all') { loadPixel(); window.fbq('track', name, params || {}); return; }
+    if (metaOn || gaOn) { send(name, params); return; }
+    if (stored() === 'all') { loadTrackers(); send(name, params); return; }
     if (queue.length < 20) queue.push({ name: name, params: params });
   }
 
@@ -121,11 +165,11 @@
       if (!btn) return;
       remember(btn.dataset.choice);
       box.hidden = true;
-      if (btn.dataset.choice === 'all') loadPixel();
+      if (btn.dataset.choice === 'all') loadTrackers();
       else queue.length = 0;
     });
 
-    if (saved === 'all') loadPixel();
+    if (saved === 'all') loadTrackers();
 
     // Keep the wording in step with the language switch.
     if (window.i18n) {

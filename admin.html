@@ -172,6 +172,12 @@
       <div class="wrap"><table>
         <thead><tr><th>Date</th><th>Pool</th><th>Available</th><th>Level</th></tr></thead>
         <tbody id="poolRows"></tbody></table></div>
+
+      <h2 style="font-size:19px;margin:28px 0 7px">Where buyers heard about us</h2>
+      <div class="tiny muted" id="heardNote" style="margin-bottom:11px"></div>
+      <div class="wrap"><table>
+        <thead><tr><th>Source</th><th>Orders</th><th>Paid</th><th>Revenue</th><th>Share</th></tr></thead>
+        <tbody id="heardRows"></tbody></table></div>
     </section>
 
     <section data-tab="vouchers">
@@ -243,7 +249,19 @@
 const SUPABASE_URL = 'https://hbosxvmprhzrheilwwfv.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_Vkz4kA1P_VlVr-NaxD-nDA_gL-xxBtm';
 const FN = SUPABASE_URL + '/functions/v1/admin';
+const INSIGHTS = SUPABASE_URL + '/functions/v1/insights';
 const AUTH = SUPABASE_URL + '/auth/v1';
+
+// Stored as codes so the wording on the shop can change without rewriting
+// what is already in the column.
+const HEARD_LABEL = {
+  instagram: 'Instagram',
+  facebook:  'Facebook',
+  search:    'Google / ChatGPT / AI',
+  friend:    'From a friend',
+  been:      'Been to the circuit',
+  other:     'Somewhere else',
+};
 
 // Supabase Auth over plain fetch. The official client would do this too, but
 // it has to be fetched from a CDN, and a page that cannot reach that CDN shows
@@ -343,6 +361,22 @@ async function api(action, params = {}, raw = false) {
   return out;
 }
 
+// Reporting lives behind its own endpoint, which reads and never writes.
+// Same door, same token, same treatment of a session that has died.
+async function report(action, params = {}) {
+  const token = await accessToken();
+  if (!token) { signedOut(); throw new Error('no session'); }
+  const res = await fetch(INSIGHTS, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+    body: JSON.stringify({ action, ...params }),
+  });
+  if (res.status === 401) { signOutLocal(); signedOut(); throw new Error('unauthorised'); }
+  const out = await res.json();
+  if (!res.ok) throw new Error(out.error || 'request failed');
+  return out;
+}
+
 // ---------------------------------------------------------------- session
 
 function signedOut() {
@@ -436,6 +470,42 @@ async function loadOverview() {
          <div class="tiny muted" style="margin-top:3px">${pc}%</div></td>`);
     return tr;
   }) : [el('tr', null, '<td colspan="4"><div class="empty">No pools yet - mint some codes.</div></td>')]));
+
+  // Its own request, and its own failure: a report that cannot load should
+  // never take the pools and the money tiles down with it.
+  loadAttribution();
+}
+
+// The question is optional, so the share who answered is reported alongside
+// the split. A split read without it would look more certain than it is.
+async function loadAttribution() {
+  let d;
+  try {
+    d = await report('attribution', { days: 90 });
+  } catch (e) {
+    if (e.message === 'unauthorised') return;
+    $('#heardNote').textContent = 'Could not load: ' + e.message;
+    return;
+  }
+
+  $('#heardNote').textContent = d.answered
+    ? `${d.answered} of ${d.total_orders} orders in the last ${d.days} days answered. ` +
+      `Shares below are of the ${d.answered} who did.`
+    : `Nobody has answered yet - ${d.total_orders} orders in the last ${d.days} days.`;
+
+  const top = Math.max(1, ...d.breakdown.map((r) => r.orders));
+
+  $('#heardRows').replaceChildren(...(d.answered ? d.breakdown.map((r) => {
+    const pc = Math.round(r.orders / d.answered * 100);
+    return el('tr', null,
+      `<td>${esc(HEARD_LABEL[r.key] || r.key)}</td>
+       <td class="mono">${r.orders}</td>
+       <td class="mono">${r.paid}</td>
+       <td class="mono">${money(r.paid_cents)}</td>
+       <td style="width:200px"><div class="bar"><i style="width:${Math.round(r.orders / top * 100)}%"></i></div>
+         <div class="tiny muted" style="margin-top:3px">${pc}%</div></td>`);
+  }) : [el('tr', null,
+    '<td colspan="5"><div class="empty">No answers yet. The question went live on 18 November.</div></td>')]));
 }
 
 // ---------------------------------------------------------------- vouchers
