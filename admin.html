@@ -602,8 +602,9 @@ function docLabel(inv) {
 
 // Neither fact lives on the order row, so both are fetched once the drawer
 // is already on screen rather than holding it up.
-async function loadOrderMeta(orderId) {
-  const pay = $('#payWith');
+async function loadOrderMeta(orderId, root) {
+  const where = root || document;
+  const pay = where.querySelector('#payWith');
   if (!pay || !orderId) return;
   let m;
   try {
@@ -614,7 +615,7 @@ async function loadOrderMeta(orderId) {
   }
   if (m.error) { pay.innerHTML = '<span class="muted tiny">—</span>'; return; }
   pay.innerHTML = payLabel(m);
-  const doc = $('#docCell');
+  const doc = where.querySelector('#docCell');
   if (doc) doc.innerHTML = docLabel(m.invoice);
 }
 
@@ -801,7 +802,9 @@ async function openVoucher(id) {
      </dl>`);
 
   // Fills the two cells above once Stripe and the order have been asked.
-  loadOrderMeta(o.id);
+  // Scoped to `head`, which is still detached at this point: a document-wide
+  // lookup finds nothing yet and the cells sit on their placeholder forever.
+  loadOrderMeta(o.id, head);
 
   // Two ways out of a failed document: ask Szamlazz again once whatever
   // blocked it is fixed, or record the number of one raised by hand.
