@@ -1,0 +1,649 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<link rel="icon" href="../favicon.ico" sizes="any">
+<title data-i18n-title="home.title">Balaton Park Circuit - Gift Vouchers</title>
+<meta name="description" content="Gift a day on track at Balaton Park Circuit. The person you give it to picks their own date.">
+
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap">
+<style>
+  :root { --ink:#0A1422; --blue:#427AB7; --pale:#A8CEF0; --text:#F5F7FB;
+          --cond:'Barlow Condensed',sans-serif; }
+  *{box-sizing:border-box}
+  /* An inline display: beats the hidden attribute otherwise. */
+  [hidden]{display:none!important}
+  body { margin:0;touch-action:manipulation; background:var(--ink); color:var(--text);
+         font-family:Inter,-apple-system,system-ui,sans-serif;
+         -webkit-font-smoothing:antialiased; overflow-x:hidden; }
+  a { color:var(--pale) } a:hover { color:var(--text) }
+  h1,h2,h3 { font-family:var(--cond); font-weight:800; text-transform:uppercase; margin:0 }
+
+  @keyframes fadeUp { from{opacity:0;transform:translateY(44px)} to{opacity:1;transform:none} }
+  @keyframes fadeIn { from{opacity:0} to{opacity:1} }
+  @keyframes slideLeft { from{opacity:0;transform:translateX(-54px)} to{opacity:1;transform:none} }
+  @keyframes kenburns { from{transform:scale(1.06)} to{transform:scale(1.19) translateY(-2%)} }
+  @keyframes cueBounce { 0%,100%{transform:translateY(0);opacity:.75} 50%{transform:translateY(9px);opacity:1} }
+  @keyframes marquee { from{transform:translateX(0)} to{transform:translateX(-50%)} }
+  @keyframes rule { from{transform:scaleX(0)} to{transform:scaleX(1)} }
+  .up{animation:fadeUp 1s cubic-bezier(.22,.61,.36,1) both}
+  .sl{animation:slideLeft 1s cubic-bezier(.22,.61,.36,1) both}
+  .fi{animation:fadeIn 1.4s ease both}
+  .d1{animation-delay:.12s} .d2{animation-delay:.24s} .d3{animation-delay:.36s}
+  .d4{animation-delay:.48s} .d5{animation-delay:.62s}
+  .kb{animation:kenburns 26s ease-out both alternate infinite}
+  .cue{animation:cueBounce 2.4s ease-in-out infinite}
+  .mq{animation:marquee 38s linear infinite}
+  .rule{transform-origin:left;animation:rule .9s cubic-bezier(.22,.61,.36,1) both;animation-delay:.1s}
+  .lift{transition:transform .4s cubic-bezier(.22,.61,.36,1),background .3s,border-color .3s,box-shadow .4s}
+  .lift:hover{transform:translateY(-5px);box-shadow:0 18px 40px rgba(0,0,0,.45)}
+  .zw{overflow:hidden} .zw img{transition:transform .9s cubic-bezier(.22,.61,.36,1);display:block}
+  .zw:hover img{transform:scale(1.07)}
+  @media (prefers-reduced-motion: reduce){
+    .up,.sl,.fi,.kb,.cue,.mq,.rule{animation:none!important;opacity:1!important;transform:none!important}
+    .lift,.zw img{transition:none!important}
+  }
+
+  .hero { position:relative; min-height:min(780px,92svh); display:flex;
+          flex-direction:column; justify-content:space-between; overflow:hidden }
+  .hero img.bg { position:absolute; inset:0; width:100%; height:100%;
+                 object-fit:cover; filter:brightness(.62) saturate(.95) }
+  .hero .veil { position:absolute; inset:0;
+    background:linear-gradient(180deg,rgba(10,20,34,.78) 0%,rgba(10,20,34,.45) 38%,rgba(10,20,34,.96) 100%) }
+  .eyebrow { letter-spacing:.26em }
+  /* "Ajándékutalványok" is far wider than "Gift vouchers" and on a phone it
+     ran right up under the language buttons. Guarantee a gap and tighten the
+     tracking so the word keeps clear of them. */
+  /* The hero spaces its header row and its text block apart, so a margin on
+     the header row is simply absorbed. Giving the hero the full small
+     viewport is what actually opens a gap under the language buttons. */
+  @media (max-width:760px){
+    .hero { min-height:100svh }
+    .eyebrow { letter-spacing:.16em }
+  }
+  .pad { padding-left:clamp(20px,5vw,56px); padding-right:clamp(20px,5vw,56px) }
+  .wrap { width:100%; max-width:1180px; margin:0 auto }
+
+  h1 { font-size:clamp(40px,8vw,76px); line-height:.94; letter-spacing:-.01em; max-width:780px }
+  h2 { font-size:clamp(30px,5vw,44px); line-height:1 }
+  h3 { font-size:clamp(21px,3vw,26px) }
+  .lede { margin:28px 0 0; font-size:clamp(16px,2.2vw,18px); font-weight:300;
+          line-height:1.65; color:rgba(245,247,251,.88); max-width:580px }
+
+  .cta { display:inline-flex; align-items:center; justify-content:center;
+         min-height:clamp(64px,9vw,86px); padding:0 clamp(28px,6vw,62px);
+         text-decoration:none; font-family:var(--cond); font-weight:800;
+         font-size:clamp(22px,4.4vw,34px); letter-spacing:.04em; text-transform:uppercase }
+  .cta.primary{background:var(--blue);color:#fff}
+  .cta.primary:hover{background:rgba(66,122,183,.5)}
+  .cta.ghost{background:rgba(10,20,34,.55);color:var(--text);border:1px solid rgba(255,255,255,.5)}
+
+  .ticker { overflow:hidden; border-top:1px solid rgba(255,255,255,.10);
+            border-bottom:1px solid rgba(255,255,255,.10); background:rgba(255,255,255,.03) }
+  .ticker .mq { display:flex; width:max-content; padding:16px 0; font-family:var(--cond);
+    font-weight:800; font-size:20px; letter-spacing:.14em; text-transform:uppercase;
+    color:rgba(245,247,251,.72); white-space:nowrap }
+  .ticker b { color:var(--blue); padding:0 22px; font-weight:800 }
+
+  .steps,.shots { display:grid; gap:clamp(18px,3vw,36px);
+                  grid-template-columns:repeat(auto-fit,minmax(240px,1fr)) }
+  .shots { gap:14px }
+  .shots img { width:100%; height:clamp(180px,28vw,260px); object-fit:cover }
+  .step { border-top:2px solid var(--blue); padding-top:24px }
+  .step .n { margin:0 0 14px; font-family:var(--cond); font-weight:800;
+             font-size:18px; color:var(--pale); letter-spacing:.1em }
+  .step p.t { margin:0; font-size:15px; font-weight:300; line-height:1.7;
+              color:rgba(245,247,251,.72) }
+  .days { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:14px }
+  .day { padding:26px 28px; background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.10) }
+  button.day { width:100%; text-align:left; color:inherit; font:inherit; cursor:pointer }
+  button.day:hover,button.day:focus-visible { border-color:var(--blue); outline:none }
+
+  /* The tiles name real dates, which reads as "pick one now". The panel is
+     there to say the voucher is not tied to any of them. */
+  .scrim { position:fixed; inset:0; z-index:70; display:grid; place-items:center;
+           padding:20px; background:rgba(4,9,16,.76) }
+  .sheet { width:100%; max-width:440px; padding:clamp(26px,5vw,38px);
+           background:#16293F; border:1px solid var(--blue) }
+  .sheet h2 { margin:0; font-family:var(--cond); font-weight:800; text-transform:uppercase;
+              font-size:clamp(26px,5vw,36px); line-height:1 }
+  .sheet p { margin:16px 0 0; font-size:15px; font-weight:300; line-height:1.7;
+             color:rgba(245,247,251,.82) }
+  .sheet .row { display:flex; flex-wrap:wrap; gap:12px; margin-top:26px }
+  .sheet .go { flex:1 1 160px; display:inline-flex; align-items:center; justify-content:center;
+    min-height:56px; padding:0 26px; background:var(--blue); color:#fff; text-decoration:none;
+    font-family:var(--cond); font-weight:800; font-size:21px; letter-spacing:.04em;
+    text-transform:uppercase; transition:background .3s }
+  .sheet .go:hover { background:rgba(66,122,183,.5) }
+  .sheet .shut { flex:0 0 auto; min-height:56px; padding:0 20px; cursor:pointer;
+    background:none; color:rgba(245,247,251,.70); border:1px solid rgba(255,255,255,.28);
+    font-family:var(--cond); font-weight:800; font-size:17px; letter-spacing:.06em;
+    text-transform:uppercase }
+  .sheet .shut:hover { color:var(--text); border-color:rgba(255,255,255,.55) }
+  .day p.big { margin:0; font-family:var(--cond); font-weight:800;
+               font-size:clamp(28px,4vw,34px); text-transform:uppercase; line-height:1 }
+  .day p.sub { margin:8px 0 0; font-size:13px; color:rgba(245,247,251,.72) }
+  .day.soon { border:1px dashed var(--blue); display:flex; align-items:center;
+              background:none }
+  .day.soon p { margin:0; font-family:var(--cond); font-weight:800; font-size:26px;
+                line-height:1.1; text-transform:uppercase; color:var(--pale) }
+
+  .note { margin:64px 0 0; padding:28px 32px; background:rgba(255,255,255,.04);
+          border-left:2px solid var(--blue) }
+  .note p { margin:0; font-size:15px; font-weight:300; line-height:1.75;
+            color:rgba(245,247,251,.85) }
+
+  footer { margin-top:92px; border-top:1px solid rgba(255,255,255,.10) }
+  footer .inner { display:flex; flex-wrap:wrap; gap:20px; align-items:center;
+    justify-content:space-between; padding-top:34px; padding-bottom:34px;
+    font-size:13px; color:rgba(245,247,251,.55) }
+  footer a { text-decoration:none; color:rgba(245,247,251,.55) }
+  footer a:hover { color:var(--text) }
+
+  #cookies { position:fixed; left:50%; transform:translateX(-50%); bottom:20px;
+    z-index:60; width:calc(100% - 40px); max-width:600px; display:flex;
+    flex-wrap:wrap; align-items:center; gap:14px; padding:13px 16px;
+    background:rgba(10,20,34,.70); backdrop-filter:blur(12px);
+    -webkit-backdrop-filter:blur(12px); border:1px solid rgba(255,255,255,.16) }
+  #cookies[hidden]{display:none}
+  #cookies p { flex:1 1 250px; margin:0; font-size:12.5px; font-weight:300;
+               line-height:1.55; color:rgba(245,247,251,.82) }
+  #cookies button { min-height:44px; font-family:Inter,sans-serif; font-size:13px;
+                    cursor:pointer; white-space:nowrap }
+  #cookies .ess { padding:0 11px; background:rgba(255,255,255,.10); color:var(--text);
+                  border:1px solid rgba(255,255,255,.38); font-weight:500 }
+  #cookies .acc { padding:0 20px; background:var(--blue); color:#fff; border:none; font-weight:600 }
+
+  /* Language picker: large enough to find without hunting, quiet enough
+     not to compete with the headline. */
+  .langpick{display:flex;gap:6px;flex:0 0 auto}
+  .langpick button{min-height:44px;min-width:52px;padding:0 14px;cursor:pointer;
+    background:rgba(10,20,34,.55);color:rgba(245,247,251,.72);
+    border:1px solid rgba(255,255,255,.28);border-radius:0;
+    font-family:var(--cond);font-weight:800;font-size:17px;letter-spacing:.08em;
+    transition:background .2s,color .2s,border-color .2s}
+  .langpick button:hover{color:var(--text);border-color:rgba(255,255,255,.55)}
+  .langpick button[aria-pressed=true]{background:var(--blue);color:#fff;border-color:var(--blue)}
+  .headrow{display:flex;align-items:center;justify-content:space-between;gap:16px}
+
+  /* ---- experiences, added below How it works ------------------------- */
+  .xgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:18px}
+  .x{min-width:0;display:flex;flex-direction:column;background:rgba(255,255,255,.04);
+     border:1px solid rgba(255,255,255,.10)}
+  .x .shot{aspect-ratio:3/2;overflow:hidden;background:#0D1A2B;position:relative}
+  .x .shot img{width:100%;height:100%;object-fit:cover;display:block;
+     transition:transform .9s cubic-bezier(.22,.61,.36,1)}
+  .x:hover .shot img{transform:scale(1.07)}
+  .x .shot .tag{position:absolute;left:0;top:0;padding:6px 11px;background:rgba(10,20,34,.86);
+     font-size:10px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--pale)}
+  .x .shot.novoucher{display:grid;place-items:center;
+     background:linear-gradient(135deg,#123052,#0A1422 72%)}
+  .x .shot.novoucher .mark{font-family:var(--cond);font-weight:800;font-size:44px;
+     letter-spacing:.04em;color:rgba(168,206,240,.5);text-transform:uppercase}
+  .x .in{display:flex;flex-direction:column;gap:10px;flex:1;padding:20px 18px 18px}
+  .x h3{font-size:22px;letter-spacing:.015em}
+  .x .hook{margin:0;font-size:14px;font-weight:300;line-height:1.6;color:rgba(245,247,251,.84)}
+  .x .meta{display:flex;flex-wrap:wrap;gap:6px}
+  .x .meta span{padding:3px 9px;background:rgba(66,122,183,.15);
+     border:1px solid rgba(66,122,183,.35);font-size:11px;color:var(--pale)}
+  .x .foot{display:flex;align-items:center;justify-content:space-between;gap:12px;
+     margin-top:auto;padding-top:15px;border-top:1px solid rgba(255,255,255,.10)}
+  .x .price{font-family:var(--cond);font-weight:800;font-size:27px;line-height:1}
+  .x .price small{display:block;margin-top:4px;font-family:Inter,sans-serif;font-weight:300;
+     font-size:11px;letter-spacing:0;text-transform:none;color:rgba(245,247,251,.45)}
+  .gift{flex:0 0 auto;min-height:46px;padding:0 16px;cursor:pointer;background:var(--blue);
+     color:#fff;border:none;font-family:var(--cond);font-weight:800;font-size:15px;
+     letter-spacing:.05em;text-transform:uppercase;white-space:nowrap;
+     transition:background .3s,transform .4s cubic-bezier(.22,.61,.36,1)}
+  .gift:hover{background:#4d8bcd;transform:translateY(-2px)}
+</style>
+<script src="i18n.js?v=20261118g"></script>
+</head>
+<body>
+
+
+<div style="min-height:100%;display:flex;flex-direction:column">
+
+  <section class="hero">
+    <img class="bg kb" src="hero.jpg" alt="A car on the kerbs at Balaton Park Circuit">
+    <div class="veil"></div>
+
+    <div class="fi wrap pad headrow" style="position:relative;padding-top:34px">
+      <img src="bpc-logo.svg" alt="Balaton Park Circuit" style="height:clamp(26px,4vw,34px);width:auto">
+      <div id="langpick"></div>
+    </div>
+
+    <div class="wrap pad" style="position:relative;padding-bottom:clamp(48px,9vw,84px)">
+      <p class="up eyebrow" style="display:flex;align-items:center;gap:16px;margin:0 0 22px;font-size:12px;font-weight:600;text-transform:uppercase">
+        <span class="rule" style="display:inline-block;width:48px;height:2px;background:var(--blue)"></span>
+        <span data-i18n="home.eyebrow">Gift vouchers</span>
+      </p>
+      <h1 class="up d1"><span data-i18n="home.h1a">Gift your loved ones a day on track.</span> <span style="color:var(--blue)" data-i18n="home.h1b">Maybe even a night.</span></h1>
+      <p class="lede up d3" data-i18n="home.lede">Buy a voucher for track sessions at Balaton Park Circuit. The person you give it to picks their own date - no need to decide for them.</p>
+      <p class="up d3" style="margin:14px 0 0;font-size:12px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:rgba(245,247,251,.72)" data-i18n="home.carsOnly">Cars only</p>
+
+      <div class="up d4" style="display:flex;flex-wrap:wrap;gap:14px;margin:40px 0 0">
+        <a class="cta primary lift" href="purchase.html" data-i18n="home.buy">Buy a voucher</a>
+        <a class="cta ghost lift" href="redeem.html" data-i18n="home.redeem">Redeem a voucher</a>
+      </div>
+
+      <p class="cue" style="margin:52px 0 0;font-size:11px;font-weight:600;letter-spacing:.3em;text-transform:uppercase;color:rgba(245,247,251,.75)" data-i18n="home.scroll">Scroll</p>
+    </div>
+  </section>
+
+  <div class="ticker">
+    <div class="mq">
+      <span>17 April 2027<b>/</b>22 May 2027<b>/</b>26 June 2027<b>/</b>More to come soon<b>/</b>17 April 2027<b>/</b>22 May 2027<b>/</b>26 June 2027<b>/</b>More to come soon<b>/</b></span>
+      <span aria-hidden="true">17 April 2027<b>/</b>22 May 2027<b>/</b>26 June 2027<b>/</b>More to come soon<b>/</b>17 April 2027<b>/</b>22 May 2027<b>/</b>26 June 2027<b>/</b>More to come soon<b>/</b></span>
+    </div>
+  </div>
+
+  <main class="wrap pad" style="flex-grow:1">
+
+    <section id="how" style="margin:clamp(56px,10vw,92px) 0 0">
+      <h2 class="up" style="margin:0 0 40px"><span data-i18n="home.howA">How it</span> <span style="color:var(--blue)" data-i18n="home.howB">works.</span></h2>
+      <div class="steps">
+        <div class="step up d1">
+          <p class="n">01</p>
+          <h3 style="margin:0 0 10px" data-i18n="home.step1h">You buy</h3>
+          <p class="t" data-i18n="home.step1p">Pick a package. We email a beautiful gift card with voucher code or you print a physical one.</p>
+        </div>
+        <div class="step up d3">
+          <p class="n">02</p>
+          <h3 style="margin:0 0 10px" data-i18n="home.step2h">They choose a date</h3>
+          <p class="t" data-i18n="home.step2p">They enter the code here and pick from our published track days.</p>
+        </div>
+        <div class="step up d5">
+          <p class="n">03</p>
+          <h3 style="margin:0 0 10px" data-i18n="home.step3h">They book</h3>
+          <p class="t" data-i18n="home.step3p">We assist them with booking their desired date &amp; time.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="experiences" style="margin:clamp(56px,10vw,92px) 0 0">
+      <h2 class="up" style="margin:0 0 16px">
+        <span data-x="h2a">Experiences</span>
+        <span style="color:var(--blue)" data-x="h2b">&amp; track days.</span></h2>
+      <p class="up d1" data-x="lede" style="margin:0 0 36px;max-width:62ch;
+         font-size:clamp(15px,2.2vw,17px);font-weight:300;line-height:1.7;
+         color:rgba(245,247,251,.78)"></p>
+      <div class="xgrid" id="xgrid"></div>
+    </section>
+
+    <section style="margin:clamp(56px,9vw,88px) 0 0">
+      <div class="shots">
+        <div class="zw up d1"><img src="driver-wave.jpg" alt="A driver waving from the car" loading="lazy"
+             style="object-position:50% 32%"></div>
+        <div class="zw up d3"><img src="pit-overhead.jpg" alt="Pit boxes seen from above" loading="lazy"></div>
+        <div class="zw up d5"><img src="grid-cars.jpg" alt="Cars lined up in the paddock" loading="lazy"></div>
+      </div>
+    </section>
+
+    <section style="margin:clamp(56px,9vw,88px) 0 0">
+      <h2 class="up" style="margin:0 0 28px"><span data-i18n="home.daysA">Track days</span> <span style="color:var(--blue)" data-i18n="home.daysB">2027.</span></h2>
+      <div class="days">
+        <button type="button" class="day lift up d1"><p class="big" data-i18n="home.d1big">17 April</p><p class="sub" data-i18n="home.daySub">Saturday · 2027</p></button>
+        <button type="button" class="day lift up d2"><p class="big" data-i18n="home.d2big">22 May</p><p class="sub" data-i18n="home.daySub">Saturday · 2027</p></button>
+        <button type="button" class="day lift up d3"><p class="big" data-i18n="home.d3big">26 June</p><p class="sub" data-i18n="home.daySub">Saturday · 2027</p></button>
+        <div class="day soon up d4"><p data-i18n="home.soon">More to come soon!</p></div>
+      </div>
+    </section>
+
+    <div class="note sl">
+      <p id="seasonNote"></p>
+    </div>
+
+  </main>
+
+
+  <footer>
+    <div class="inner wrap pad">
+      <a href="https://balatonpark.com" target="_blank" rel="noopener" style="display:inline-flex">
+        <img src="bpc-logo.svg" alt="Balaton Park Circuit" style="height:22px;width:auto;opacity:.75"></a>
+      <span style="display:flex;flex-wrap:wrap;gap:24px">
+        <a href="https://balatonpark.com" target="_blank" rel="noopener" data-i18n="foot.site">BalatonPark.com</a>
+        <a href="faq.html" data-i18n="foot.faq">FAQ</a>
+        <a href="https://www.balatonparkcircuit.com/tc" target="_blank" rel="noopener" data-i18n="foot.terms">Terms</a>
+        <a href="https://www.balatonparkcircuit.com/privacy-policy" target="_blank" rel="noopener" data-i18n="foot.privacy">Privacy</a>
+        <a href="mailto:info@balatonparkcircuit.com" data-i18n="foot.contact">Contact us</a>
+      </span>
+    </div>
+  </footer>
+
+</div>
+
+<script>
+// The banner records a choice and stays away afterwards. Nothing beyond the
+// essentials is loaded until there is a stored "all" - so the page is
+// compliant by doing nothing, rather than by promising to.
+(function () {
+  // Season note has links inside it, so it is built from the dictionary
+  // rather than marked up word by word.
+  function paintNote() {
+    var n = document.getElementById('seasonNote');
+    if (!n) return;
+    n.innerHTML = i18n.t('home.note', {
+      terms: '<a href="https://www.balatonparkcircuit.com/tc" target="_blank" rel="noopener">' +
+             i18n.t('common.terms') + '</a>',
+      email: '<a href="mailto:info@balatonparkcircuit.com?subject=Gift%20Voucher%20Refund%20Request">' +
+             i18n.t('common.emailUs') + '</a>'
+    });
+  }
+  // The marquee repeats its dates, so it is built from the dictionary too.
+  function paintTicker() {
+    var parts = [i18n.t('home.d1long'), i18n.t('home.d2long'), i18n.t('home.d3long'),
+                 i18n.t('home.soon')];
+    var run = parts.concat(parts).map(function (p) { return p + '<b>/</b>'; }).join('');
+    document.querySelectorAll('.ticker span').forEach(function (s) { s.innerHTML = run; });
+  }
+
+  // Clicking a date says, in one panel, that the voucher is not tied to it.
+  var sheet = null;
+  function closeSheet() {
+    if (!sheet) return;
+    sheet.remove();
+    sheet = null;
+    document.removeEventListener('keydown', onSheetKey);
+  }
+  function onSheetKey(ev) { if (ev.key === 'Escape') closeSheet(); }
+  function openSheet() {
+    closeSheet();
+    sheet = document.createElement('div');
+    sheet.className = 'scrim';
+    sheet.innerHTML =
+      '<div class="sheet" role="dialog" aria-modal="true">' +
+        '<h2>' + i18n.t('home.dayPickH') + '</h2>' +
+        '<p>' + i18n.t('home.dayPickP') + '</p>' +
+        '<div class="row">' +
+          '<a class="go" href="purchase.html">' + i18n.t('home.dayPickCta') + '</a>' +
+          '<button type="button" class="shut">' + i18n.t('home.dayPickClose') + '</button>' +
+        '</div>' +
+      '</div>';
+    sheet.addEventListener('click', function (ev) {
+      if (ev.target === sheet || ev.target.closest('.shut')) closeSheet();
+    });
+    document.body.appendChild(sheet);
+    document.addEventListener('keydown', onSheetKey);
+    var go = sheet.querySelector('.go');
+    if (go) go.focus();
+  }
+  document.querySelectorAll('button.day').forEach(function (b) {
+    b.addEventListener('click', openSheet);
+  });
+
+  i18n.apply();
+  i18n.mountSwitch(document.getElementById('langpick'));
+  paintNote();
+  paintTicker();
+  i18n.onChange(function () { paintNote(); paintTicker(); closeSheet(); });
+
+  // The consent bar and the pixel behind it live in analytics.js now, so
+  // every page asks rather than only this one.
+})();
+</script>
+
+<script>
+// The experiences grid, exactly as it would sit on the live home page:
+// track time first, then the nine programmes. Everything here is driven by
+// one table per language, so the switch in the header moves this section too.
+(function () {
+  var EN = {
+    h2a: 'Experiences', h2b: '& track days.',
+    lede: 'Nine driving programmes and two ways to buy track time. Every one of them is a gift card with a code on it - the person you give it to picks their own date.',
+    gift: 'Gift this experience', from: 'from', vat: 'incl. VAT', each: 'per person',
+    voucher: 'Voucher',
+    cat: { track: 'Track days', control: 'Car control', ontrack: 'On track',
+           offroad: 'Off-road', bts: 'Behind the scenes', open: 'Open voucher' },
+    sheetH: 'On the live site', sheetP: 'This opens the purchase page with {name} already selected. Everything else stays available, so a basket can hold sessions and experiences together.',
+    sheetX: 'Close',
+    items: {
+      sessions: { name: 'Sessions On Track',
+        hook: 'Their own car on an FIA Grade 2 circuit, in 25-minute sessions. One, three, six - or build it up.',
+        meta: ['25 minutes each', 'own car', '3 dates in 2027'] },
+      vip: { name: 'VIP Day',
+        hook: 'Six sessions, a box garage of their own, timekeeping, and someone looking after them all day.',
+        meta: ['6 sessions', 'own car', 'box garage', 'timekeeping'] },
+      'driving-advanced': { name: 'Driving Advanced',
+        hook: 'Get to know your car better - and your own limits with it.',
+        meta: ['4 hours', 'own car', 'professional instructor'] },
+      'driving-fun': { name: 'Driving Fun',
+        hook: 'Car control with a twist. Literally.',
+        meta: ['4 hours', 'drift basics', 'own car', 'wet asphalt', 'max. 5 people'] },
+      'driving-premium': { name: 'Driving Premium',
+        hook: 'If you are learning car control, why stop at the circuit gates?',
+        meta: ['4 hours', 'on the race track', 'own car', 'max. 5 people', 'lunch'] },
+      'hot-laps': { name: 'Hot Laps',
+        hook: 'Take Balaton Park Circuit at racing pace, beside a professional driver.',
+        meta: ['2 laps', 'Mazda MX5 · BMW M2 · Porsche GT3'] },
+      'offroad-advanced': { name: 'Off-Road Advanced',
+        hook: 'Find out what your car can do once the asphalt runs out.',
+        meta: ['4 hours', 'own car', 'off-road course'] },
+      'offroad-fun': { name: 'Off-Road Fun',
+        hook: 'First you drive. Then we show you how it is done on properly rough ground.',
+        meta: ['4 hours', 'off-road taxi', 'own car', 'instructor'] },
+      'suv-experience': { name: 'SUV Experience',
+        hook: 'Sure you know what your SUV can do?',
+        meta: ['4 hours', 'own SUV', 'asphalt + off-road'] },
+      'behind-the-scenes': { name: 'Behind the Scenes Tour',
+        hook: 'See the circuit from the side the crowd never gets to see.',
+        meta: ['about 1 hour', 'Race Control', 'Balaton Park gift'] },
+      'open-voucher': { name: 'Open Experience Voucher',
+        hook: 'Give the experience. Let them choose which one.',
+        meta: ['€80 · €135 · €275', 'spend it on anything'] }
+    }
+  };
+
+  // The Hungarian is the circuit's own copy, taken from the programme texts.
+  var HU = {
+    h2a: 'Élmények', h2b: 'és pályanapok.',
+    lede: 'Kilenc vezetéstechnikai program és kétféle pályaidő. Mindegyik egy kódos ajándékkártya - az időpontot a megajándékozott választja ki.',
+    gift: 'Ajándékozd ezt', from: '-tól', vat: 'áfával', each: 'fő / program',
+    voucher: 'Utalvány',
+    cat: { track: 'Pályanapok', control: 'Vezetéstechnika', ontrack: 'Pályán',
+           offroad: 'Off-road', bts: 'Kulisszák mögött', open: 'Nyitott utalvány' },
+    sheetH: 'Az éles oldalon', sheetP: 'Ez megnyitja a vásárlási oldalt, ahol a {name} már ki van választva. Minden más továbbra is elérhető, így egy kosárba menetek és élmények is kerülhetnek.',
+    sheetX: 'Bezárás',
+    items: {
+      sessions: { name: 'Menetek a pályán',
+        hook: 'Saját autóval egy FIA Grade 2 versenypályán, 25 perces menetekben. Egy, három, hat - vagy ahogy jólesik.',
+        meta: ['25 perc menetenként', 'saját autó', '3 időpont 2027-ben'] },
+      vip: { name: 'VIP nap',
+        hook: 'Hat menet, saját box, időmérés, és egy ember, aki egész nap rájuk figyel.',
+        meta: ['6 menet', 'saját autó', 'saját box', 'időmérés'] },
+      'driving-advanced': { name: 'Driving Advanced',
+        hook: 'Ismerd meg jobban az autódat - és a saját határaidat is!',
+        meta: ['4 óra', 'saját autó', 'profi instruktor'] },
+      'driving-fun': { name: 'Driving Fun',
+        hook: 'Vezetéstechnika egy kis csavarral - szó szerint.',
+        meta: ['4 óra', 'drift alapok', 'saját autó', 'nedves aszfalt', 'max. 5 fő'] },
+      'driving-premium': { name: 'Driving Premium',
+        hook: 'Ha már vezetéstechnika, miért állnánk meg a versenypálya kapujában?',
+        meta: ['4 óra', 'versenypályán', 'saját autó', 'max. 5 fő', 'ebéd'] },
+      'hot-laps': { name: 'Élményautózás',
+        hook: 'Éld át a Balaton Park Circuitet versenytempóban!',
+        meta: ['2 kör', 'Mazda MX5 · BMW M2 · Porsche GT3'] },
+      'offroad-advanced': { name: 'Off-Road Advanced',
+        hook: 'Tudd meg, mire képes az autód, amikor elfogy alóla az aszfalt!',
+        meta: ['4 óra', 'saját autó', 'off-road pálya'] },
+      'offroad-fun': { name: 'Off-Road Fun',
+        hook: 'Először te vezetsz. Aztán megmutatjuk, hogyan csinálják igazán kemény terepen.',
+        meta: ['4 óra', 'off-road taxi', 'saját autó', 'instruktor'] },
+      'suv-experience': { name: 'SUV Experience',
+        hook: 'Biztos, hogy tudod, mire képes az SUV-od?',
+        meta: ['4 óra', 'saját SUV', 'aszfalt + off-road'] },
+      'behind-the-scenes': { name: '„Behind the Scenes” túra',
+        hook: 'Nézd meg a Balaton Park Circuitet abból a szemszögből, ahonnan a nézők nem láthatják!',
+        meta: ['kb. 1 óra', 'Race Control', 'Balaton Park ajándék'] },
+      'open-voucher': { name: 'Élményutalvány',
+        hook: 'Ajándékozz élményt - a programot pedig válassza ki ő!',
+        meta: ['€80 · €135 · €275', 'bármire felhasználható'] }
+    }
+  };
+
+  // Price, picture and category are the same in both languages, so they sit
+  // here once rather than in each dictionary.
+  var ROWS = [
+    { id: 'sessions',          cat: 'track',    img: 'img/sessions.jpg',          price: 65,  from: true },
+    { id: 'vip',               cat: 'track',    img: 'img/vip-day.jpg',           price: 450 },
+    { id: 'driving-advanced',  cat: 'control',  img: 'img/driving-advanced.jpg',  price: 435 },
+    { id: 'driving-fun',       cat: 'control',  img: 'img/driving-fun.jpg',       price: 500 },
+    { id: 'driving-premium',   cat: 'control',  img: 'img/driving-premium.jpg',   price: 640 },
+    { id: 'hot-laps',          cat: 'ontrack',  img: 'img/hot-laps.jpg',          price: 345, from: true },
+    { id: 'offroad-advanced',  cat: 'offroad',  img: 'img/offroad-advanced.jpg',  price: 330 },
+    { id: 'offroad-fun',       cat: 'offroad',  img: 'img/offroad-fun.jpg',       price: 435 },
+    { id: 'suv-experience',    cat: 'offroad',  img: 'img/suv-experience.jpg',    price: 500 },
+    { id: 'behind-the-scenes', cat: 'bts',      img: 'img/behind-the-scenes.jpg', price: 45  },
+    { id: 'open-voucher',      cat: 'open',     img: null,                        price: 80,  from: true }
+  ];
+
+  // Title Case for the chips. Each word's first letter is raised and the rest
+  // is left exactly as written, so MX5, BMW, GT3, SUV and FIA survive, and
+  // hyphens get the same treatment so off-road reads Off-Road.
+  var SMALL = ['a', 'an', 'and', 'at', 'by', 'for', 'in', 'of', 'on', 'or', 'the', 'to', 'with',
+               'és', 'a', 'az'];
+  function titleCase(str) {
+    return String(str).split(' ').map(function (word, i) {
+      if (!word) return word;
+      if (i > 0 && SMALL.indexOf(word.toLowerCase()) !== -1) return word.toLowerCase();
+      return word.split('-').map(function (part) {
+        return part ? part.charAt(0).toUpperCase() + part.slice(1) : part;
+      }).join('-');
+    }).join(' ');
+  }
+  function esc(s) {
+    return String(s).replace(/[&<>"]/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c];
+    });
+  }
+  function dict() {
+    return (window.i18n && i18n.lang === 'hu') ? HU : EN;
+  }
+  // English puts "from" in front of the figure, Hungarian hangs -tol off the
+  // end of it, so the two cannot share one template.
+  function priceOf(r, D) {
+    if (!r.from) return '€' + r.price;
+    return D === HU ? '€' + r.price + D.from : D.from + ' €' + r.price;
+  }
+
+  function paint() {
+    var D = dict();
+    var grid = document.getElementById('xgrid');
+    if (!grid) return;
+
+    document.querySelectorAll('[data-x]').forEach(function (el) {
+      var k = el.getAttribute('data-x');
+      if (D[k]) el.textContent = D[k];
+    });
+
+    grid.innerHTML = ROWS.map(function (r) {
+      var t = D.items[r.id];
+      var shot = r.img
+        ? '<div class="shot"><img src="' + r.img + '" alt="' + esc(t.name) + '" loading="lazy">' +
+          '<span class="tag">' + esc(D.cat[r.cat]) + '</span></div>'
+        : '<div class="shot novoucher"><span class="mark">' + esc(D.voucher) + '</span>' +
+          '<span class="tag">' + esc(D.cat[r.cat]) + '</span></div>';
+      var chips = t.meta.map(function (m) {
+        return '<span>' + esc(titleCase(m)) + '</span>'; }).join('');
+      return '<article class="x">' + shot + '<div class="in">' +
+        '<h3>' + esc(t.name) + '</h3>' +
+        '<p class="hook">' + esc(t.hook) + '</p>' +
+        '<div class="meta">' + chips + '</div>' +
+        '<div class="foot">' +
+          '<span class="price tnum">' + priceOf(r, D) +
+            '<small>' + esc(D.vat) + (r.id === 'open-voucher' ? '' : ' · ' + esc(D.each)) +
+            '</small></span>' +
+          '<button class="gift" type="button" data-gift="' + r.id + '">' +
+            esc(D.gift) + '</button>' +
+        '</div></div></article>';
+    }).join('');
+  }
+
+  // The live button goes to the purchase page with that package picked. There
+  // is no purchase page in this preview, so it says so instead of dying.
+  // The page opens its own panel on the track-day buttons, so closing means
+  // every scrim on the page, not only the one this file put there.
+  var panel = null;
+  function shut() {
+    document.querySelectorAll('.scrim').forEach(function (s) { s.remove(); });
+    panel = null;
+    document.removeEventListener('keydown', onKey);
+  }
+  function onKey(ev) { if (ev.key === 'Escape') shut(); }
+  function open(id) {
+    var D = dict();
+    shut();
+    panel = document.createElement('div');
+    panel.className = 'scrim';
+    panel.innerHTML =
+      '<div class="sheet" role="dialog" aria-modal="true">' +
+        '<h2>' + esc(D.sheetH) + '</h2>' +
+        '<p>' + esc(D.sheetP.replace('{name}', D.items[id].name)) + '</p>' +
+        '<div class="row">' +
+          '<button type="button" class="shut">' + esc(D.sheetX) + '</button>' +
+        '</div>' +
+      '</div>';
+    panel.addEventListener('click', function (ev) {
+      if (ev.target === panel || ev.target.closest('.shut')) shut();
+    });
+    document.body.appendChild(panel);
+    document.addEventListener('keydown', onKey);
+  }
+
+  document.getElementById('xgrid').addEventListener('click', function (ev) {
+    var b = ev.target.closest('[data-gift]');
+    if (b) open(b.getAttribute('data-gift'));
+  });
+
+  // Every other page of the shop is missing from this preview, so a link to
+  // one would land on nothing. They say where they go instead of 404ing.
+  var PAGES = {
+    en: { 'purchase.html': 'the purchase page', 'redeem.html': 'the redeem page',
+          'faq.html': 'the questions page' },
+    hu: { 'purchase.html': 'a vásárlási oldal', 'redeem.html': 'a beváltó oldal',
+          'faq.html': 'a kérdések oldala' }
+  };
+  function noteFor(href) {
+    var hu = dict() === HU;
+    var what = PAGES[hu ? 'hu' : 'en'][href] || href;
+    return hu
+      ? { h: 'Az éles oldalon', p: 'Ez a gomb ' + what + 'ra visz. Ez az előnézet csak a kezdőlapot tartalmazza.', x: 'Bezárás' }
+      : { h: 'On the live site', p: 'This goes to ' + what + '. This preview is the home page only.', x: 'Close' };
+  }
+  function openNote(n) {
+    shut();
+    panel = document.createElement('div');
+    panel.className = 'scrim';
+    panel.innerHTML =
+      '<div class="sheet" role="dialog" aria-modal="true">' +
+        '<h2>' + esc(n.h) + '</h2><p>' + esc(n.p) + '</p>' +
+        '<div class="row"><button type="button" class="shut">' + esc(n.x) + '</button></div>' +
+      '</div>';
+    panel.addEventListener('click', function (ev) {
+      if (ev.target === panel || ev.target.closest('.shut')) shut();
+    });
+    document.body.appendChild(panel);
+    document.addEventListener('keydown', onKey);
+  }
+  document.addEventListener('click', function (ev) {
+    var a = ev.target.closest('a[href$=".html"]');
+    if (!a) return;
+    var href = a.getAttribute('href');
+    if (/^https?:/i.test(href)) return;
+    ev.preventDefault();
+    ev.stopPropagation();
+    openNote(noteFor(href));
+  }, true);
+
+  paint();
+  if (i18n && i18n.onChange) i18n.onChange(function () { paint(); shut(); });
+})();
+</script>
+
+</body>
+</html>
