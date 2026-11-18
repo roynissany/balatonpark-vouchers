@@ -130,6 +130,20 @@
   .msg.ok{background:rgba(79,180,119,.13);color:#9BDCB6;border:1px solid rgba(79,180,119,.3)}
   .empty{padding:34px;text-align:center;color:var(--dimmer);font-size:13px}
   .muted{color:var(--dim)} .tiny{font-size:11.5px}
+
+  /* Daily trend. Drawn with divs rather than a charting library: it is one
+     series of small numbers and the page already refuses to depend on a CDN. */
+  .trend{display:flex;align-items:flex-end;gap:3px;height:160px;padding:16px 18px 0;
+    background:var(--ink2);border:1px solid var(--line);border-radius:11px}
+  .trend span{flex:1 1 0;min-width:0;min-height:2px;border-radius:2px 2px 0 0;
+    background:var(--blue);opacity:.75;transition:opacity .15s}
+  .trend span:hover{opacity:1}
+  .trend span[data-today]{background:var(--pale)}
+  .trendfoot{display:flex;justify-content:space-between;gap:12px;
+    margin:7px 2px 22px;font-size:11.5px;color:var(--dimmer)}
+  .scopenote{margin:0 0 16px;padding:11px 13px;border-radius:9px;
+    background:rgba(66,122,183,.12);border:1px solid rgba(66,122,183,.32);
+    font-size:12.5px;line-height:1.6;color:var(--dim)}
 </style>
 </head>
 <body>
@@ -154,6 +168,7 @@
     <div class="mark">BALATON PARK</div>
     <nav>
       <button data-tab="overview" aria-current="page">Overview</button>
+      <button data-tab="traffic">Traffic</button>
       <button data-tab="vouchers">Vouchers</button>
       <button data-tab="codes">Cooltix codes</button>
       <button data-tab="log">Activity</button>
@@ -178,6 +193,31 @@
       <div class="wrap"><table>
         <thead><tr><th>Source</th><th>Orders</th><th>Paid</th><th>Revenue</th><th>Share</th></tr></thead>
         <tbody id="heardRows"></tbody></table></div>
+    </section>
+
+    <section data-tab="traffic">
+      <p class="scopenote">Counted from our own request logs, not from Google. Only pages that
+        talk to the server are visible here &ndash; the shop, redeem and thank&nbsp;you pages &ndash;
+        so this is how many people reached the shop, not how many reached the site. Bots and the
+        pool&#8209;warming job are excluded. Visitors are distinct addresses within a day, so
+        somebody who came back on two days counts twice. <span id="tTestNote"></span></p>
+      <div class="toolbar">
+        <div><label for="tDays">Period</label>
+          <select id="tDays">
+            <option value="7">Last 7 days</option>
+            <option value="30" selected>Last 30 days</option>
+            <option value="90">Last 90 days</option>
+          </select></div>
+        <div class="grow"></div>
+      </div>
+      <div class="tiles" id="tTiles"></div>
+      <h2 style="font-size:19px;margin-bottom:11px">Visitors per day</h2>
+      <div class="trend" id="tTrend"></div>
+      <div class="trendfoot"><span id="tFrom"></span><span id="tTo"></span></div>
+      <h2 style="font-size:19px;margin-bottom:11px">Where they came from</h2>
+      <div class="wrap"><table>
+        <thead><tr><th>Country</th><th>Requests</th><th>Visitors</th><th>Share</th></tr></thead>
+        <tbody id="tCountries"></tbody></table></div>
     </section>
 
     <section data-tab="vouchers">
@@ -427,6 +467,7 @@ document.querySelectorAll('nav button').forEach((b) => {
     document.querySelectorAll('section').forEach((s) => s.removeAttribute('data-on'));
     document.querySelector(`section[data-tab="${b.dataset.tab}"]`).setAttribute('data-on', '');
     if (b.dataset.tab === 'vouchers') loadVouchers();
+    if (b.dataset.tab === 'traffic') loadTraffic();
     if (b.dataset.tab === 'log') loadLog();
   });
 });
@@ -507,6 +548,74 @@ async function loadAttribution() {
   }) : [el('tr', null,
     '<td colspan="5"><div class="empty">No answers yet. The question went live on 18 November.</div></td>')]));
 }
+
+// ---------------------------------------------------------------- traffic
+
+const pct = (x) => (x * 100).toFixed(x >= 0.1 ? 0 : 1) + '%';
+
+async function loadTraffic() {
+  let d;
+  try {
+    d = await report('traffic', { days: Number($('#tDays').value) || 30 });
+  } catch (e) {
+    if (e.message === 'unauthorised') return;
+    flash($('#appErr'), 'Could not load traffic: ' + e.message);
+    return;
+  }
+
+  $('#tTestNote').textContent = d.excluded_test_days
+    ? `${d.excluded_test_days} day${d.excluded_test_days > 1 ? 's' : ''} of our own ` +
+      `end-to-end testing (10–11 November) are left out.`
+    : '';
+
+  $('#tTiles').replaceChildren(...[
+    ['Visitors', d.visitors, 'reached the shop'],
+    ['Shop page views', d.shop_views, ''],
+    ['Views per visitor', d.views_per_visitor.toFixed(2),
+      d.views_per_visitor < 1.3 ? 'they look once and leave' : ''],
+    ['On a phone', pct(d.mobile_share), `${d.mobile_hits} of ${d.hits} requests`],
+    ['From social', d.social_hits,
+      `${d.instagram_hits} Instagram · ${d.facebook_hits} Facebook`],
+    ['Reached checkout', d.checkout_starts, 'pressed Pay'],
+    ['Paid orders', d.paid_orders, d.orders !== d.paid_orders
+      ? `${d.orders} started` : ''],
+    ['Revenue', money(d.revenue_cents), 'paid orders only'],
+    ['Conversion', pct(d.conversion), 'paid orders per visitor'],
+    ['Countries', d.countries.length, ''],
+  ].map(([k, v, n]) => el('div', 'tile',
+    `<div class="k">${k}</div><div class="v">${esc(v)}</div>` +
+    (n ? `<div class="n">${esc(n)}</div>` : ''))));
+
+  // One bar per day. The tallest sets the scale, so a quiet week still
+  // reads rather than flattening into nothing.
+  const top = Math.max(1, ...d.series.map((s) => s.visitors));
+  const today = new Date().toISOString().slice(0, 10);
+  $('#tTrend').replaceChildren(...(d.series.length ? d.series.map((s) => {
+    const bar = el('span', null, '');
+    bar.style.height = Math.max(2, Math.round(s.visitors / top * 100)) + '%';
+    if (s.day === today) bar.setAttribute('data-today', '');
+    bar.title = `${s.day} · ${s.visitors} visitors · ${s.shop_views} views` +
+      (s.checkout_starts ? ` · ${s.checkout_starts} reached checkout` : '');
+    return bar;
+  }) : [el('div', 'empty', 'Nothing captured for this period.')]));
+
+  $('#tFrom').textContent = d.series.length ? day(d.series[0].day) : '';
+  $('#tTo').textContent = d.series.length
+    ? day(d.series[d.series.length - 1].day) + ' · today so far' : '';
+
+  const hits = d.countries.reduce((n, c) => n + c.hits, 0) || 1;
+  $('#tCountries').replaceChildren(...(d.countries.length ? d.countries.map((c) =>
+    el('tr', null,
+      `<td class="mono">${esc(c.country)}</td>
+       <td class="mono">${c.hits}</td>
+       <td class="mono">${c.visitors}</td>
+       <td style="width:190px"><div class="bar"><i style="width:${
+         Math.round(c.hits / hits * 100)}%"></i></div>
+         <div class="tiny muted" style="margin-top:3px">${pct(c.hits / hits)}</div></td>`))
+    : [el('tr', null, '<td colspan="4"><div class="empty">Nothing yet.</div></td>')]));
+}
+
+$('#tDays').addEventListener('change', loadTraffic);
 
 // ---------------------------------------------------------------- vouchers
 
