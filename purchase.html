@@ -217,6 +217,14 @@
   .langchoice .lng:hover{color:var(--text);border-color:rgba(255,255,255,.45)}
   .langchoice .lng[aria-pressed=true]{background:var(--blue);color:#fff;border-color:var(--blue)}
 
+  /* Reuses the chip pattern above at a smaller size: six one-tap answers
+     read faster on a phone than a select, and leave nothing to type. */
+  .heard{margin:28px 0 0}
+  .heard .f{display:block;margin:0 0 11px}
+  .heard .opt{font-weight:400;text-transform:none;letter-spacing:0;
+    color:rgba(245,247,251,.45)}
+  .heard .lng{min-height:44px;padding:0 15px;font-size:14px}
+
   .wantinv{display:flex;align-items:center;gap:12px;margin:24px 0 0;cursor:pointer;
     font-size:15px;font-weight:300;color:rgba(245,247,251,.86)}
   .wantinv input{width:20px;height:20px;flex:0 0 auto;accent-color:var(--blue);cursor:pointer}
@@ -232,8 +240,8 @@
   .langpick button[aria-pressed=true]{background:var(--blue);color:#fff;border-color:var(--blue)}
   .headrow{display:flex;align-items:center;justify-content:space-between;gap:16px}
 </style>
-<script src="i18n.js?v=20261117a"></script>
-<script src="analytics.js?v=20261117a" defer></script>
+<script src="i18n.js?v=20261118a"></script>
+<script src="analytics.js?v=20261118a" defer></script>
 </head>
 <body>
 
@@ -311,6 +319,15 @@
                     color:rgba(245,247,251,.62)" data-i18n="buy.invNote">
             Without this you get a receipt, which is all a private buyer needs.
           </p>
+        </div>
+
+        <!-- Optional by design. A marketing question must never stand
+             between someone and paying, so nothing here validates, nothing
+             blocks, and a second tap clears a wrong answer. -->
+        <div class="heard">
+          <span class="f" id="heardLabel"><span data-i18n="buy.heard">Where did you hear about us?</span>
+            <span class="opt" data-i18n="buy.heardOpt">(optional)</span></span>
+          <div class="langchoice" id="heardPick" role="group" aria-labelledby="heardLabel"></div>
         </div>
 
         <button type="button" id="addGift" class="addgift">
@@ -893,6 +910,7 @@
         throw new Error(t(r.body && r.body.error === 'payments_not_configured'
           ? 'buy.errNoPay' : 'buy.errStart'));
       }
+      recordHeard(r.body.order_id);
       // The card form on this page takes it from here. Without a publishable
       // key the server hands back a hosted URL instead, and we send them
       // there rather than failing.
@@ -920,6 +938,47 @@
       paintPayButton();
     });
   });
+
+  // ------------------------------------------------ where they heard of us
+
+  // Answered after the sale is already won or lost, never before it: the
+  // chips sit below the buyer's own details and carry no validation.
+  var HEARD = ['instagram', 'facebook', 'search', 'friend', 'been', 'other'];
+  var heardAbout = '';
+
+  function paintHeard() {
+    var box = $('#heardPick');
+    if (!box) return;
+    box.innerHTML = HEARD.map(function (k) {
+      return '<button type="button" class="lng" data-heard="' + k +
+        '" aria-pressed="' + (heardAbout === k) + '">' +
+        t('buy.heard.' + k) + '</button>';
+    }).join('');
+  }
+
+  $('#heardPick').addEventListener('click', function (ev) {
+    var b = ev.target.closest('button[data-heard]');
+    if (!b) return;
+    // Tapping the chosen one again clears it. A mis-tap on a phone should
+    // not be something the buyer is stuck with.
+    heardAbout = (heardAbout === b.dataset.heard) ? '' : b.dataset.heard;
+    paintHeard();
+  });
+
+  // Sent on its own path, after the order exists and before the card is
+  // confirmed. keepalive, because confirming the card navigates away a
+  // moment later. Nothing waits on it and nothing reads the answer back.
+  function recordHeard(orderId) {
+    if (!heardAbout || !orderId) return;
+    try {
+      fetch(API + '/attribution', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ order_id: orderId, heard_about: heardAbout }),
+        keepalive: true
+      }).catch(function () {});
+    } catch (e) { /* never worth failing a sale over */ }
+  }
 
   // ------------------------------------------------------ embedded payment
 
@@ -1132,6 +1191,7 @@
   i18n.apply();
   i18n.mountSwitch(document.getElementById('langpick'));
   paintProse();
+  paintHeard();
   // Stripe fixes its locale when the element is created, so switching
   // language has to build a new one; draw() mounts it again straight after.
   function resetPaymentForm() {
@@ -1149,6 +1209,7 @@
   i18n.onChange(function () {
     closeTip();
     paintProse();
+    paintHeard();
     gifts.forEach(function (g) {
       // Switching the site language moves the gift languages with it, but
       // only the ones nobody has deliberately set.
