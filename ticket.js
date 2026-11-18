@@ -54,6 +54,10 @@
     var d = outline();
     var sx = W - STUB;
     var big = String(o.sessions == null ? '' : o.sessions);
+    // A session count is one digit, and VIP or a two-letter experience code
+    // still sits inside the stub at the same size. Anything longer has to
+    // come down rather than run over the perforation.
+    var bigSize = big.length <= 3 ? 112 : 78;
     var qr = o.qr
       ? '<rect x="578" y="222" width="168" height="168" rx="3" fill="#FBEFC8" opacity=".28"/>' +
         '<g transform="translate(592,236) scale(' + (140 / o.qrModules) + ')">' +
@@ -125,7 +129,7 @@
       '<text text-anchor="middle" y="-96" font-family="Barlow Condensed,sans-serif" font-weight="800" ' +
         'font-size="21" letter-spacing="6" fill="#FFF0BC" opacity=".9">' + esc(o.admit || 'ADMIT ONE') + '</text>' +
       '<text text-anchor="middle" y="14" font-family="Barlow Condensed,sans-serif" font-weight="800" ' +
-        'font-size="112" fill="#FFF6D6">' + esc(big) + '</text>' +
+        'font-size="' + bigSize + '" fill="#FFF6D6">' + esc(big) + '</text>' +
       '<text text-anchor="middle" y="58" font-family="Barlow Condensed,sans-serif" font-weight="800" ' +
         'font-size="30" letter-spacing="4" fill="#FFE9A8">' + esc(o.unit || '') + '</text>' +
       '<text text-anchor="middle" y="134" font-family="Barlow Condensed,sans-serif" font-weight="800" ' +
