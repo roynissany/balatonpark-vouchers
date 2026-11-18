@@ -549,6 +549,75 @@ async function loadAttribution() {
     '<td colspan="5"><div class="empty">No answers yet. The question went live on 18 November.</div></td>')]));
 }
 
+// ------------------------------------------------------------ order meta
+
+// Apple Pay and Google Pay are not payment methods of their own: they
+// arrive as a card with a wallet on it, so the wallet is the headline and
+// the card underneath is what was actually charged.
+const WALLET = {
+  apple_pay: 'Apple&nbsp;Pay', google_pay: 'Google&nbsp;Pay',
+  samsung_pay: 'Samsung&nbsp;Pay', link: 'Link',
+};
+const METHOD = {
+  card: 'Card', revolut_pay: 'Revolut&nbsp;Pay', link: 'Link',
+  paypal: 'PayPal', klarna: 'Klarna', sepa_debit: 'SEPA direct debit',
+};
+
+const brandOf = (b) => b
+  ? b.charAt(0).toUpperCase() + b.slice(1).replace(/_/g, ' ')
+  : 'Card';
+
+function payLabel(m) {
+  const p = m.payment;
+  if (!p) {
+    return `<span class="muted tiny">${
+      m.payment_error === 'no_payment_on_order' ? 'Never paid' : 'Could not read Stripe'}</span>`;
+  }
+  const card = p.last4
+    ? ` <span class="muted tiny mono">${esc(brandOf(p.brand))} ····${esc(p.last4)}</span>`
+    : '';
+  if (p.wallet) return `<strong>${WALLET[p.wallet] || esc(p.wallet)}</strong>${card}`;
+  if (p.type === 'card') {
+    return `<strong>${esc(brandOf(p.brand))}</strong>` +
+      (p.last4 ? ` <span class="mono">····${esc(p.last4)}</span>` : '');
+  }
+  return `<strong>${METHOD[p.type] || esc(p.type || 'Unknown')}</strong>`;
+}
+
+// What was asked for and what came back are different questions: an order
+// can be marked for a szamla and still have nothing issued.
+function docLabel(inv) {
+  if (!inv) return '—';
+  if (inv.issued) {
+    return `<span style="color:#6FCF97">${
+        inv.issued === 'szamla' ? 'Számla' : 'Nyugta'} issued</span> ` +
+      `<span class="mono">${esc(inv.number)}</span>` +
+      (inv.at ? ` <span class="muted tiny">${when(inv.at)}</span>` : '') +
+      (inv.url ? ` <a href="${esc(inv.url)}" target="_blank" rel="noopener">open</a>` : '');
+  }
+  return `<span style="color:#E8705F">No ${
+    inv.requested === 'szamla' ? 'számla' : 'nyugta'} issued</span>` +
+    ` <span class="muted tiny">(${inv.requested === 'szamla' ? 'invoice' : 'receipt'} requested)</span>`;
+}
+
+// Neither fact lives on the order row, so both are fetched once the drawer
+// is already on screen rather than holding it up.
+async function loadOrderMeta(orderId) {
+  const pay = $('#payWith');
+  if (!pay || !orderId) return;
+  let m;
+  try {
+    m = await report('order_meta', { order_id: orderId });
+  } catch (e) {
+    pay.innerHTML = '<span class="muted tiny">Could not read Stripe</span>';
+    return;
+  }
+  if (m.error) { pay.innerHTML = '<span class="muted tiny">—</span>'; return; }
+  pay.innerHTML = payLabel(m);
+  const doc = $('#docCell');
+  if (doc) doc.innerHTML = docLabel(m.invoice);
+}
+
 // ---------------------------------------------------------------- traffic
 
 const pct = (x) => (x * 100).toFixed(x >= 0.1 ? 0 : 1) + '%';
@@ -722,13 +791,17 @@ async function openVoucher(id) {
        <dt>Paid</dt><dd class="mono">${money(o.total_cents)}${
           o.discount_cents ? ` <span class="muted tiny">(${money(o.discount_cents)} off)</span>` : ''}</dd>
        <dt>Order</dt><dd>${pill(o.status)} <span class="muted tiny">${when(o.paid_at)}</span></dd>
-       <dt>${o.invoice_kind === 'szamla' ? 'Invoice' : 'Receipt'}</dt>
-       <dd>${o.invoice_number
+       <dt>Paid with</dt><dd id="payWith"><span class="muted tiny">reading Stripe…</span></dd>
+       <dt>Tax document</dt>
+       <dd id="docCell">${o.invoice_number
             ? `<span class="mono">${esc(o.invoice_number)}</span>` +
               (o.invoiced_at ? ` <span class="muted tiny">${when(o.invoiced_at)}</span>` : '')
             : `<span style="color:#E8705F">Not issued</span>${docFlag(o)}`}</dd>
        ${o.gift_message ? `<dt>Message</dt><dd class="muted">${esc(o.gift_message)}</dd>` : ''}
      </dl>`);
+
+  // Fills the two cells above once Stripe and the order have been asked.
+  loadOrderMeta(o.id);
 
   // Two ways out of a failed document: ask Szamlazz again once whatever
   // blocked it is fixed, or record the number of one raised by hand.
