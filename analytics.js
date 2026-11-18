@@ -16,9 +16,9 @@
   'use strict';
 
   var PIXEL_ID = '987233217783582';
-  // Google Analytics 4. Blank until the property exists, and nothing about
-  // GA loads or runs while it is blank, so this file is safe either way.
-  var GA_ID = '';
+  // Google Analytics 4. Blank disables it outright: no script is fetched and
+  // no gtag exists, which is how this shipped before the property existed.
+  var GA_ID = 'G-F8XV2C65RN';
   var KEY = 'bpc-cookie-choice';
   var PRIVACY = 'https://www.balatonparkcircuit.com/privacy-policy';
 
