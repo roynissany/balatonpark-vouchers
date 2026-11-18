@@ -49,8 +49,13 @@
     .lift,.zw img{transition:none!important}
   }
 
+  /* space-between alone gives the logo and the headline whatever is left
+     over, which on a short or squeezed window is almost nothing - the two
+     then read as one cluster. The gap is the floor under that: below it the
+     hero grows past the viewport rather than closing up. */
   .hero { position:relative; min-height:min(780px,92svh); display:flex;
-          flex-direction:column; justify-content:space-between; overflow:hidden }
+          flex-direction:column; justify-content:space-between;
+          gap:clamp(54px,9vh,66px); overflow:hidden }
   .hero img.bg { position:absolute; inset:0; width:100%; height:100%;
                  object-fit:cover; filter:brightness(.62) saturate(.95) }
   .hero .veil { position:absolute; inset:0;
@@ -219,7 +224,7 @@
     </div>
 
     <div class="wrap pad" style="position:relative;padding-bottom:clamp(48px,9vw,84px)">
-      <p class="up eyebrow" style="display:flex;align-items:center;gap:16px;margin:0 0 22px;font-size:12px;font-weight:600;text-transform:uppercase">
+      <p class="up eyebrow" style="display:flex;align-items:center;gap:16px;margin:0 0 clamp(28px,4.5vw,36px);font-size:12px;font-weight:600;text-transform:uppercase">
         <span class="rule" style="display:inline-block;width:48px;height:2px;background:var(--blue)"></span>
         <span data-i18n="home.eyebrow">Gift vouchers</span>
       </p>
@@ -405,7 +410,7 @@
     items: {
       sessions: { name: 'Sessions On Track',
         hook: 'Their own car on an FIA Grade 2 circuit, in 25-minute sessions. One, three, six - or build it up.',
-        meta: ['25 minutes each', 'own car', '3 dates in 2027'] },
+        meta: ['25 minutes each', 'own car', '2027 season'] },
       vip: { name: 'VIP Day',
         hook: 'Six sessions, a box garage of their own, timekeeping, and someone looking after them all day.',
         meta: ['6 sessions', 'own car', 'box garage', 'timekeeping'] },
@@ -452,7 +457,7 @@
     items: {
       sessions: { name: 'Menetek a pályán',
         hook: 'Saját autóval egy FIA Grade 2 versenypályán, 25 perces menetekben. Egy, három, hat - vagy ahogy jólesik.',
-        meta: ['25 perc menetenként', 'saját autó', '3 időpont 2027-ben'] },
+        meta: ['25 perc menetenként', 'saját autó', '2027-es szezon'] },
       vip: { name: 'VIP nap',
         hook: 'Hat menet, saját box, időmérés, és egy ember, aki egész nap rájuk figyel.',
         meta: ['6 menet', 'saját autó', 'saját box', 'időmérés'] },
@@ -499,7 +504,7 @@
     { id: 'offroad-fun',       cat: 'offroad',  img: 'img/offroad-fun.jpg',       price: 435 },
     { id: 'suv-experience',    cat: 'offroad',  img: 'img/suv-experience.jpg',    price: 500 },
     { id: 'behind-the-scenes', cat: 'bts',      img: 'img/behind-the-scenes.jpg', price: 45  },
-    { id: 'open-voucher',      cat: 'open',     img: null,                        price: 80,  from: true }
+    { id: 'open-voucher',      cat: 'open',     img: 'img/open-voucher.jpg',      price: 80,  from: true }
   ];
 
   // Title Case for the chips. Each word's first letter is raised and the rest
@@ -511,6 +516,9 @@
     return String(str).split(' ').map(function (word, i) {
       if (!word) return word;
       if (i > 0 && SMALL.indexOf(word.toLowerCase()) !== -1) return word.toLowerCase();
+      // A word opening with a figure keeps its own suffix: Hungarian writes
+      // 2027-es, never 2027-Es.
+      if (/^[0-9]/.test(word)) return word;
       return word.split('-').map(function (part) {
         return part ? part.charAt(0).toUpperCase() + part.slice(1) : part;
       }).join('-');
