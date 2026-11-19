@@ -166,9 +166,9 @@
   .langpick button[aria-pressed=true]{background:var(--blue);color:#fff;border-color:var(--blue)}
   .headrow{display:flex;align-items:center;justify-content:space-between;gap:16px}
 </style>
-<script src="i18n.js?v=20261119b"></script>
-<script src="analytics.js?v=20261119b" defer></script>
-<script src="ticket.js?v=20261119b"></script>
+<script src="i18n.js?v=20261119c"></script>
+<script src="analytics.js?v=20261119c" defer></script>
+<script src="ticket.js?v=20261119c"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
 </head>
 <body data-page="thanks">
@@ -531,21 +531,30 @@
     }
   }
 
+  // The same three shapes the emailed ticket has always drawn: a session
+  // voucher names a count, an experience names its programme and carries its
+  // two letters on the stub, and the VIP day is a day rather than one
+  // session. This page drew everything as a session count, so an experience
+  // read "ONE SESSION" and a VIP day did too.
   function ticketFor(v) {
     var n = v.sessions_total || 1;
+    var vip = v.package_code === 'vip';
+    var exp = !!v.is_experience && !vip;
     var qr = qrFor(v.code);
     return bpcTicket({
       code: v.code,
       shortCode: String(v.code).replace(/^BPC-/, ''),
-      sessions: v.package_code === 'vip' ? 'VIP' : n,
-      headline: t('tk.headline' + (n > 1 ? 'Many' : 'One'), { n: n }),
-      sub: t('tk.sub'),
+      sessions: exp ? (v.ticket_mark || '') : (vip ? 'VIP' : n),
+      headline: exp ? String(v.package || '').toUpperCase()
+        : (vip ? t('tk.vipHeadline') : t('tk.headline' + (n > 1 ? 'Many' : 'One'), { n: n })),
+      sub: exp ? t('tk.expSub') : t('tk.sub'),
       eyebrow: t('tk.eyebrow'),
       codeLabel: t('tk.codeLabel'),
-      footnote: t('tk.footnote'),
+      footnote: exp ? t('tk.expFootnote') : t('tk.footnote'),
       admit: t('tk.admit'),
-      unit: t(n > 1 ? 'common.sessionMany' : 'common.sessionOne').toUpperCase(),
-      each: t('tk.each'),
+      unit: exp ? t('tk.expUnit')
+        : (vip ? t('tk.vipUnit') : t(n > 1 ? 'common.sessionMany' : 'common.sessionOne').toUpperCase()),
+      each: exp ? t('tk.expEach') : (vip ? t('tk.vipEach') : t('tk.each')),
       scanLabel: t('tk.scan'),
       alt: v.package + ' ' + v.code,
       qr: qr && qr.rects,
