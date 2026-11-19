@@ -10,7 +10,7 @@ import { createClient } from "jsr:@supabase/supabase-js@2";
 //          invoice?: { name, tax_number, country, postcode, city, address } }
 //
 // One order can carry several gifts, each going to its own person on its
-// own schedule, in its own language, paid for in one go. The session tier is
+// own schedule, in its own language, paid for in one go. The volume tier is
 // worked out across everything in the basket, so buying for four people
 // reaches the deeper discount that buying for one would not.
 //
@@ -246,14 +246,25 @@ Deno.serve(async (req: Request) => {
 
   // The tier is counted across the whole basket, not per gift: buying for
   // four people is what reaches the deeper discount.
-  let totalSessions = 0;
+  //
+  // It is counted in SELECTIONS, not sessions. A session package counts its
+  // own sessions, so 3 sessions still reaches the first tier exactly as it
+  // did; anything else in the ladder counts one per unit, so three
+  // experiences reach it too. Before this, adding experiences moved the
+  // counter not at all and the basket's "{pct}% off everything" was a
+  // promise it could not keep. The Tour and the open vouchers are out of the
+  // ladder, so they neither count towards a tier nor take a discount from
+  // one. discount_tiers.min_sessions keeps its name and now reads as a
+  // number of selections.
+  let totalPicks = 0;
   for (const p of parsed) {
     for (const [code, qty] of p.wanted) {
       const pkg = find(code);
-      if (pkg?.splittable) totalSessions += (pkg.session_count ?? 0) * qty;
+      if (!pkg || pkg.in_ladder === false) continue;
+      totalPicks += (pkg.splittable ? (pkg.session_count ?? 1) : 1) * qty;
     }
   }
-  const tier = (tiers ?? []).find((t) => totalSessions >= t.min_sessions) ?? null;
+  const tier = (tiers ?? []).find((t) => totalPicks >= t.min_sessions) ?? null;
 
   const gifts: Record<string, unknown>[] = [];
   const flatItems: Record<string, unknown>[] = [];
@@ -271,12 +282,11 @@ Deno.serve(async (req: Request) => {
 
       const list = pkg.list_price_cents ?? pkg.price_cents;
       const sessions = pkg.session_count ?? 1;
-      // The tier is reached by counting sessions, but it comes off every
-      // package flagged in_ladder - which is what the basket's own nudge
-      // ("{pct}% off everything") has always said. A session package is
-      // priced from the tier's stated per-session figure; anything else
-      // takes the tier's percentage off its own price, rounded to whole
-      // euros because nothing on this product is ever sold in cents.
+      // The tier comes off every package flagged in_ladder - which is what
+      // the basket's own nudge ("{pct}% off everything") says. A session
+      // package is priced from the tier's stated per-session figure;
+      // anything else takes the tier's percentage off its own price, rounded
+      // to whole euros because nothing on this product is ever sold in cents.
       const inLadder = pkg.in_ladder !== false;
       let tiered: number | null = null;
       if (tier && inLadder) {

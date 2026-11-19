@@ -441,5 +441,6 @@ Deno.serve(async (req: Request) => {
   if (logErr) console.error("email_log insert failed", logErr);
 
   if (!res.ok) return json({ error: "send_failed", detail: out }, 502);
-  return json({ sent: true, to, kind, lang: lg, attached: !!attach, id: out.id });
+  return json({ sent: true, to, kind, lang: lg, channel: order.channel ?? "gift",
+                attached: !!attach, id: out.id });
 });
