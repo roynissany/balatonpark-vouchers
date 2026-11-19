@@ -401,7 +401,7 @@
   var EN = {
     h2a: 'Experiences', h2b: '& track days.',
     lede: 'Nine driving programmes and two ways to buy track time. Every one of them is a gift card with a code on it - the person you give it to picks their own date.',
-    gift: 'Gift this experience', from: 'from', vat: 'incl. VAT', each: 'per person',
+    gift: 'Gift this experience', from: 'from', vat: 'incl. VAT', each: 'per person', sep: ' · ',
     voucher: 'Voucher',
     cat: { track: 'Track days', control: 'Car control', ontrack: 'On track',
            offroad: 'Off-road', bts: 'Behind the scenes', open: 'Open voucher' },
@@ -448,7 +448,7 @@
   var HU = {
     h2a: 'Élmények', h2b: 'és pályanapok.',
     lede: 'Kilenc vezetéstechnikai és élményprogram, valamint kétféle pályanapcsomag. Mindegyik ajándékutalványként vásárolható meg, az időpontot pedig a megajándékozott választja ki.',
-    gift: 'Add ezt ajándékba', from: '-tól', vat: 'áfával', each: 'személyenként',
+    gift: 'Add ezt ajándékba', from: '-tól', vat: 'áfával', each: 'személyenként', sep: ' - ',
     voucher: 'Utalvány',
     cat: { track: 'Pályanapok', control: 'Vezetéstechnika', ontrack: 'A pályán',
            offroad: 'Off-road', bts: 'Kulisszák mögött', open: 'Szabad választás' },
@@ -564,7 +564,7 @@
         '<div class="meta">' + chips + '</div>' +
         '<div class="foot">' +
           '<span class="price tnum">' + priceOf(r, D) +
-            '<small>' + esc(D.vat) + (r.id === 'open-voucher' ? '' : ' · ' + esc(D.each)) +
+            '<small>' + esc(D.vat) + (r.id === 'open-voucher' ? '' : D.sep + esc(D.each)) +
             '</small></span>' +
           '<button class="gift" type="button" data-gift="' + r.id + '">' +
             esc(D.gift) + '</button>' +
