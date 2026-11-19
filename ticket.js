@@ -58,6 +58,16 @@
     // still sits inside the stub at the same size. Anything longer has to
     // come down rather than run over the perforation.
     var bigSize = big.length <= 3 ? 112 : 78;
+
+  // The headline used to be a word or two - "6 SESSIONS", "VIP DAY" - and so
+  // was set at one size. An experience puts its whole name there, and the
+  // long ones ran straight over the perforation into the stub. 0.62em per
+  // character is Barlow Condensed 800 measured generously, counting spaces
+  // as full width, so this errs small rather than over the edge.
+  var head = String(o.headline || '');
+  var HEAD_ROOM = 788;
+  var headSize = Math.max(44, Math.min(96,
+    Math.floor(HEAD_ROOM / ((head.length || 1) * 0.62))));
     var qr = o.qr
       ? '<rect x="578" y="222" width="168" height="168" rx="3" fill="#FBEFC8" opacity=".28"/>' +
         '<g transform="translate(592,236) scale(' + (140 / o.qrModules) + ')">' +
@@ -108,8 +118,9 @@
       '<g transform="scale(0.148)">' + LOGO_DARK + '</g>' +
       '<text x="2" y="104" font-family="Barlow Condensed,sans-serif" font-weight="800" font-size="25" ' +
         'letter-spacing="7.5" fill="#6A4E0B">' + esc(o.eyebrow || 'GIFT VOUCHER \u00b7 AJ\u00c1ND\u00c9KUTALV\u00c1NY') + '</text>' +
-      '<text x="0" y="196" font-family="Barlow Condensed,sans-serif" font-weight="800" font-size="96" ' +
-        'letter-spacing="-0.5" fill="#241803">' + esc(o.headline || '') + '</text>' +
+      '<text x="0" y="196" font-family="Barlow Condensed,sans-serif" font-weight="800" ' +
+        'font-size="' + headSize + '" ' +
+        'letter-spacing="-0.5" fill="#241803">' + esc(head) + '</text>' +
       '<text x="0" y="252" font-family="Barlow Condensed,sans-serif" font-weight="800" font-size="40" ' +
         'letter-spacing="2" fill="#5E440A">' + esc(o.sub || '') + '</text>' +
 

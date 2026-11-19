@@ -112,19 +112,29 @@ async function renderTicket(v: Record<string, unknown>) {
   const { fonts, ticket } = await ready();
   const sessions = Number(v.sessions_total ?? 1);
   const isVip = v.package_code === "vip";
+  // An experience is not measured in sessions, so its ticket names the
+  // programme where a session voucher names a count, and the stub carries
+  // its two letters.
+  const mark = typeof v.ticket_mark === "string" && v.ticket_mark ? v.ticket_mark : null;
+  const isExperience = !!mark && !isVip;
+  const name = String(v.package_name ?? "").toUpperCase();
   const qr = qrFor(String(v.code));
   const svg = ticket({
     code: v.code,
     shortCode: String(v.code).replace(/^BPC-/, ""),
-    sessions: isVip ? "VIP" : sessions,
-    headline: isVip ? "VIP DAY" : (sessions > 1 ? `${sessions} SESSIONS` : "ONE SESSION"),
-    sub: "ON TRACK AT BALATON PARK",
+    sessions: isExperience ? mark : (isVip ? "VIP" : sessions),
+    headline: isExperience
+      ? name
+      : (isVip ? "VIP DAY" : (sessions > 1 ? `${sessions} SESSIONS` : "ONE SESSION")),
+    sub: isExperience ? "BALATON PARK CIRCUIT" : "ON TRACK AT BALATON PARK",
     eyebrow: "GIFT VOUCHER · AJÁNDÉKUTALVÁNY",
     codeLabel: "VOUCHER CODE",
-    footnote: "Redeem at gifts.balatonpark.com · valid for the 2027 season",
+    footnote: isExperience
+      ? "Arrange your date at gifts.balatonpark.com · valid for 2027"
+      : "Redeem at gifts.balatonpark.com · valid for the 2027 season",
     admit: "ADMIT ONE",
-    unit: sessions > 1 ? "SESSIONS" : "SESSION",
-    each: "25 MINUTES EACH",
+    unit: isExperience ? "PLACE" : (sessions > 1 ? "SESSIONS" : "SESSION"),
+    each: isExperience ? "ONE PERSON" : "25 MINUTES EACH",
     scanLabel: "SCAN TO REDEEM",
     qr: qr.rects,
     qrModules: qr.modules,
@@ -312,7 +322,7 @@ Deno.serve(async (req: Request) => {
 
   const { data: vouchers, error: vErr } = await db
     .from("vouchers")
-    .select("id, code, sessions_total, gift_index, packages ( code )")
+    .select("id, code, sessions_total, gift_index, packages ( code, name, ticket_mark )")
     .eq("order_id", orderId)
     .order("created_at");
 
@@ -328,10 +338,14 @@ Deno.serve(async (req: Request) => {
   const tickets: { url: string; code: string; sessions: number }[] = [];
   try {
     for (const v of mine) {
+      const pk = v.packages as
+        { code?: string; name?: string; ticket_mark?: string } | null;
       const png = await renderTicket({
         code: v.code,
         sessions_total: v.sessions_total,
-        package_code: (v.packages as { code?: string } | null)?.code ?? "",
+        package_code: pk?.code ?? "",
+        package_name: pk?.name ?? "",
+        ticket_mark: pk?.ticket_mark ?? null,
       });
       tickets.push({
         url: await hostTicket(String(v.code), png),

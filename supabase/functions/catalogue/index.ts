@@ -32,7 +32,7 @@ Deno.serve(async (req: Request) => {
 
   const [packages, tiers, days, settings] = await Promise.all([
     db.from("packages")
-      .select("code, name, price_cents, list_price_cents, session_count, includes_room, splittable")
+      .select("code, name, price_cents, list_price_cents, session_count, includes_room, splittable, is_experience")
       .eq("sellable", true).eq("active", true)
       .order("sort_order"),
     db.from("discount_tiers").select("min_sessions, percent, unit_cents").order("min_sessions"),

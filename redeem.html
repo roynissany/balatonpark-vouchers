@@ -330,6 +330,43 @@
     var d = state.data;
     if (d.fully_redeemed && (!d.sessions_remaining || d.sessions_remaining === 0)) return renderSpent(d);
 
+    // An experience has no track day to pick and no Cooltix code behind it,
+    // so this branch comes before anything that counts sessions. Rather than
+    // an empty picker the page says when dates land and how to reach us.
+    if (d.experience) {
+      setHead(t('red.expStep'), t('red.expH2'));
+      view.replaceChildren();
+      var xb = el('div', 'banner up',
+        '<span style="display:flex;align-items:center;gap:12px;font-size:15px;font-weight:300">' +
+          '<span class="dot pulse"></span>' +
+          '<span><strong style="font-family:var(--cond);font-weight:800;font-size:19px;' +
+            'letter-spacing:.1em">' + esc(state.code) + '</strong> - ' +
+            esc(d.voucher.package) + '</span></span>');
+      var xs = el('button', 'linkish', t('red.different'));
+      xs.type = 'button';
+      xs.addEventListener('click', function () { state.data = null; askForCode(''); });
+      xb.append(xs);
+      view.append(xb);
+
+      var xi = el('p', 'up d1', t('red.expIntro'));
+      xi.style.cssText = 'margin:32px 0 22px;font-size:17px;font-weight:300;' +
+        'line-height:1.7;color:rgba(245,247,251,.80)';
+      view.append(xi);
+
+      view.append(el('div', 'note up d1',
+        '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#A8CEF0" ' +
+        'stroke-width="2" stroke-linecap="round" style="flex:0 0 auto;margin-top:1px" ' +
+        'aria-hidden="true"><circle cx="12" cy="12" r="9"></circle>' +
+        '<path d="M12 11v5M12 7.5v.5"></path></svg>' +
+        '<p>' + t('red.expNotice', {
+          contact: '<a href="mailto:info@balatonparkcircuit.com?subject=' +
+            encodeURIComponent('Experience voucher ' + state.code) + '">' +
+            t('red.expContact') + '</a>'
+        }) + '</p>'));
+      i18n.apply(view);
+      return;
+    }
+
     var left = d.sessions_remaining;
     var total = d.sessions_total;
     setHead(t('red.step2', { left: left, total: total }),

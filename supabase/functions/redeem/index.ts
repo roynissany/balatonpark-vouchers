@@ -241,7 +241,7 @@ Deno.serve(async (req: Request) => {
 
   const { data: pkg, error: pErr } = await db
     .from("packages")
-    .select("id, code, name, session_count, includes_room, splittable")
+    .select("id, code, name, session_count, includes_room, splittable, is_experience")
     .eq("id", voucher.package_id)
     .maybeSingle();
 
@@ -253,6 +253,25 @@ Deno.serve(async (req: Request) => {
   // ---- lookup
   if (action === "lookup") {
     await logAttempt(typed, ip, ua, true);
+
+    // An experience is not claimed against a track day: there is no Cooltix
+    // pool behind it and no published date yet. The page is told plainly,
+    // so it can say when dates land instead of drawing an empty picker.
+    if (pkg.is_experience) {
+      return json({
+        voucher: {
+          code: voucher.code,
+          package: pkg.name,
+          expires_on: voucher.expires_on,
+        },
+        experience: true,
+        splittable: false,
+        sessions_total: null,
+        sessions_remaining: null,
+        parts: await partsOf(voucher.id),
+        dates: [],
+      });
+    }
 
     const left = voucher.sessions_remaining;
 
@@ -330,6 +349,7 @@ Deno.serve(async (req: Request) => {
 
   // ---- claim
   if (action === "claim") {
+    if (pkg.is_experience) return json({ error: "experience_not_claimable" }, 409);
     const trackDayId = String(body.track_day_id ?? "");
     if (!trackDayId) return json({ error: "track_day_required" }, 400);
 
