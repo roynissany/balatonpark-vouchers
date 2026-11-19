@@ -196,22 +196,19 @@
   .x .meta{display:flex;flex-wrap:wrap;gap:6px}
   .x .meta span{padding:3px 9px;background:rgba(66,122,183,.15);
      border:1px solid rgba(66,122,183,.35);font-size:11px;color:var(--pale)}
-  /* Price on its own line, the two buttons side by side under it. All
-     three in one row fits at some card widths and wraps badly at the
-     rest, and the cards change width with the grid. */
-  .x .foot{margin-top:auto;padding-top:15px;
+  .x .foot{display:flex;align-items:center;justify-content:space-between;
+     gap:10px;margin-top:auto;padding-top:15px;
      border-top:1px solid rgba(255,255,255,.10)}
   .x .price{font-family:var(--cond);font-weight:800;font-size:27px;line-height:1}
   .x .price small{display:block;margin-top:4px;font-family:Inter,sans-serif;font-weight:300;
      font-size:11px;letter-spacing:0;text-transform:none;color:rgba(245,247,251,.45)}
-  .gift{flex:0 0 auto;min-height:46px;padding:0 16px;cursor:pointer;background:var(--blue);
+  .gift{flex:0 1 auto;min-height:46px;padding:0 13px;cursor:pointer;background:var(--blue);
      color:#fff;border:none;font-family:var(--cond);font-weight:800;font-size:15px;
      letter-spacing:.05em;text-transform:uppercase;white-space:nowrap;
      transition:background .3s,transform .4s cubic-bezier(.22,.61,.36,1)}
   .gift:hover{background:#4d8bcd;transform:translateY(-2px)}
-  .x .acts{display:flex;gap:8px;margin-top:13px}
-  .x .acts .gift{flex:1 1 auto;justify-content:center;text-align:center}
-  .more{flex:0 0 auto;min-height:46px;padding:0 14px;cursor:pointer;background:none;
+  .x .acts{display:flex;flex:0 0 auto;gap:8px}
+  .more{flex:0 0 auto;min-height:46px;padding:0 11px;cursor:pointer;background:none;
      color:rgba(245,247,251,.72);border:1px solid rgba(255,255,255,.26);
      font-family:var(--cond);font-weight:800;font-size:15px;letter-spacing:.05em;
      text-transform:uppercase;transition:color .3s,border-color .3s}
@@ -422,7 +419,7 @@
   var EN = {
     h2a: 'Experiences', h2b: '& track days.',
     lede: 'Nine driving programmes and two ways to buy track time. Every one of them is a gift card with a code on it - the person you give it to picks their own date.',
-    gift: 'Gift this experience', more: 'More', from: 'from', vat: 'incl. VAT', each: 'per person', sep: ' · ',
+    gift: 'Gift it', giftFull: 'Gift this experience', more: 'More', from: 'from', vat: 'incl. VAT', each: 'per person', sep: ' · ',
     voucher: 'Voucher',
     cat: { track: 'Track days', control: 'Car control', ontrack: 'On track',
            offroad: 'Off-road', bts: 'Behind the scenes', open: 'Open voucher' },
@@ -480,7 +477,7 @@
   var HU = {
     h2a: 'Élmények', h2b: 'és pályanapok.',
     lede: 'Kilenc vezetéstechnikai és élményprogram, valamint kétféle pályanapcsomag. Mindegyik ajándékutalványként vásárolható meg, az időpontot pedig a megajándékozott választja ki.',
-    gift: 'Add ezt ajándékba', more: 'Részletek', from: '-tól', vat: 'áfával', each: 'személyenként', sep: ' - ',
+    gift: 'Ajándékozd', giftFull: 'Add ezt ajándékba', more: 'Részletek', from: '-tól', vat: 'áfával', each: 'személyenként', sep: ' - ',
     voucher: 'Utalvány',
     cat: { track: 'Pályanapok', control: 'Vezetéstechnika', ontrack: 'A pályán',
            offroad: 'Off-road', bts: 'Kulisszák mögött', open: 'Szabad választás' },
@@ -671,7 +668,7 @@
           (id === 'open-voucher' ? '' : D.sep + esc(D.each)) + '</small></div>' +
         '<div class="row">' +
           '<button type="button" class="go" data-gift="' + id + '">' +
-            esc(D.gift) + '</button>' +
+            esc(D.giftFull) + '</button>' +
           '<button type="button" class="shut">' + esc(D.sheetX) + '</button>' +
         '</div>' +
       '</div>';
