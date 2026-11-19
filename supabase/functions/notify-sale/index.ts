@@ -18,11 +18,33 @@ const db = createClient(
 );
 
 const RESEND = Deno.env.get("RESEND_API_KEY");
-const SITE = "https://gifts.balatonpark.com";
 const FROM = "Balaton Park Circuit <gifts@balatonpark.com>";
 const REPLY_TO = "info@balatonparkcircuit.com";
 const SALES_INBOX = "info@balatonparkcircuit.com";
-const LOGO = `${SITE}/email-logo.png`;
+
+// Which shop raised the order, from orders.channel. The receipt has to link
+// back to the site the buyer actually used, and the sale notice has to say
+// which shop it came from now that both write to the same table.
+type Chan = { site: string; label: string; isGift: boolean; sold: string; soldMany: string };
+
+const CHANNELS: Record<string, Chan> = {
+  gift: {
+    site: "https://gifts.balatonpark.com",
+    label: "Gifts.BalatonPark.com",
+    isGift: true,
+    sold: "a gift voucher",
+    soldMany: "gift vouchers",
+  },
+  self: {
+    site: "https://experience.balatonpark.com",
+    label: "Experience.BalatonPark.com",
+    isGift: false,
+    sold: "a ticket",
+    soldMany: "tickets",
+  },
+};
+
+const chanOf = (v: unknown) => CHANNELS[String(v ?? "gift")] ?? CHANNELS.gift;
 
 const INK = "#0A1422";
 const CARD = "#101D2E";
@@ -49,14 +71,24 @@ const money = (c: number) => {
 const firstName = (s: unknown) => String(s ?? "").trim().split(/\s+/)[0] || "";
 
 type Copy = Record<string, Record<string, string>>;
-let copyCache: Promise<Copy> | null = null;
-function copyFile(): Promise<Copy> {
-  if (!copyCache) {
-    copyCache = fetch(`${SITE}/email-copy.json`)
-      .then((r) => (r.ok ? r.json() : {}))
-      .catch(() => ({})) as Promise<Copy>;
+
+// Per shop, because each one keeps its own wording. A fetch that comes back
+// empty is not cached: an unreachable site would otherwise leave this worker
+// sending key names instead of sentences for as long as it lives.
+const copies: Record<string, Promise<Copy>> = {};
+function copyFile(ch: Chan): Promise<Copy> {
+  if (!copies[ch.site]) {
+    const pending = fetch(`${ch.site}/email-copy.json`)
+      .then((r) => {
+        if (!r.ok) throw new Error(`email-copy ${r.status}`);
+        return r.json();
+      }) as Promise<Copy>;
+    pending.catch(() => {
+      if (copies[ch.site] === pending) delete copies[ch.site];
+    });
+    copies[ch.site] = pending;
   }
-  return copyCache;
+  return copies[ch.site];
 }
 function say(copy: Copy, lg: string, key: string, vars?: Record<string, unknown>) {
   const s = (copy[lg] ?? {})[key] ?? (copy.en ?? {})[key] ?? key;
@@ -102,8 +134,11 @@ function eyebrow(text: string) {
     text-transform:uppercase;color:${PALE}">${text}</div>`;
 }
 
-/** One receiver and what they are getting. */
-function giftCard(g: Gift, i: number, many: boolean, copy: Copy, lg: string) {
+/** One receiver and what they are getting - or, on the self shop, one order
+ *  and what is in it. There the buyer is the attendee, so naming them back to
+ *  themselves and repeating their own address adds nothing: the card carries
+ *  the wording's own heading and the lines. */
+function giftCard(g: Gift, i: number, many: boolean, copy: Copy, lg: string, ch: Chan) {
   const items = (g.items as Record<string, unknown>[] ?? []).map((it) => `
     <tr>
       <td style="padding:5px 0;font-family:${SANS};font-size:14px;color:${BODY}">
@@ -113,8 +148,10 @@ function giftCard(g: Gift, i: number, many: boolean, copy: Copy, lg: string) {
         color:#ffffff;white-space:nowrap">${money(Number(it.line_cents))}</td>
     </tr>`).join("");
 
-  const name = esc(String(g.recipient_name ?? "")) || say(copy, lg, "r.unnamed");
-  const mail = esc(String(g.recipient_email ?? ""));
+  const name = ch.isGift
+    ? (esc(String(g.recipient_name ?? "")) || say(copy, lg, "r.unnamed"))
+    : say(copy, lg, "r.unnamed");
+  const mail = ch.isGift ? esc(String(g.recipient_email ?? "")) : "";
 
   return `<tr><td style="padding:0 0 12px">
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0"
@@ -143,6 +180,7 @@ function giftCard(g: Gift, i: number, many: boolean, copy: Copy, lg: string) {
 }
 
 function shell(o: {
+  ch: Chan;
   eyebrowText: string; title: string; lede: string; body: string;
   footReply: string; footFaq: string;
 }) {
@@ -155,7 +193,7 @@ function shell(o: {
   <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="width:100%;max-width:600px">
 
     <tr><td style="padding:0 0 30px">
-      <img src="${LOGO}" width="196" alt="Balaton Park Circuit"
+      <img src="${o.ch.site}/email-logo.png" width="196" alt="Balaton Park Circuit"
            style="display:block;width:196px;max-width:60%;height:auto;border:0">
     </td></tr>
 
@@ -174,9 +212,9 @@ function shell(o: {
     <tr><td style="padding:30px 0 0;border-top:1px solid ${LINE}">
       <div style="font-family:${SANS};font-size:12px;line-height:1.9;color:rgba(245,247,251,0.5)">
         ${o.footReply}<br>
-        <a href="${SITE}/faq.html" style="color:${PALE};text-decoration:none">${o.footFaq}</a>
+        <a href="${o.ch.site}/faq.html" style="color:${PALE};text-decoration:none">${o.footFaq}</a>
         &nbsp;&middot;&nbsp;
-        <a href="${SITE}" style="color:${PALE};text-decoration:none">Gifts.BalatonPark.com</a>
+        <a href="${o.ch.site}" style="color:${PALE};text-decoration:none">${o.ch.label}</a>
       </div>
     </td></tr>
   </table>
@@ -268,13 +306,24 @@ Deno.serve(async (req: Request) => {
   const { data: order } = await db.from("orders")
     .select("id, status, buyer_name, buyer_email, gifts, items, total_cents, gross_cents, " +
             "discount_cents, paid_at, lang, invoice_kind, invoice_number, invoice_url, " +
-            "recipient_name, recipient_email, delivery_method, deliver_at")
+            "recipient_name, recipient_email, delivery_method, deliver_at, channel")
     .eq("id", orderId).maybeSingle();
 
   if (!order) return json({ error: "order_not_found" }, 404);
   if (order.status !== "paid") return json({ error: "order_not_paid" }, 409);
 
-  const copy = await copyFile();
+  const ch = chanOf(order.channel);
+
+  // Rather than send an email full of key names, fail and let the outbox try
+  // again in a minute: a receipt that is late is recoverable, one that went
+  // out looking broken is not.
+  let copy: Copy;
+  try {
+    copy = await copyFile(ch);
+  } catch (e) {
+    console.error("email-copy unreachable", ch.site, e);
+    return json({ error: "copy_unreachable", site: ch.site }, 503);
+  }
   // The receipt speaks to the buyer, so it follows the language they bought
   // in. The sale notice speaks to the circuit, and stays in English.
   const lg = kind === "receipt" && String(order.lang ?? "") === "hu" ? "hu" : "en";
@@ -288,7 +337,7 @@ Deno.serve(async (req: Request) => {
     }]) as Gift[];
 
   const many = gifts.length > 1;
-  const cards = gifts.map((g, i) => giftCard(g, i, many, copy, lg)).join("");
+  const cards = gifts.map((g, i) => giftCard(g, i, many, copy, lg, ch)).join("");
   const ref = String(order.id).slice(0, 8).toUpperCase();
   const saved = Number(order.gross_cents ?? 0) - Number(order.total_cents ?? 0);
 
@@ -313,6 +362,7 @@ Deno.serve(async (req: Request) => {
 
     subject = say(copy, lg, "r.subject", { ref });
     html = shell({
+      ch,
       eyebrowText: say(copy, lg, "r.eyebrow"),
       title: who ? say(copy, lg, "r.title", { name: esc(who) }) : say(copy, lg, "r.titleAnon"),
       lede: many ? say(copy, lg, "r.ledeMany", { n: gifts.length }) : say(copy, lg, "r.lede"),
@@ -337,21 +387,26 @@ Deno.serve(async (req: Request) => {
     });
   } else {
     to = override ?? SALES_INBOX;
-    subject = `Voucher sale ${money(Number(order.total_cents))}` +
+    // Both shops land in the same inbox, so the subject says which one it
+    // was rather than leaving them to be told apart by the wording below.
+    subject = `${ch.isGift ? "Voucher" : "Ticket"} sale ${money(Number(order.total_cents))}` +
       (many ? ` to ${gifts.length} receivers` : "") + ` (${ref})`;
     html = shell({
-      eyebrowText: "New voucher sale",
+      ch,
+      eyebrowText: ch.isGift ? "New voucher sale" : "New ticket sale",
       title: `${money(Number(order.total_cents))} just came in.`,
       footReply: "",
       footFaq: "Read the FAQ",
       lede: `${esc(String(order.buyer_name ?? "")) || "A buyer"} ` +
         `(<a href="mailto:${esc(String(order.buyer_email ?? ""))}" ` +
         `style="color:${PALE};text-decoration:none">${esc(String(order.buyer_email ?? ""))}</a>) ` +
-        `bought ${gifts.length === 1 ? "a gift voucher" : `${gifts.length} gift vouchers`}.`,
+        `bought ${gifts.length === 1 ? ch.sold : `${gifts.length} ${ch.soldMany}`}` +
+        `${ch.isGift ? "" : " for themselves"}.`,
       body:
         `<table role="presentation" width="100%" cellpadding="0" cellspacing="0">` +
         metaRow([
           ["Order", ref],
+          ["Shop", ch.isGift ? "Gifts" : "Experience"],
           ["Paid", shortDateTime(order.paid_at)],
           ["Discount", saved > 0 ? money(saved) : "none"],
           [order.invoice_kind === "szamla" ? "Invoice" : "Receipt",
