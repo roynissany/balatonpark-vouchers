@@ -306,8 +306,8 @@
   .langpick button[aria-pressed=true]{background:var(--blue);color:#fff;border-color:var(--blue)}
   .headrow{display:flex;align-items:center;justify-content:space-between;gap:16px}
 </style>
-<script src="i18n.js?v=20261119c"></script>
-<script src="analytics.js?v=20261119c" defer></script>
+<script src="i18n.js?v=20261119d"></script>
+<script src="analytics.js?v=20261119d" defer></script>
 </head>
 <body data-page="purchase">
 
@@ -873,7 +873,11 @@
       var add = next.min_sessions - picks;
       var nudge = el('button', 'nudge',
         '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>' +
-        '<span>' + t('buy.nudge', { n: add, pct: next.percent }) + '</span>');
+        '<span>' + t('buy.nudge', {
+          n: add,
+          selections: t(add === 1 ? 'common.selectionOne' : 'common.selectionMany'),
+          pct: next.percent
+        }) + '</span>');
       nudge.type = 'button';
       nudge.style.marginTop = '16px';
       // Pressing it adds single sessions, which is the cheapest way to the

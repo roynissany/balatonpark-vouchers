@@ -213,7 +213,9 @@
       'buy.paying': 'Paying…',
       // Selections, not sessions: an experience moves the counter too, so
       // naming sessions here would be promising the wrong thing.
-      'buy.nudge': 'Add {n} more <strong>selections</strong> for <strong>{pct}%</strong> off everything',
+      'common.selectionOne': 'selection',
+      'common.selectionMany': 'selections',
+      'buy.nudge': 'Add {n} more <strong>{selections}</strong> for <strong>{pct}%</strong> off everything',
       'buy.noCard': 'We never see your card details.',
       'buy.codeOne': 'Your code is issued the moment payment clears.',
       'buy.codeMany': 'You get {n} separate voucher codes, one per voucher.',
@@ -586,6 +588,8 @@
       'buy.paying': 'Fizetés…',
       /* Hungarian wants the accusative here, so the noun is written into the
          sentence rather than slotted in as a bare word. */
+      'common.selectionOne': 'tétel',
+      'common.selectionMany': 'tétel',
       'buy.nudge': 'Válassz még <strong>{n} tételt</strong>, és mindenre <strong>{pct}%</strong> kedvezményt kapsz',
       'buy.noCard': 'A kártyaadataidat soha nem látjuk.',
       'buy.codeOne': 'A kódot a fizetés beérkezésekor azonnal kiállítjuk.',
