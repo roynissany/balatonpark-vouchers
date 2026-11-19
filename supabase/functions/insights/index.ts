@@ -117,13 +117,20 @@ async function traffic(body: Record<string, unknown>) {
   const includeTest = body.include_test === true;
   const since = new Date(Date.now() - days * 86400000).toISOString().slice(0, 10);
 
+  // Which shop. Empty means both added together, which is what this answered
+  // before the two shops existed separately.
+  const wantSite = ["gift", "self"].includes(String(body.site ?? ""))
+    ? String(body.site)
+    : "";
+
   let q = db.from("traffic_daily").select("*").gte("day", since).order("day");
   if (!includeTest) q = q.eq("is_test", false);
+  if (wantSite) q = q.eq("site", wantSite);
 
   const [{ data: rows, error }, { data: orderRows, error: oErr }, { count: testDays }] =
     await Promise.all([
       q,
-      db.from("orders").select("created_at, status, total_cents")
+      db.from("orders").select("created_at, status, total_cents, channel")
         .gte("created_at", since + "T00:00:00Z"),
       db.from("traffic_daily").select("day", { count: "exact", head: true })
         .gte("day", since).eq("is_test", true),
@@ -133,6 +140,9 @@ async function traffic(body: Record<string, unknown>) {
 
   const byDay = new Map<string, Record<string, number>>();
   const byCountry = new Map<string, { hits: number; visitors: number }>();
+  // Always reported, whichever shop is being looked at, so the split is
+  // visible without having to switch back and forth.
+  const bySite = new Map<string, { hits: number; visitors: number; shop_views: number }>();
   const sum = {
     hits: 0, visitors: 0, mobile_hits: 0, instagram_hits: 0,
     facebook_hits: 0, shop_views: 0, checkout_starts: 0, redeems: 0,
@@ -155,20 +165,36 @@ async function traffic(body: Record<string, unknown>) {
     c.visitors += r.visitors;
     byCountry.set(r.country, c);
 
+    const sName = String(r.site ?? "gift");
+    const s = bySite.get(sName) ?? { hits: 0, visitors: 0, shop_views: 0 };
+    s.hits += r.hits;
+    s.visitors += r.visitors;
+    s.shop_views += r.shop_views;
+    bySite.set(sName, s);
+
     for (const k of Object.keys(sum) as (keyof typeof sum)[]) {
       sum[k] += Number(r[k] ?? 0);
     }
   }
 
   // Orders are counted only on days the traffic covers, so the conversion
-  // rate has the same denominator as its numerator.
-  const counted = (o: { created_at: string }) => byDay.has(String(o.created_at).slice(0, 10));
+  // rate has the same denominator as its numerator - and when one shop is
+  // being looked at, only that shop's orders count, or the rate would be
+  // one shop's sales over the other shop's visitors.
+  const counted = (o: { created_at: string; channel?: string | null }) =>
+    byDay.has(String(o.created_at).slice(0, 10)) &&
+    (!wantSite || (o.channel === "self" ? "self" : "gift") === wantSite);
   const inScope = (orderRows ?? []).filter(counted);
   const paid = inScope.filter((o) => o.status === "paid");
   const revenue_cents = paid.reduce((n, o) => n + Number(o.total_cents ?? 0), 0);
 
   return {
     days,
+    site: wantSite || "all",
+    by_site: ["gift", "self"].map((s) => ({
+      site: s,
+      ...(bySite.get(s) ?? { hits: 0, visitors: 0, shop_views: 0 }),
+    })),
     excluded_test_days: testDays ?? 0,
     // Visitors are distinct addresses within a day, so a period total is a
     // sum of days and counts somebody who returned twice as two.

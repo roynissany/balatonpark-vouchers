@@ -182,6 +182,22 @@
   .langpick button:hover{color:var(--text);border-color:rgba(255,255,255,.55)}
   .langpick button[aria-pressed=true]{background:var(--blue);color:#fff;border-color:var(--blue)}
   .headrow{display:flex;align-items:center;justify-content:space-between;gap:16px}
+  /* Each shop points at the other. A band under the ticker rather than a
+     third button in the hero: the hero's two buttons are the job this
+     visitor came to do, and on a phone a third one pushes everything else
+     below the fold. */
+  .cross{border-bottom:1px solid rgba(255,255,255,.10);background:rgba(66,122,183,.07)}
+  .cross .in{display:flex;flex-wrap:wrap;gap:16px;align-items:center;
+    justify-content:space-between;padding-top:22px;padding-bottom:22px}
+  .cross p{margin:0;font-size:15px;font-weight:300;line-height:1.6;
+    color:rgba(245,247,251,.82)}
+  .cross a{display:inline-flex;align-items:center;justify-content:center;
+    flex:0 0 auto;min-height:52px;padding:0 26px;text-decoration:none;
+    background:none;color:var(--text);border:1px solid rgba(255,255,255,.5);
+    font-family:var(--cond);font-weight:800;font-size:19px;letter-spacing:.04em;
+    text-transform:uppercase;transition:background .3s,border-color .3s}
+  .cross a:hover{border-color:#fff;background:rgba(255,255,255,.06)}
+
   /* ---- experiences, added below How it works ------------------------- */
   .xgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:18px}
   .x{min-width:0;display:flex;flex-direction:column;background:rgba(255,255,255,.04);
@@ -272,6 +288,13 @@
       <span aria-hidden="true">17 April 2027<b>/</b>22 May 2027<b>/</b>26 June 2027<b>/</b>More to come soon<b>/</b>17 April 2027<b>/</b>22 May 2027<b>/</b>26 June 2027<b>/</b>More to come soon<b>/</b></span>
     </div>
   </div>
+
+  <section class="cross">
+    <div class="in wrap pad">
+      <p data-i18n="cross.giftLead"></p>
+      <a href="https://experience.balatonpark.com/" data-i18n="cross.giftCta"></a>
+    </div>
+  </section>
 
   <main class="wrap pad" style="flex-grow:1">
 

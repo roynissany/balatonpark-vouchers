@@ -213,9 +213,16 @@
             <option value="30" selected>Last 30 days</option>
             <option value="90">Last 90 days</option>
           </select></div>
+        <div><label for="tSite">Shop</label>
+          <select id="tSite">
+            <option value="" selected>Both shops</option>
+            <option value="gift">Gifts</option>
+            <option value="self">Experience</option>
+          </select></div>
         <div class="grow"></div>
       </div>
       <div class="tiles" id="tTiles"></div>
+      <p class="tiny muted" id="tSplit" style="margin:10px 2px 0"></p>
       <h2 style="font-size:19px;margin-bottom:11px">Visitors per day</h2>
       <div class="trend" id="tTrend"></div>
       <div class="trendfoot"><span id="tFrom"></span><span id="tTo"></span></div>
@@ -637,7 +644,8 @@ const pct = (x) => (x * 100).toFixed(x >= 0.1 ? 0 : 1) + '%';
 async function loadTraffic() {
   let d;
   try {
-    d = await report('traffic', { days: Number($('#tDays').value) || 30 });
+    d = await report('traffic', { days: Number($('#tDays').value) || 30,
+                                  site: $('#tSite').value });
   } catch (e) {
     if (e.message === 'unauthorised') return;
     flash($('#appErr'), 'Could not load traffic: ' + e.message);
@@ -666,6 +674,17 @@ async function loadTraffic() {
   ].map(([k, v, n]) => el('div', 'tile',
     `<div class="k">${k}</div><div class="v">${esc(v)}</div>` +
     (n ? `<div class="n">${esc(n)}</div>` : ''))));
+
+  // The split, always, whichever shop is selected: the point of the column
+  // is being able to see one against the other without switching twice.
+  const siteName = { gift: 'Gifts', self: 'Experience' };
+  const split = (d.by_site || []).map((s) =>
+    `${siteName[s.site] || s.site}: <strong>${s.visitors}</strong> visitors` +
+    ` · ${s.shop_views} shop views`).join(' &nbsp;|&nbsp; ');
+  $('#tSplit').innerHTML = split
+    ? split + (d.site && d.site !== 'all'
+        ? ` <span class="muted">(showing ${siteName[d.site] || d.site} only)</span>` : '')
+    : '';
 
   // One bar per day. The tallest sets the scale, so a quiet week still
   // reads rather than flattening into nothing.
@@ -698,6 +717,7 @@ async function loadTraffic() {
 }
 
 $('#tDays').addEventListener('change', loadTraffic);
+$('#tSite').addEventListener('change', loadTraffic);
 
 // ---------------------------------------------------------------- vouchers
 
