@@ -6,13 +6,19 @@ import { createClient } from "jsr:@supabase/supabase-js@2";
 //   POST { gifts: [{ items: [{ package_code, qty }], recipient_email,
 //                    recipient_name, gift_message, delivery_method,
 //                    deliver_at, lang }],
-//          buyer_email, buyer_name, lang,
+//          buyer_email, buyer_name, lang, channel?,
 //          invoice?: { name, tax_number, country, postcode, city, address } }
 //
 // One order can carry several gifts, each going to its own person on its
 // own schedule, in its own language, paid for in one go. The session tier is
 // worked out across everything in the basket, so buying for four people
 // reaches the deeper discount that buying for one would not.
+//
+// channel says which shop raised the order: "gift" (the default, and what
+// every order written before the column existed is) or "self", the
+// experience shop, where the buyer is the attendee. It decides nothing about
+// money - only which site the buyer is sent back to and which wording the
+// emails use.
 //
 // The older flat shape (items + recipient at the top level) is still
 // accepted and read as a single gift, so a page cached from before this
@@ -49,6 +55,9 @@ const json = (body: unknown, status = 200) =>
 const MAX_QTY_PER_LINE = 20;
 const MAX_GIFTS = 25;
 const LANGS = ["en", "hu"];
+// Whitelisted here rather than with a check constraint on the column: a
+// third shop must never be able to fail an insert at the till.
+const CHANNELS = ["gift", "self"];
 
 const lang = (v: unknown, fallback = "en") => {
   const s = String(v ?? "").toLowerCase().slice(0, 2);
@@ -124,6 +133,8 @@ Deno.serve(async (req: Request) => {
   if (!validEmail(buyerEmail)) return json({ error: "buyer_email_invalid" }, 400);
 
   const orderLang = lang(body.lang);
+  const channel = CHANNELS.includes(String(body.channel ?? "")) ? String(body.channel) : "gift";
+  const isGift = channel === "gift";
 
   // One shape to work with, whichever shape arrived.
   const rawGifts: RawGift[] = Array.isArray(body.gifts) && body.gifts.length
@@ -205,7 +216,7 @@ Deno.serve(async (req: Request) => {
 
   const { data: packages, error: pkgErr } = await db
     .from("packages")
-    .select("code, name, price_cents, list_price_cents, session_count, splittable, sellable")
+    .select("code, name, price_cents, list_price_cents, session_count, splittable, sellable, in_ladder")
     .in("code", codes);
 
   if (pkgErr) {
@@ -226,7 +237,10 @@ Deno.serve(async (req: Request) => {
 
   const currency = await setting<string>("currency", "eur");
   const vatRate = await setting<number>("vat_rate", 0.27);
-  const siteUrl = await setting<string>("site_url", "https://gifts.balatonpark.com");
+  // Each shop is sent back to its own address after Stripe.
+  const siteUrl = isGift
+    ? await setting<string>("site_url", "https://gifts.balatonpark.com")
+    : await setting<string>("site_url_self", "https://experience.balatonpark.com");
 
   const find = (code: string) => (packages ?? []).find((p) => p.code === code);
 
@@ -257,7 +271,21 @@ Deno.serve(async (req: Request) => {
 
       const list = pkg.list_price_cents ?? pkg.price_cents;
       const sessions = pkg.session_count ?? 1;
-      const tiered = pkg.splittable && tier?.unit_cents ? tier.unit_cents * sessions : null;
+      // The tier is reached by counting sessions, but it comes off every
+      // package flagged in_ladder - which is what the basket's own nudge
+      // ("{pct}% off everything") has always said. A session package is
+      // priced from the tier's stated per-session figure; anything else
+      // takes the tier's percentage off its own price, rounded to whole
+      // euros because nothing on this product is ever sold in cents.
+      const inLadder = pkg.in_ladder !== false;
+      let tiered: number | null = null;
+      if (tier && inLadder) {
+        if (pkg.splittable && tier.unit_cents) {
+          tiered = tier.unit_cents * sessions;
+        } else if (!pkg.splittable && tier.percent) {
+          tiered = Math.round(pkg.price_cents * (100 - tier.percent) / 10000) * 100;
+        }
+      }
       const unit = tiered ?? pkg.price_cents;
       const line = unit * qty;
 
@@ -306,6 +334,7 @@ Deno.serve(async (req: Request) => {
       buyer_email: buyerEmail,
       buyer_name: String(body.buyer_name ?? "").slice(0, 200) || null,
       lang: orderLang,
+      channel,
       // The single-recipient columns carry the first gift, so everything
       // written against them before this change still reads sensibly.
       recipient_email: first.recipient_email,
@@ -336,7 +365,9 @@ Deno.serve(async (req: Request) => {
     return json({ error: "server_error" }, 500);
   }
 
-  const descr = `Balaton Park Circuit gift voucher - ${labels.slice(0, 6).join(", ")}` +
+  // What the buyer sees on their card statement and Stripe receipt.
+  const what = isGift ? "gift voucher" : "ticket";
+  const descr = `Balaton Park Circuit ${what} - ${labels.slice(0, 6).join(", ")}` +
     (labels.length > 6 ? ` +${labels.length - 6} more` : "");
 
   if (ON_PAGE) {
@@ -346,7 +377,7 @@ Deno.serve(async (req: Request) => {
       receipt_email: buyerEmail,
       description: descr.slice(0, 1000),
       automatic_payment_methods: { enabled: true },
-      metadata: { order_id: order.id, gifts: String(gifts.length) },
+      metadata: { order_id: order.id, gifts: String(gifts.length), channel },
     }, `order_${order.id}`);
 
     if (!ok || !intent.client_secret) {
@@ -376,7 +407,7 @@ Deno.serve(async (req: Request) => {
     price_data: {
       currency,
       unit_amount: it.unit_cents,
-      product_data: { name: `${it.name} - Balaton Park Circuit gift voucher` },
+      product_data: { name: `${it.name} - Balaton Park Circuit ${what}` },
     },
   }));
 

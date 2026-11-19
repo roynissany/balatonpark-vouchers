@@ -49,7 +49,7 @@ type Admin = { email: string; full_name: string | null };
 const ORDER_COLS =
   `id, status, buyer_name, buyer_email, recipient_name, recipient_email,
    delivery_method, total_cents, paid_at, invoice_kind, invoice_number,
-   invoice_error, invoiced_at`;
+   invoice_error, invoiced_at, channel`;
 
 // ---------------------------------------------------------------- auth
 
@@ -164,7 +164,7 @@ async function voucherDetail(body: Record<string, unknown>) {
      paid_value_cents, expires_on, created_at, redeemed_at,
      packages ( code, name, session_count ),
      orders ( id, status, buyer_name, buyer_email, recipient_name, recipient_email,
-              gift_message, delivery_method, deliver_at, gross_cents, discount_cents,
+              channel, gift_message, delivery_method, deliver_at, gross_cents, discount_cents,
               total_cents, vat_rate, stripe_payment_id, invoice_kind, invoice_number,
               invoice_url, invoice_error, invoiced_at, invoice_name,
               invoice_tax_number, invoice_country, invoice_postcode, invoice_city,

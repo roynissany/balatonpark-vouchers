@@ -529,17 +529,35 @@
     return s === k ? p.name : s;
   }
 
-  // What one voucher of this package costs right now.
+  // Whether the tier reaches this package at all. in_ladder is a column on
+  // packages; a catalogue old enough not to carry it means "yes", which is
+  // what it was for every package before the Tour and the open vouchers
+  // were taken out.
+  function laddered(p, sessions) {
+    return p.in_ladder === false ? null : tierFor(sessions);
+  }
+  // What one voucher of this package costs right now. The arithmetic here
+  // has to match checkout's exactly - checkout is what the buyer is
+  // actually charged, and a page that disagrees with it is worse than a
+  // page with no prices on it.
   function unitFor(p, sessions) {
-    var tier = p.splittable ? tierFor(sessions) : null;
-    if (!tier || !tier.unit_cents) return p.price_cents;
-    return tier.unit_cents * (p.session_count || 1);
+    var tier = laddered(p, sessions);
+    if (!tier) return p.price_cents;
+    if (p.splittable && tier.unit_cents) return tier.unit_cents * (p.session_count || 1);
+    // Not sold by the session, so the tier's percentage comes off its own
+    // price, rounded to whole euros.
+    if (!p.splittable && tier.percent) {
+      return Math.round(p.price_cents * (100 - tier.percent) / 10000) * 100;
+    }
+    return p.price_cents;
   }
   // What the badge says, which is the tier's stated figure rather than one
   // worked back out of the price.
   function pctFor(p, sessions, list, now) {
-    var tier = p.splittable ? tierFor(sessions) : null;
-    if (tier && tier.unit_cents) return tier.percent;
+    var tier = laddered(p, sessions);
+    if (tier && ((p.splittable && tier.unit_cents) || (!p.splittable && tier.percent))) {
+      return tier.percent;
+    }
     return list > now ? Math.round((1 - now / list) * 100) : 0;
   }
 
@@ -883,7 +901,10 @@
     if (focus) {
       g.el.scrollIntoView({ behavior: 'smooth', block: 'start' });
       var f = g.el.querySelector('.r-name');
-      if (f) setTimeout(function () { f.focus(); }, 300);
+      // preventScroll, or the focus lands mid-animation and drags the page
+      // down to the name field - the block's own heading ends up above the
+      // viewport and the new receiver reads as having jumped past.
+      if (f) setTimeout(function () { f.focus({ preventScroll: true }); }, 300);
     }
     return g;
   }
@@ -1399,16 +1420,16 @@
       { "code": "s6",  "name": "6 sessions", "price_cents": 34800, "list_price_cents": 39000, "session_count": 6, "includes_room": false, "splittable": true },
       { "code": "vip", "name": "VIP Day",    "price_cents": 45000, "list_price_cents": 45000, "session_count": 6, "includes_room": false, "splittable": false },
       { "code": "x-drv-adv",  "name": "Driving Advanced",       "price_cents": 43500, "list_price_cents": null, "session_count": null, "includes_room": false, "splittable": false, "is_experience": true },
-      { "code": "x-drv-fun",  "name": "Driving Fun",            "price_cents": 50000, "list_price_cents": null, "session_count": null, "includes_room": false, "splittable": false, "is_experience": true },
+      { "code": "x-drv-fun",  "name": "Driving Fun",            "price_cents": 49000, "list_price_cents": null, "session_count": null, "includes_room": false, "splittable": false, "is_experience": true },
       { "code": "x-drv-prm",  "name": "Driving Premium",        "price_cents": 64000, "list_price_cents": null, "session_count": null, "includes_room": false, "splittable": false, "is_experience": true },
       { "code": "x-hotlaps",  "name": "Hot Laps",               "price_cents": 34500, "list_price_cents": null, "session_count": null, "includes_room": false, "splittable": false, "is_experience": true },
       { "code": "x-off-adv",  "name": "Off-Road Advanced",      "price_cents": 33000, "list_price_cents": null, "session_count": null, "includes_room": false, "splittable": false, "is_experience": true },
       { "code": "x-off-fun",  "name": "Off-Road Fun",           "price_cents": 43500, "list_price_cents": null, "session_count": null, "includes_room": false, "splittable": false, "is_experience": true },
-      { "code": "x-suv",      "name": "SUV Experience",         "price_cents": 50000, "list_price_cents": null, "session_count": null, "includes_room": false, "splittable": false, "is_experience": true },
-      { "code": "x-bts",      "name": "Behind the Scenes Tour", "price_cents":  4500, "list_price_cents": null, "session_count": null, "includes_room": false, "splittable": false, "is_experience": true },
-      { "code": "x-open-80",  "name": "Open Experience Voucher 80",  "price_cents":  8000, "list_price_cents": null, "session_count": null, "includes_room": false, "splittable": false, "is_experience": true },
-      { "code": "x-open-135", "name": "Open Experience Voucher 135", "price_cents": 13500, "list_price_cents": null, "session_count": null, "includes_room": false, "splittable": false, "is_experience": true },
-      { "code": "x-open-275", "name": "Open Experience Voucher 275", "price_cents": 27500, "list_price_cents": null, "session_count": null, "includes_room": false, "splittable": false, "is_experience": true }
+      { "code": "x-suv",      "name": "SUV Experience",         "price_cents": 49000, "list_price_cents": null, "session_count": null, "includes_room": false, "splittable": false, "is_experience": true },
+      { "code": "x-bts",      "name": "Behind the Scenes Tour", "price_cents":  4500, "list_price_cents": null, "session_count": null, "includes_room": false, "splittable": false, "is_experience": true, "in_ladder": false },
+      { "code": "x-open-80",  "name": "Open Experience Voucher 80",  "price_cents":  8000, "list_price_cents": null, "session_count": null, "includes_room": false, "splittable": false, "is_experience": true, "in_ladder": false },
+      { "code": "x-open-135", "name": "Open Experience Voucher 135", "price_cents": 13500, "list_price_cents": null, "session_count": null, "includes_room": false, "splittable": false, "is_experience": true, "in_ladder": false },
+      { "code": "x-open-275", "name": "Open Experience Voucher 275", "price_cents": 27500, "list_price_cents": null, "session_count": null, "includes_room": false, "splittable": false, "is_experience": true, "in_ladder": false }
     ],
     "tiers": [
       { "min_sessions": 3,  "percent": 5,  "unit_cents": 6200 },

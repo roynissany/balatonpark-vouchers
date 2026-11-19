@@ -83,7 +83,8 @@ Deno.serve(async (req: Request) => {
 
   const [{ data: vouchers, error: vErr }, { data: sent }] = await Promise.all([
     db.from("vouchers")
-      .select("code, status, sessions_total, sessions_remaining, expires_on, gift_index, packages ( name, code )")
+      .select("code, status, sessions_total, sessions_remaining, expires_on, gift_index, " +
+              "packages ( name, code, ticket_mark, is_experience )")
       .eq("order_id", id)
       .order("gift_index", { ascending: true, nullsFirst: true })
       .order("created_at"),
@@ -108,15 +109,25 @@ Deno.serve(async (req: Request) => {
     if (typeof row.gift_index === "number") sentFor.add(row.gift_index);
   }
 
-  const shape = (v: Record<string, unknown>) => ({
-    code: v.code,
-    status: v.status,
-    package: (v.packages as { name?: string } | null)?.name ?? "",
-    package_code: (v.packages as { code?: string } | null)?.code ?? "",
-    sessions_total: v.sessions_total,
-    sessions_remaining: v.sessions_remaining,
-    expires_on: v.expires_on,
-  });
+  // ticket_mark and is_experience are here so a page can draw the same
+  // ticket face the email does. Without them an experience voucher renders
+  // as "ONE SESSION", because fulfil_order gives every non-session package a
+  // sessions_total of 1.
+  const shape = (v: Record<string, unknown>) => {
+    const pk = v.packages as
+      { name?: string; code?: string; ticket_mark?: string; is_experience?: boolean } | null;
+    return {
+      code: v.code,
+      status: v.status,
+      package: pk?.name ?? "",
+      package_code: pk?.code ?? "",
+      ticket_mark: pk?.ticket_mark ?? null,
+      is_experience: !!pk?.is_experience,
+      sessions_total: v.sessions_total,
+      sessions_remaining: v.sessions_remaining,
+      expires_on: v.expires_on,
+    };
+  };
 
   // An order raised before gifts existed has one recipient at the top level.
   const raw = Array.isArray(order.gifts) && order.gifts.length

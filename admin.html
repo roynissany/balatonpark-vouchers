@@ -91,6 +91,11 @@
   .k-redeemed{background:rgba(66,122,183,.22);color:var(--pale)}
   .k-refunded{background:rgba(217,96,79,.17);color:var(--bad)}
   .k-admin{background:rgba(245,247,251,.09);color:var(--dim)}
+  /* Which shop raised the order. Both write to this one table, so the
+     column is the only way to tell a gift from someone buying for
+     themselves. Quiet on purpose: it is a label, not a status. */
+  .c-gift{background:rgba(201,164,92,.18);color:#D9BE70}
+  .c-self{background:rgba(66,122,183,.22);color:var(--pale)}
 
   .seg{display:flex;gap:4px;flex-wrap:wrap}
   .seg button{background:transparent;color:var(--dim);border:1px solid var(--line);
@@ -235,7 +240,7 @@
       </div>
       <div class="wrap"><table>
         <thead><tr><th>Voucher</th><th>Package</th><th>Sessions</th><th>Recipient</th>
-          <th>Buyer</th><th>Paid</th><th>Status</th></tr></thead>
+          <th>Buyer</th><th>Shop</th><th>Paid</th><th>Status</th></tr></thead>
         <tbody id="vRows"></tbody></table></div>
       <div style="display:flex;justify-content:space-between;align-items:center;margin-top:13px">
         <span class="muted tiny" id="vCount"></span>
@@ -375,6 +380,12 @@ const when = (s) => s ? new Date(s).toLocaleString('en-GB',
 const day = (s) => s ? new Date(s).toLocaleDateString('en-GB',
   { day: 'numeric', month: 'short', year: 'numeric' }) : '-';
 const pill = (s) => `<span class="pill s-${esc(s)}">${esc(String(s).replace(/_/g, ' '))}</span>`;
+// Orders written before the column existed read as gift, which is what they
+// were: there was only one shop.
+const shopPill = (c) => {
+  const s = c === 'self' ? 'self' : 'gift';
+  return `<span class="pill c-${s}">${s === 'self' ? 'Self' : 'Gift'}</span>`;
+};
 
 function flash(node, text, kind) {
   node.className = 'msg ' + (kind || 'err');
@@ -724,12 +735,13 @@ async function loadVouchers() {
        <td class="mono">${v.sessions_remaining} / ${v.sessions_total}</td>
        <td>${esc(o.recipient_name || '-')}<div class="tiny muted">${esc(o.recipient_email || '')}</div></td>
        <td>${esc(o.buyer_name || '-')}<div class="tiny muted">${esc(o.buyer_email || '')}</div></td>
+       <td>${shopPill(o.channel)}</td>
        <td class="mono">${money(v.paid_value_cents)}${docFlag(o)}</td>
        <td>${pill(v.status)}</td>`);
     tr.style.cursor = 'pointer';
     tr.addEventListener('click', () => openVoucher(v.id));
     return tr;
-  }) : [el('tr', null, '<td colspan="7"><div class="empty">No vouchers match.</div></td>')]));
+  }) : [el('tr', null, '<td colspan="8"><div class="empty">No vouchers match.</div></td>')]));
 }
 
 let searchTimer;
@@ -787,6 +799,8 @@ async function openVoucher(id) {
          <span class="muted tiny">${esc(o.recipient_email || '')}</span></dd>
        <dt>Buyer</dt><dd>${esc(o.buyer_name || '-')}<br>
          <span class="muted tiny">${esc(o.buyer_email || '')}</span></dd>
+       <dt>Shop</dt><dd>${shopPill(o.channel)} <span class="muted tiny">${
+          o.channel === 'self' ? 'experience.balatonpark.com' : 'gifts.balatonpark.com'}</span></dd>
        <dt>Delivery</dt><dd>${esc(o.delivery_method || '')}${
           o.deliver_at ? ' · ' + when(o.deliver_at) : ''}</dd>
        <dt>Paid</dt><dd class="mono">${money(o.total_cents)}${
