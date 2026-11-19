@@ -10,7 +10,7 @@
     "g.lede": "{buyer} has given you a gift voucher for Balaton Park Circuit. Nothing is booked yet - you choose the track day yourself.",
     "g.ledeAnon": "Someone has given you a gift voucher for Balaton Park Circuit. Nothing is booked yet - you choose the track day yourself.",
     "g.redeem": "REDEEM THIS VOUCHER &rarr;",
-    "g.scanHint": "or scan the square on the ticket",
+    "g.scanHint": "or scan the QR code on the ticket",
     "g.messageTitle": "A message for you",
     "g.whatH": "What this is",
     "g.whatP": "A voucher for track time, not a booking. You pick which published track day to use it on, then it turns into the booking code for that day.",
