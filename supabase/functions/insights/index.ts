@@ -127,14 +127,27 @@ async function traffic(body: Record<string, unknown>) {
   if (!includeTest) q = q.eq("is_test", false);
   if (wantSite) q = q.eq("site", wantSite);
 
-  const [{ data: rows, error }, { data: orderRows, error: oErr }, { count: testDays }] =
-    await Promise.all([
-      q,
-      db.from("orders").select("created_at, status, total_cents, channel")
-        .gte("created_at", since + "T00:00:00Z"),
-      db.from("traffic_daily").select("day", { count: "exact", head: true })
-        .gte("day", since).eq("is_test", true),
-    ]);
+  // The split is its own query, deliberately NOT filtered by shop: the point
+  // of showing it is being able to read one shop against the other, which a
+  // filtered copy could not do - it would report zero for the shop not
+  // selected.
+  let splitQ = db.from("traffic_daily")
+    .select("site, hits, visitors, shop_views").gte("day", since);
+  if (!includeTest) splitQ = splitQ.eq("is_test", false);
+
+  const [
+    { data: rows, error },
+    { data: orderRows, error: oErr },
+    { count: testDays },
+    { data: splitRows },
+  ] = await Promise.all([
+    q,
+    db.from("orders").select("created_at, status, total_cents, channel")
+      .gte("created_at", since + "T00:00:00Z"),
+    db.from("traffic_daily").select("day", { count: "exact", head: true })
+      .gte("day", since).eq("is_test", true),
+    splitQ,
+  ]);
   if (error) throw error;
   if (oErr) throw oErr;
 
@@ -165,16 +178,18 @@ async function traffic(body: Record<string, unknown>) {
     c.visitors += r.visitors;
     byCountry.set(r.country, c);
 
-    const sName = String(r.site ?? "gift");
-    const s = bySite.get(sName) ?? { hits: 0, visitors: 0, shop_views: 0 };
-    s.hits += r.hits;
-    s.visitors += r.visitors;
-    s.shop_views += r.shop_views;
-    bySite.set(sName, s);
-
     for (const k of Object.keys(sum) as (keyof typeof sum)[]) {
       sum[k] += Number(r[k] ?? 0);
     }
+  }
+
+  for (const r of splitRows ?? []) {
+    const sName = String(r.site ?? "gift");
+    const s = bySite.get(sName) ?? { hits: 0, visitors: 0, shop_views: 0 };
+    s.hits += Number(r.hits ?? 0);
+    s.visitors += Number(r.visitors ?? 0);
+    s.shop_views += Number(r.shop_views ?? 0);
+    bySite.set(sName, s);
   }
 
   // Orders are counted only on days the traffic covers, so the conversion
