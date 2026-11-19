@@ -124,7 +124,7 @@ async function voucherList(body: Record<string, unknown>) {
     .from("vouchers")
     .select(
       `id, code, status, sessions_total, sessions_remaining, face_value_cents,
-       paid_value_cents, expires_on, created_at,
+       paid_value_cents, expires_on, created_at, variant_name,
        packages!inner ( code, name ),
        orders!inner ( ${ORDER_COLS} )`,
       { count: "exact" },
@@ -161,7 +161,7 @@ async function voucherDetail(body: Record<string, unknown>) {
 
   let q = db.from("vouchers").select(
     `id, code, status, sessions_total, sessions_remaining, face_value_cents,
-     paid_value_cents, expires_on, created_at, redeemed_at,
+     paid_value_cents, expires_on, created_at, redeemed_at, variant_name,
      packages ( code, name, session_count ),
      orders ( id, status, buyer_name, buyer_email, recipient_name, recipient_email,
               channel, gift_message, delivery_method, deliver_at, gross_cents, discount_cents,

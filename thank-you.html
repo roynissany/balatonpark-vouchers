@@ -547,7 +547,10 @@
       sessions: exp ? (v.ticket_mark || '') : (vip ? 'VIP' : n),
       headline: exp ? String(v.package || '').toUpperCase()
         : (vip ? t('tk.vipHeadline') : t('tk.headline' + (n > 1 ? 'Many' : 'One'), { n: n })),
-      sub: exp ? t('tk.expSub') : t('tk.sub'),
+      // The car goes on the line under the headline, where an experience
+      // otherwise names the circuit. The headline stays the programme.
+      sub: exp ? (v.variant_name ? String(v.variant_name).toUpperCase() : t('tk.expSub'))
+        : t('tk.sub'),
       eyebrow: t('tk.eyebrow'),
       codeLabel: t('tk.codeLabel'),
       footnote: exp ? t('tk.expFootnote') : t('tk.footnote'),

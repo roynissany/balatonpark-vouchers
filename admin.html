@@ -751,7 +751,7 @@ async function loadVouchers() {
     const o = v.orders || {};
     const tr = el('tr', null,
       `<td class="mono">${esc(v.code)}<div class="tiny muted">${when(v.created_at)}</div></td>
-       <td>${esc(v.packages?.name || '')}</td>
+       <td>${esc((v.packages?.name || '') + (v.variant_name ? ' \u00b7 ' + v.variant_name : ''))}</td>
        <td class="mono">${v.sessions_remaining} / ${v.sessions_total}</td>
        <td>${esc(o.recipient_name || '-')}<div class="tiny muted">${esc(o.recipient_email || '')}</div></td>
        <td>${esc(o.buyer_name || '-')}<div class="tiny muted">${esc(o.buyer_email || '')}</div></td>
@@ -812,7 +812,7 @@ async function openVoucher(id) {
          <div style="margin-top:7px">${pill(v.status)}</div></div>
        <button class="ghost" id="shut">Close</button></div>
      <dl class="kv">
-       <dt>Package</dt><dd>${esc(v.packages?.name || '')}</dd>
+       <dt>Package</dt><dd>${esc((v.packages?.name || '') + (v.variant_name ? ' \u00b7 ' + v.variant_name : ''))}</dd>
        <dt>Sessions</dt><dd class="mono">${v.sessions_remaining} of ${v.sessions_total} left</dd>
        <dt>Valid until</dt><dd>${day(v.expires_on)}</dd>
        <dt>Recipient</dt><dd>${esc(o.recipient_name || '-')}<br>

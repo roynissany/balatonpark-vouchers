@@ -189,6 +189,7 @@ async function renderTicket(ch: Chan, v: Record<string, unknown>) {
   const mark = typeof v.ticket_mark === "string" && v.ticket_mark ? v.ticket_mark : null;
   const isExperience = !!mark && !isVip;
   const name = String(v.package_name ?? "").toUpperCase();
+  const car = typeof v.variant_name === "string" && v.variant_name ? v.variant_name : null;
   const qr = qrFor(ch, String(v.code));
   const svg = ticket({
     code: v.code,
@@ -197,7 +198,11 @@ async function renderTicket(ch: Chan, v: Record<string, unknown>) {
     headline: isExperience
       ? name
       : (isVip ? "VIP DAY" : (sessions > 1 ? `${sessions} SESSIONS` : "ONE SESSION")),
-    sub: isExperience ? "BALATON PARK CIRCUIT" : "ON TRACK AT BALATON PARK",
+    // The car goes on the line under the headline rather than into it:
+    // "HOT LAPS - PORSCHE 911 GT3" as one headline ran over the perforation.
+    sub: isExperience
+      ? (car ? car.toUpperCase() : "BALATON PARK CIRCUIT")
+      : "ON TRACK AT BALATON PARK",
     eyebrow: ch.eyebrow,
     codeLabel: ch.codeLabel,
     footnote: ch.foot(isExperience),
@@ -405,7 +410,7 @@ Deno.serve(async (req: Request) => {
 
   const { data: vouchers, error: vErr } = await db
     .from("vouchers")
-    .select("id, code, sessions_total, gift_index, packages ( code, name, ticket_mark )")
+    .select("id, code, sessions_total, gift_index, variant_name, packages ( code, name, ticket_mark )")
     .eq("order_id", orderId)
     .order("created_at");
 
@@ -428,6 +433,9 @@ Deno.serve(async (req: Request) => {
         sessions_total: v.sessions_total,
         package_code: pk?.code ?? "",
         package_name: pk?.name ?? "",
+        // Which car, where the package is sold by the car. Copied onto the
+        // voucher when it was minted, so it reads correctly years later.
+        variant_name: v.variant_name ?? null,
         ticket_mark: pk?.ticket_mark ?? null,
       });
       tickets.push({

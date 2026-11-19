@@ -153,6 +153,8 @@
       'buy.removeOne': 'Remove one {name}',
       'buy.addOne': 'Add one more {name}',
       'buy.secExp': 'Or an experience',
+      // Hot Laps is sold by the car, so the car has to be chosen.
+      'buy.pickCar': 'Choose your car',
       'pkg.x-drv-adv.name': 'Driving Advanced',
       'pkg.x-drv-fun.name': 'Driving Fun',
       'pkg.x-drv-prm.name': 'Driving Premium',
@@ -530,6 +532,7 @@
       'buy.removeOne': 'Egy {name} eltávolítása',
       'buy.addOne': 'Még egy {name} hozzáadása',
       'buy.secExp': 'Vagy egy élményprogram',
+      'buy.pickCar': 'Válaszd ki az autót',
       'pkg.x-drv-adv.name': 'Driving Advanced',
       'pkg.x-drv-fun.name': 'Driving Fun',
       'pkg.x-drv-prm.name': 'Driving Premium',

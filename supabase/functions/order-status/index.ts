@@ -84,7 +84,7 @@ Deno.serve(async (req: Request) => {
   const [{ data: vouchers, error: vErr }, { data: sent }] = await Promise.all([
     db.from("vouchers")
       .select("code, status, sessions_total, sessions_remaining, expires_on, gift_index, " +
-              "packages ( name, code, ticket_mark, is_experience )")
+              "variant_name, packages ( name, code, ticket_mark, is_experience )")
       .eq("order_id", id)
       .order("gift_index", { ascending: true, nullsFirst: true })
       .order("created_at"),
@@ -123,6 +123,9 @@ Deno.serve(async (req: Request) => {
       package_code: pk?.code ?? "",
       ticket_mark: pk?.ticket_mark ?? null,
       is_experience: !!pk?.is_experience,
+      // Which car, where the package is sold by the car. The thank-you page
+      // draws the same ticket as the email and needs the same line on it.
+      variant_name: v.variant_name ?? null,
       sessions_total: v.sessions_total,
       sessions_remaining: v.sessions_remaining,
       expires_on: v.expires_on,

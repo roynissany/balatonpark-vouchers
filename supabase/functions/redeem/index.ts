@@ -203,7 +203,7 @@ Deno.serve(async (req: Request) => {
   const { data: voucher, error: vErr } = await db
     .from("vouchers")
     .select("id, code, status, expires_on, face_value_cents, package_id, " +
-            "sessions_total, sessions_remaining")
+            "sessions_total, sessions_remaining, variant_name")
     .eq("code", code)
     .maybeSingle();
 
@@ -261,7 +261,11 @@ Deno.serve(async (req: Request) => {
       return json({
         voucher: {
           code: voucher.code,
-          package: pkg.name,
+          // Which car, where the package is sold by the car. Whoever is
+          // booking has to see what they actually hold.
+          package: voucher.variant_name
+            ? `${pkg.name} - ${voucher.variant_name}`
+            : pkg.name,
           expires_on: voucher.expires_on,
         },
         experience: true,
