@@ -202,7 +202,8 @@
   .x .price{font-family:var(--cond);font-weight:800;font-size:27px;line-height:1}
   .x .price small{display:block;margin-top:4px;font-family:Inter,sans-serif;font-weight:300;
      font-size:11px;letter-spacing:0;text-transform:none;color:rgba(245,247,251,.45)}
-  .gift{flex:0 1 auto;min-height:46px;padding:0 13px;cursor:pointer;background:var(--blue);
+  .gift{flex:0 1 auto;display:inline-flex;align-items:center;justify-content:center;
+     text-decoration:none;min-height:46px;padding:0 13px;cursor:pointer;background:var(--blue);
      color:#fff;border:none;font-family:var(--cond);font-weight:800;font-size:15px;
      letter-spacing:.05em;text-transform:uppercase;white-space:nowrap;
      transition:background .3s,transform .4s cubic-bezier(.22,.61,.36,1)}
@@ -455,7 +456,7 @@
         meta: ['4 hours', 'own car', 'off-road course', 'max 5 people', 'pro instructor'],
         long: ["Find out what your own car can do once the asphalt runs out, on our varied off-road course. An instructor stays with you throughout and sets the challenges to what your car can actually handle.", "Speed is not the point here: the real challenge is technique, choosing the right line, and handling the car deliberately.", "Small groups keep it intensive, hands-on and personally coached.", "It ends over a drink in our restaurant."] },
       'offroad-fun': { name: 'Off-Road Fun',
-        hook: 'First you drive. Then we show you how it is done on properly rough ground.',
+        hook: 'First you drive. Then a professional driver shows you what properly rough ground is like.',
         meta: ['4 hours', 'off-road taxi', 'own car', 'max 5 people', 'pro instructor'],
         long: ["You start in your own car, with an instructor, exploring Balaton Park Circuit's varied off-road course and what your car can do on it.", "Small groups keep it intensive, hands-on and personally coached.", "Then you swap seats: as a passenger in a proper off-road vehicle, you find out what a quick run across the harder ground feels like.", "Two experiences in one programme - driving it yourself, and a real off-road taxi."] },
       'suv-experience': { name: 'SUV Experience',
@@ -477,7 +478,7 @@
   var HU = {
     h2a: 'Élmények', h2b: 'és pályanapok.',
     lede: 'Kilenc vezetéstechnikai és élményprogram, valamint kétféle pályanapcsomag. Mindegyik ajándékutalványként vásárolható meg, az időpontot pedig a megajándékozott választja ki.',
-    gift: 'Ajándékozd', giftFull: 'Add ezt ajándékba', more: 'Részletek', from: '-tól', vat: 'áfával', each: 'személyenként', sep: ' - ',
+    gift: 'Ezt választom', giftFull: 'Ezt ajándékozom', more: 'Részletek', from: '-tól', vat: 'áfával', each: 'személyenként', sep: ' - ',
     voucher: 'Utalvány',
     cat: { track: 'Pályanapok', control: 'Vezetéstechnika', ontrack: 'A pályán',
            offroad: 'Off-road', bts: 'Kulisszák mögött', open: 'Szabad választás' },
@@ -507,13 +508,13 @@
       'hot-laps': { name: 'Élményautózás',
         hook: 'Ülj be egy profi pilóta mellé, és éld át a versenytempót a Balaton Parkban!',
         meta: ['2 kör', 'Mazda MX5 · BMW M2 · Porsche GT3'],
-        long: ["Foglalj helyet profi pilótánk mellett, és tapasztald meg testközelből, milyen érzés egy igazi versenypályán, sportautóban száguldani! A kétkörös élményautózás során neked csak egy dolgod van: hátradőlni - már amennyire sikerül - és élvezni a tempót.", "A pályaélmény mellett egy kicsit a Balaton Park Circuit kuliszzái mögé is bepillanthatsz, a programot pedig egy frissítővel zárjuk éttermünkben.", "Mazda MX5 Cup versenyautó · BMW M2 Competition · Porsche 911 GT3"] },
+        long: ["Foglalj helyet profi pilótánk mellett, és tapasztald meg testközelből, milyen érzés egy igazi versenypályán, sportautóban száguldani! A kétkörös élményautózás során neked csak egy dolgod van: hátradőlni - már amennyire sikerül - és élvezni a tempót.", "A pályaélmény mellett egy kicsit a Balaton Park Circuit kulisszái mögé is bepillanthatsz, a programot pedig egy frissítővel zárjuk éttermünkben.", "Mazda MX5 Cup versenyautó · BMW M2 Competition · Porsche 911 GT3"] },
       'offroad-advanced': { name: 'Off-Road Advanced',
         hook: 'Tudd meg, mire képes az autód, amikor elfogy alóla az aszfalt!',
         meta: ['4 óra', 'saját autó', 'off-road pálya', 'max 5 fő', 'profi instruktor'],
         long: ["Változatos off-road pályánkon fedezheted fel saját autód terepképességeit. Instruktorunk végig melletted lesz, és az autód adottságaihoz igazítva vezet végig a különböző terepes kihívásokon.", "Nem a sebesség számít: itt a megfelelő technika, a jó nyomvonal és az autó tudatos kezelése jelenti az igazi kihívást.", "A kis létszámú csoportok intenzív, gyakorlatorientált képzést és személyre szabott instruktori figyelmet tesznek lehetővé.", "A program végén egy frissítővel várunk éttermünkben."] },
       'offroad-fun': { name: 'Off-Road Fun',
-        hook: 'Először te vezetsz. Aztán egy profi megmutatja, mire képes az autód igazán kemény terepen.',
+        hook: 'Először te vezetsz. Aztán egy profi pilóta megmutatja, milyen az igazán kemény terep.',
         meta: ['4 óra', 'off-road taxi', 'saját autó', 'max 5 fő', 'profi instruktor'],
         long: ["A program első részében saját autóddal, instruktor segítségével fedezheted fel a Balaton Park Circuit változatos off-road pályáját és autód terepképességeit.", "A kis létszámú csoportok intenzív, gyakorlatorientált képzést és személyre szabott instruktori figyelmet tesznek lehetővé.", "A végén azonban helyet cserélünk: utasként egy vérbeli off-road autóban is megtapasztalhatod, milyen egy dinamikus menet a pálya nehezebb terepein.", "Két különböző élmény egy programban - saját vezetés és egy igazi off-road taxi."] },
       'suv-experience': { name: 'SUV Experience',
@@ -523,7 +524,7 @@
       'behind-the-scenes': { name: 'Túra a kulisszák mögött',
         hook: 'Fedezd fel a Balaton Park kulisszatitkait, és nézz be oda is, ahová a nézők nem juthatnak be!',
         meta: ['kb. 1 óra', 'versenyirányítás', 'ajándék emléktárgy'],
-        long: ["Barangold be velünk a versenypálya kuliszzáit, hallgass meg érdekes történeteket a versenyhétvégék világából, és pillants be a Race Controlba, ahonnan a pályán zajló eseményeket irányítjuk.", "A körülbelül egyórás túrát egy frissítővel zárjuk éttermünkben, és egy Balaton Park-ajándékkal is meglepünk, hogy legyen mit hazavinned az élményből."] },
+        long: ["Barangold be velünk a versenypálya kulisszáit, hallgass meg érdekes történeteket a versenyhétvégék világából, és pillants be a versenyirányítási központba, ahonnan a pályán zajló eseményeket irányítjuk.", "A körülbelül egyórás túrát egy frissítővel zárjuk éttermünkben, és egy Balaton Park-ajándékkal is meglepünk, hogy legyen mit hazavinned az élményből."] },
       'open-voucher': { name: 'Élményutalvány',
         hook: 'Ajándékozz élményt - hogy melyiket, azt döntse el ő!',
         meta: ['€80 · €135 · €275', 'szabadon felhasználható'],
@@ -534,17 +535,17 @@
   // Price, picture and category are the same in both languages, so they sit
   // here once rather than in each dictionary.
   var ROWS = [
-    { id: 'sessions',          cat: 'track',    img: 'img/sessions.jpg',          price: 65,  from: true },
-    { id: 'vip',               cat: 'track',    img: 'img/vip-day.jpg',           price: 450 },
-    { id: 'driving-advanced',  cat: 'control',  img: 'img/driving-advanced.jpg',  price: 435 },
-    { id: 'driving-fun',       cat: 'control',  img: 'img/driving-fun.jpg',       price: 500 },
-    { id: 'driving-premium',   cat: 'control',  img: 'img/driving-premium.jpg',   price: 640 },
-    { id: 'hot-laps',          cat: 'ontrack',  img: 'img/hot-laps.jpg',          price: 345, from: true },
-    { id: 'offroad-advanced',  cat: 'offroad',  img: 'img/offroad-advanced.jpg',  price: 330 },
-    { id: 'offroad-fun',       cat: 'offroad',  img: 'img/offroad-fun.jpg',       price: 435 },
-    { id: 'suv-experience',    cat: 'offroad',  img: 'img/suv-experience.jpg',    price: 500 },
-    { id: 'behind-the-scenes', cat: 'bts',      img: 'img/behind-the-scenes.jpg', price: 45  },
-    { id: 'open-voucher',      cat: 'open',     img: 'img/open-voucher.jpg',      price: 80,  from: true }
+    { id: 'sessions', pkg: '',          cat: 'track',    img: 'img/sessions.jpg',          price: 65,  from: true },
+    { id: 'vip', pkg: 'vip',               cat: 'track',    img: 'img/vip-day.jpg',           price: 450 },
+    { id: 'driving-advanced', pkg: 'x-drv-adv',  cat: 'control',  img: 'img/driving-advanced.jpg',  price: 435 },
+    { id: 'driving-fun', pkg: 'x-drv-fun',       cat: 'control',  img: 'img/driving-fun.jpg',       price: 500 },
+    { id: 'driving-premium', pkg: 'x-drv-prm',   cat: 'control',  img: 'img/driving-premium.jpg',   price: 640 },
+    { id: 'hot-laps', pkg: 'x-hotlaps',          cat: 'ontrack',  img: 'img/hot-laps.jpg',          price: 345, from: true },
+    { id: 'offroad-advanced', pkg: 'x-off-adv',  cat: 'offroad',  img: 'img/offroad-advanced.jpg',  price: 330 },
+    { id: 'offroad-fun', pkg: 'x-off-fun',       cat: 'offroad',  img: 'img/offroad-fun.jpg',       price: 435 },
+    { id: 'suv-experience', pkg: 'x-suv',    cat: 'offroad',  img: 'img/suv-experience.jpg',    price: 500 },
+    { id: 'behind-the-scenes', pkg: 'x-bts', cat: 'bts',      img: 'img/behind-the-scenes.jpg', price: 45  },
+    { id: 'open-voucher', pkg: 'x-open-80',      cat: 'open',     img: 'img/open-voucher.jpg',      price: 80,  from: true }
   ];
 
   // Title Case for the chips. Each word's first letter is raised and the rest
@@ -564,6 +565,14 @@
       }).join('-');
     }).join(' ');
   }
+  // Away from the shop - inside the preview, the artifact, or a local file -
+  // there is no purchase page to reach, so those builds explain the button
+  // instead of following it.
+  var PREVIEW = /\/preview\/|claude\.ai|^file:/.test(location.href);
+  function buyHref(r) {
+    return '/purchase.html' + (r.pkg ? '?pkg=' + encodeURIComponent(r.pkg) : '');
+  }
+
   function esc(s) {
     return String(s).replace(/[&<>"]/g, function (c) {
       return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c];
@@ -609,8 +618,8 @@
           '<span class="acts">' +
             '<button class="more" type="button" data-more="' + r.id + '">' +
               esc(D.more) + '</button>' +
-            '<button class="gift" type="button" data-gift="' + r.id + '">' +
-              esc(D.gift) + '</button>' +
+            '<a class="gift" href="' + buyHref(r) + '" data-gift="' + r.id + '">' +
+              esc(D.gift) + '</a>' +
           '</span>' +
         '</div></div></article>';
     }).join('');
@@ -667,15 +676,15 @@
           '<small>' + esc(D.vat) +
           (id === 'open-voucher' ? '' : D.sep + esc(D.each)) + '</small></div>' +
         '<div class="row">' +
-          '<button type="button" class="go" data-gift="' + id + '">' +
-            esc(D.giftFull) + '</button>' +
+          '<a class="go" href="' + buyHref(r) + '" data-gift="' + id + '">' +
+            esc(D.giftFull) + '</a>' +
           '<button type="button" class="shut">' + esc(D.sheetX) + '</button>' +
         '</div>' +
       '</div>';
     panel.addEventListener('click', function (ev) {
       if (ev.target === panel || ev.target.closest('.shut')) return shut();
       var g = ev.target.closest('[data-gift]');
-      if (g) open(g.getAttribute('data-gift'));
+      if (g && PREVIEW) { ev.preventDefault(); open(g.getAttribute('data-gift')); }
     });
     document.body.appendChild(panel);
     document.addEventListener('keydown', onKey);
@@ -685,7 +694,7 @@
     var m = ev.target.closest('[data-more]');
     if (m) return openMore(m.getAttribute('data-more'));
     var b = ev.target.closest('[data-gift]');
-    if (b) open(b.getAttribute('data-gift'));
+    if (b && PREVIEW) { ev.preventDefault(); open(b.getAttribute('data-gift')); }
   });
 
   // Every other page of the shop is missing from this preview, so a link to
@@ -719,7 +728,8 @@
     document.addEventListener('keydown', onKey);
   }
   document.addEventListener('click', function (ev) {
-    var a = ev.target.closest('a[href$=".html"]');
+    if (!PREVIEW) return;
+    var a = ev.target.closest('a[href^="/"], a[href$=".html"]');
     if (!a) return;
     var href = a.getAttribute('href');
     if (/^https?:/i.test(href)) return;
